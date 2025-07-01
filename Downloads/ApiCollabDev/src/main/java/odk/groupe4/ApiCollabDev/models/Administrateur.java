@@ -1,4 +1,7 @@
 package odk.groupe4.ApiCollabDev.models;
 
-public class Administrateur {
+import jakarta.persistence.Entity;
+
+@Entity
+public class Administrateur extends Utilisateur{
 }

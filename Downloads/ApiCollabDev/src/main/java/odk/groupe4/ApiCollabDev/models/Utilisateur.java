@@ -1,26 +1,19 @@
 package odk.groupe4.ApiCollabDev.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Entity @AllArgsConstructor @NoArgsConstructor @Getter @Setter
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Utilisateur {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id // Permet de spécifier que cette propriété est notre clé primaire
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Spécifie que l'AUTO_Increment est géré par notre BD.
+    @Column(name = "id_utilisateur")
     private int id;
-    private String nom;
-    private String prenom;
-    private String telephone;
     private String email;
     private String password;
-    private int totalCoin;
-
-
 }
