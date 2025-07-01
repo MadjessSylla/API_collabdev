@@ -6,7 +6,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
-public class UtilisateurDto {
+public class ContributeurDto {
+    private String nom;
+    private String prenom;
+    private String telephone;
     private String email;
     private String password;
+    private int totalCoin;
+
 }

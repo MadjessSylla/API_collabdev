@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity @Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@PrimaryKeyJoinColumn(name = "id_contributeur")
 public class Contributeur extends Utilisateur {
 
     @Column(length = 45)

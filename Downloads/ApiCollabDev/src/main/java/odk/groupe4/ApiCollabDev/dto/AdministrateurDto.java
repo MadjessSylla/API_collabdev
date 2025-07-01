@@ -1,4 +1,6 @@
 package odk.groupe4.ApiCollabDev.dto;
 
-public class AdministrateurDto {
+import odk.groupe4.ApiCollabDev.dao.AdministrateurDao;
+
+public class AdministrateurDto extends UtilisateurDto{
 }
