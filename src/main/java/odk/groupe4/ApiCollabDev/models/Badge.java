@@ -10,20 +10,20 @@ import odk.groupe4.ApiCollabDev.models.enums.TypeBadge;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Badge {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_badge")
     private int id;
+
+    @Enumerated(EnumType.STRING)
     private TypeBadge type;
     private String description;
     private int coin_recompense;
 
+    // Clé étrangère de la table Administrateur
     @ManyToOne
     @JoinColumn(name = "id_administrateur")
     private Administrateur administrateur;

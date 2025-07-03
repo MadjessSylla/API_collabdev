@@ -16,7 +16,10 @@ public class Fonctionnalite {
     @Column(name = "id_fonctionnalite")
     private int id;
 
+    @Column(length = 50)
     private String titre;
+
+    @Column(length = 500)
     private String contenu;
 
     @Enumerated(EnumType.STRING)

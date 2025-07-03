@@ -13,11 +13,16 @@ public class Notification {
     @JoinColumn(name = "id_notification")
     private int id;
     private String sujet;
+    @Column(length = 500)
     private String contenu;
-    private String destinataireEmail;
 
-    // Clé étranègre de la table contribution
+    // Clé étranègre de la table contribution.
+    @ManyToOne
+    @JoinColumn(name = "id_contribution")
+    private Contribution contribution;
+
+    // Clé étrangère de la table contributeur.
     @ManyToOne
     @JoinColumn(name = "id_contributeur")
-    private Contribution contribution;
+    private Contributeur contributeur;
 }

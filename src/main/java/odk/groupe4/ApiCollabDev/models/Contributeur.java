@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity @Getter @Setter @AllArgsConstructor @NoArgsConstructor
@@ -22,9 +23,14 @@ public class Contributeur extends Utilisateur {
     @Column(length = 15)
     private String telephone;
 
+    private int pointExp;
+
     private int totalCoin;
 
     // Clé de réference pour l'association plusieurs à plusieurs vers la table Participants
     @OneToMany(mappedBy = "contributeur")
     private Set<Participant> participations = new HashSet<>();
+
+    @OneToMany(mappedBy = "contributeur", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> historiqueNotifications;
 }

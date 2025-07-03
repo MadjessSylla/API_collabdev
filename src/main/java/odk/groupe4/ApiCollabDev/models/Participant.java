@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import odk.groupe4.ApiCollabDev.models.enums.Profil;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity @Getter  @Setter @NoArgsConstructor @AllArgsConstructor
@@ -21,19 +23,19 @@ public class Participant {
     @Enumerated(EnumType.STRING)
     private Profil profil;
 
-    // Clé étrnagère de la table Projet
+    // Clé étrangère de la table Projet
     @ManyToOne
     @JoinColumn(name = "id_projet")
     private Projet projet;
 
-    // Clé étrnagère de la table Contributeur
+    // Clé étrangère de la table Contributeur
     @ManyToOne
     @JoinColumn(name = "id_contributeur")
     private Contributeur contributeur;
 
     // On spécifie tjrs le type de la classe d'association
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Commentaire> commentaires = new HashSet<>();
+    private List<Commentaire> commentaires = new ArrayList<>();
 
     // Clé de reference vers la classe association Badge_Participation
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)

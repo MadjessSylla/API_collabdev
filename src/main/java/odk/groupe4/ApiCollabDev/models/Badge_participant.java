@@ -8,11 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Badge_participant {
 
     @Id
@@ -21,12 +17,12 @@ public class Badge_participant {
     private int id;
     private LocalDate dateAcquisition;
 
-    // Clé étrangère de Badge (ManyToMany)
+    // Clé étrangère de la table Badge
     @ManyToOne
     @JoinColumn(name = "id_bagde")
     private Badge badge;
 
-    // Clé étrangère de Participant (ManyToMany)
+    // Clé étrangère de la table Participant
     @ManyToOne
     @JoinColumn(name = "id_participant")
     private Participant participant;
