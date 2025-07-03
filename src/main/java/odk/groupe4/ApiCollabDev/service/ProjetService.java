@@ -3,14 +3,21 @@ package odk.groupe4.ApiCollabDev.service;
 import odk.groupe4.ApiCollabDev.dao.ProjetDao;
 import odk.groupe4.ApiCollabDev.dto.ProjetDto;
 import odk.groupe4.ApiCollabDev.models.Projet;
+import odk.groupe4.ApiCollabDev.models.Utilisateur;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ProjetService {
     @Autowired
     private ProjetDao projetDao;
 
+
+    public List<Projet> afficherProjetService() {
+        return projetDao.findAll();
+    }
 
     public Projet ajouterProjet(ProjetDto projet){
         Projet projet1 = new Projet();

@@ -4,13 +4,21 @@ package odk.groupe4.ApiCollabDev.service;
 import odk.groupe4.ApiCollabDev.dao.ContributionDao;
 import odk.groupe4.ApiCollabDev.dto.ContributionDto;
 import odk.groupe4.ApiCollabDev.models.Contribution;
+import odk.groupe4.ApiCollabDev.models.Utilisateur;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class ContributionService {
     @Autowired
     private ContributionDao contributionDao;
+
+
+    public List<Contribution> afficherContribution(){
+        return contributionDao.findAll();
+    }
 
     public Contribution ajouterContribution(ContributionDto contribution){
 
