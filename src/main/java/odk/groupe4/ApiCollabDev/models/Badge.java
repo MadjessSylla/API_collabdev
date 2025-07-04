@@ -10,15 +10,12 @@ import odk.groupe4.ApiCollabDev.models.enums.TypeBadge;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Badge {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_badge")
     private int id;
     private TypeBadge type;
     private String description;

@@ -26,7 +26,6 @@ public class Projet {
     @Enumerated(EnumType.STRING)
     private StatusProject status;
 
-
     // Liste des fonctionnalités de la classe fonctionnalités
     // OprhanRemoval = true permet d'indiquer que les objects fonctionnalités seront supprimés avec l'objet projet concerné
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -36,5 +35,7 @@ public class Projet {
     @OneToMany(mappedBy = "projet")
     private Set<Participant> participants = new HashSet<>();
 
+    @ManyToOne
+    @JoinColumn(name = "id_validateur")
+    private Administrateur validateur;
 }
-
