@@ -12,6 +12,7 @@ import java.time.LocalDate;
 
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class ContributionDto {
+    private int id;
     private String lienUrl;
     private String fileUrl;
     private StatusContribution status;
