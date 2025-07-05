@@ -1,4 +1,40 @@
 package odk.groupe4.ApiCollabDev.controllers;
 
+import odk.groupe4.ApiCollabDev.dto.CommentaireDto;
+import odk.groupe4.ApiCollabDev.models.Commentaire;
+import odk.groupe4.ApiCollabDev.service.CommentaireService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/commentaire")
 public class CommentaireController {
+    private CommentaireService commentaireService;
+
+    @Autowired
+    public CommentaireController(CommentaireService commentaireService){
+        this.commentaireService = commentaireService;
+    }
+
+    // SIMPO POST
+    @PostMapping
+    public Commentaire creerCommentaires(@RequestBody CommentaireDto commentaire){
+        return commentaireService.creerCommentaire(commentaire);
+    }
+
+    //SIMPO GET ALL
+    @GetMapping
+    public List<Commentaire> afficherCommentaire(CommentaireDto commentaire){
+        return commentaireService.afficherCommentaire();
+    }
+/*
+    // SIMPO DELETE
+    @DeleteMapping
+    public Commentaire supprimerCommentaire(int id_commentaire){
+        return commentaireService.supprimerCommentaire(id);
+    }
+
+ */
 }
