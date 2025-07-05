@@ -19,8 +19,9 @@ public class CommentaireService {
         this.commentaireDao = commentaireDao;
     }
 
-    //POST
+    // SIMPO POST
     public Commentaire creerCommentaire(CommentaireDto dto){
+
         // Initialisation d'un nouvel objet commentaire à partir du DTO
         Commentaire commentaire = new Commentaire();
 
@@ -31,20 +32,20 @@ public class CommentaireService {
         return commentaireDao.save(commentaire);
     }
 
-    //GET BY ID
+    //SIMPO GET BY ID
     public Commentaire aficherUnCommentaire(int id_commentaire){
         return commentaireDao.findById(id_commentaire)
                 .orElseThrow(() -> new RuntimeException("Commentaire not found with id: \" + idCommentaire"));
     }
 
-    //GET ALL
+    //SIMPO GET ALL
     public List<Commentaire> afficherCommentaire(){
 
         return commentaireDao.findAll();
     }
-    //PUT
+    //SIMPO PUT
 
-    //DELETE
+    //SIMPO DELETE
     public String supprimerCommentaire(int id_commentaire){
         // Vérification de l'existence du commentaire avant la suppression
         if (!commentaireDao.existsById(id_commentaire)){

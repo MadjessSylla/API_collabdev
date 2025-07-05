@@ -47,7 +47,7 @@ public class NotificationService {
     }
 
 
-    //DELETE
+    //SIMPO DELETE
     public String supprimerNotification(int id_notification){
         // Vérification de l'existence du notification avant la suppression
         if (!notificationDao.existsById(id_notification)){

@@ -29,12 +29,11 @@ public class CommentaireController {
     public List<Commentaire> afficherCommentaire(CommentaireDto commentaire){
         return commentaireService.afficherCommentaire();
     }
-/*
+
     // SIMPO DELETE
-    @DeleteMapping
-    public Commentaire supprimerCommentaire(int id_commentaire){
-        return commentaireService.supprimerCommentaire(id);
+   @DeleteMapping("/{id}")
+    public String supprimerCommentaire(@PathVariable("id") int id_commentaire) {
+        return commentaireService.supprimerCommentaire(id_commentaire);
     }
 
- */
 }
