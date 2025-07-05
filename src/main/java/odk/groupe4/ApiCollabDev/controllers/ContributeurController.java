@@ -4,10 +4,7 @@ import odk.groupe4.ApiCollabDev.dto.ContributeurDto;
 import odk.groupe4.ApiCollabDev.models.Contributeur;
 import odk.groupe4.ApiCollabDev.service.ContributeurSercice;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController @RequestMapping ("/api/contributeurs")
 
@@ -20,4 +17,11 @@ public class ContributeurController {
        return contributeurSercice.ajouterContributeur(contributeur);
 
     }
+
+    // Get Solde Contributeur
+    @GetMapping("/solde/{id}")
+    public String afficherSoldeContributeur(@PathVariable("id") int id) {
+        return contributeurSercice.afficherSoldeContributeur(id).toString();
+    }
+
 }
