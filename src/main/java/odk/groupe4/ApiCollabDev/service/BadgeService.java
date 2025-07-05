@@ -13,7 +13,7 @@ import java.util.Optional;
 @Service
 public class BadgeService {
 
-    private BadgeDao badgeDao;
+    private final BadgeDao badgeDao;
 
     @Autowired
     public BadgeService(BadgeDao badgeDao) {
@@ -27,6 +27,7 @@ public class BadgeService {
 
         badge.setType(dto.getType());
         badge.setDescription(dto.getDescription());
+        badge.setNombreContribution(dto.getNombreContribution());
         badge.setCoin_recompense(dto.getCoin_recompense());
 
         return badgeDao.save(badge);

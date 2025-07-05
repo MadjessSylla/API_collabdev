@@ -19,6 +19,7 @@ public class Badge {
     private int id;
     private TypeBadge type;
     private String description;
+    private int nombreContribution;
     private int coin_recompense;
 
     @ManyToOne
