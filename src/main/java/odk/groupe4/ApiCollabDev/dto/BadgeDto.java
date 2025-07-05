@@ -9,5 +9,6 @@ import odk.groupe4.ApiCollabDev.models.enums.TypeBadge;
 public class BadgeDto {
     private TypeBadge type;
     private String description;
+    private int nombreContribution;
     private int coin_recompense;
 }

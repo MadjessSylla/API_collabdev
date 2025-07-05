@@ -13,7 +13,7 @@ import java.util.List;
 @RequestMapping("/api/badges")
 public class BadgeController {
 
-    private BadgeService badgeService;
+    private final BadgeService badgeService;
 
     @Autowired
     public BadgeController(BadgeService badgeService) {
@@ -28,7 +28,7 @@ public class BadgeController {
 
     // GET By ID
     @GetMapping("/{idBadge}")
-    public Badge obtenirBadgeParId(@PathVariable("{idBadge}") int idBadge) {
+    public Badge obtenirBadgeParId(@PathVariable("idBadge") int idBadge) {
         return badgeService.obtenirBadgeParId(idBadge);
     }
     // GET All
@@ -39,19 +39,19 @@ public class BadgeController {
 
     // PUT
     @PutMapping("/{idBadge}")
-    public Badge miseAJourBadge(@PathVariable("{idBadge}") int idBadge,@RequestBody BadgeDto badgeDto){
+    public Badge miseAJourBadge(@PathVariable("idBadge") int idBadge,@RequestBody BadgeDto badgeDto){
         return badgeService.mettreAJourBagde(idBadge, badgeDto);
     }
 
     // PATCH
     @PatchMapping("{id}")
-    public Badge miseAJourCoinDesc(@PathVariable("{id}") int idBadge,@RequestBody BadgeCoinDescDto dto){
+    public Badge miseAJourCoinDesc(@PathVariable("id") int idBadge,@RequestBody BadgeCoinDescDto dto){
         return badgeService.mettreAJourCoinEtDescription(idBadge, dto);
     }
 
     // DELETE
     @DeleteMapping("{id}")
-    public String supprimerBadge(@PathVariable("{id}") int idBadge){
+    public String supprimerBadge(@PathVariable("id") int idBadge){
         return badgeService.supprimerBadge(idBadge);
     }
 }
