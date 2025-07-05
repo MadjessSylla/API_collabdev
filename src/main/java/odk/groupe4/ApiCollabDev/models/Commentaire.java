@@ -22,6 +22,6 @@ public class Commentaire {
     // Clé étrangère vers la table Contributeur
     @ManyToOne
     @JoinColumn(name = "id_auteur")
-    private Contributeur auteur;
+    private Participant auteur;
 
 }

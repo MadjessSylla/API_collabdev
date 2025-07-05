@@ -11,7 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/commentaire")
 public class CommentaireController {
-    private CommentaireService commentaireService;
+    private final CommentaireService commentaireService;
 
     @Autowired
     public CommentaireController(CommentaireService commentaireService){
@@ -19,9 +19,9 @@ public class CommentaireController {
     }
 
     // SIMPO POST
-    @PostMapping
-    public Commentaire creerCommentaires(@RequestBody CommentaireDto commentaire){
-        return commentaireService.creerCommentaire(commentaire);
+    @PostMapping("/participant/{id}")
+    public Commentaire creerCommentaires(@PathVariable("id") int id, @RequestBody CommentaireDto commentaire){
+        return commentaireService.creerCommentaire(id, commentaire);
     }
 
     //SIMPO GET ALL

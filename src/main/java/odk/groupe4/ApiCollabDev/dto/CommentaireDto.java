@@ -1,18 +1,13 @@
 package odk.groupe4.ApiCollabDev.dto;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import odk.groupe4.ApiCollabDev.models.Contribution;
+import lombok.*;
 import odk.groupe4.ApiCollabDev.models.Participant;
 
 import java.time.LocalDate;
 
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@Data @AllArgsConstructor @NoArgsConstructor
 public class CommentaireDto {
-    private String contenu;
-    private Contribution contribution;
-    private Participant participant;
+    private String contenu; // Contenu du commentaire
+    private LocalDate date; // Date de création du commentaire
 }
