@@ -16,12 +16,12 @@ public class Fonctionnalite {
     @Column(name = "id_fonctionnalite")
     private int id;
 
-    private String titre;
-    private String contenu;
-
+    private String titre; // Titre de la fonctionnalité
+    private String contenu; // Contenu de la fonctionnalité (description détaillée)
     @Enumerated(EnumType.STRING)
-    private StatusFeatures statusFeatures;
+    private StatusFeatures statusFeatures; // Statut de la fonctionnalité (ex: En attente, En cours, Terminé, etc.)
 
+    // Clé étrangère vers l'entité Projet (Projet auquel la fonctionnalité est associée)
     @ManyToOne
     @JoinColumn(name = "id_projet")
     private Projet projet;

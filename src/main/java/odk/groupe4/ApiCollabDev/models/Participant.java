@@ -19,23 +19,23 @@ public class Participant {
     private int id;
 
     @Enumerated(EnumType.STRING)
-    private Profil profil;
+    private Profil profil; // Profil du participant (Porteur de projet, Développeur, Designer, Gestionnaire, Testeur, etc.)
 
-    // Clé étrnagère de la table Projet
+    // Clé étrangère de la table Projet
     @ManyToOne
     @JoinColumn(name = "id_projet")
     private Projet projet;
 
-    // Clé étrnagère de la table Contributeur
+    // Clé étrangère de la table Contributeur
     @ManyToOne
     @JoinColumn(name = "id_contributeur")
     private Contributeur contributeur;
 
-    // On spécifie tjrs le type de la classe d'association
+    // Liste des commentaires associés à ce participant
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Commentaire> commentaires = new HashSet<>();
 
-    // Clé de reference vers la classe association Badge_Participation
+    // Les badges reçus par le participant
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Badge_participant> badgeParticipants = new HashSet<>();
 }

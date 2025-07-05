@@ -6,27 +6,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+import java.time.LocalDate;
+
+@Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Commentaire {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JoinColumn(name = "id_commentaire")
     private int id;
+    private String contenu; // Contenu du commentaire
+    private LocalDate date; // Date de création du commentaire
 
-    private String contenu;
-
-    // Clé étrnagère de Contribution (ManyToMany)
+    // Auteur du commentaire
+    // Clé étrangère vers la table Contributeur
     @ManyToOne
-    @JoinColumn(name = "id_contribution")
-    private Contribution contribution;
+    @JoinColumn(name = "id_auteur")
+    private Contributeur auteur;
 
-    // Clé étrangère de Participant (ManyToMany)
-    @ManyToOne
-    @JoinColumn(name = "id_participant")
-    private Participant participant;
 }

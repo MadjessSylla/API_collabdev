@@ -22,6 +22,7 @@ public class Badge {
     private int nombreContribution;
     private int coin_recompense;
 
+    // Administrateur qui a créé le badge
     @ManyToOne
     @JoinColumn(name = "id_administrateur")
     private Administrateur administrateur;

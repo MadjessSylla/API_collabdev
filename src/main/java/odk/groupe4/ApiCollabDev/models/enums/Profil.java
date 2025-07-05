@@ -1,7 +1,14 @@
 package odk.groupe4.ApiCollabDev.models.enums;
 
 public enum Profil {
+    PORTEUR_DE_PROJET,
     DEVELOPPEUR,
     DESIGNER,
+    TESTEUR,
+    DATA_SCIENTIST,
+    ADMINISTRATEUR_SYSTEME,
+    ADMINISTRATEUR_RESEAU,
+    INGENIEUR_DEVOPS,
+    INGENIEUR_IA,
     GESTIONNAIRE
 }

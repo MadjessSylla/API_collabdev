@@ -1,9 +1,5 @@
 package odk.groupe4.ApiCollabDev.service;
 
-import odk.groupe4.ApiCollabDev.dao.NotificationDao;
-import odk.groupe4.ApiCollabDev.dto.NotificationDto;
-import odk.groupe4.ApiCollabDev.models.Commentaire;
-import odk.groupe4.ApiCollabDev.models.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
