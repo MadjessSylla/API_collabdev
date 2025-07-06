@@ -6,12 +6,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import odk.groupe4.ApiCollabDev.models.enums.Profil;
+import odk.groupe4.ApiCollabDev.models.interfaces.NotificationObserver;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity @Getter  @Setter @NoArgsConstructor @AllArgsConstructor
-public class Participant {
+public class Participant implements NotificationObserver {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,4 +39,17 @@ public class Participant {
     // Les badges reçus par le participant
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Badge_participant> badgeParticipants = new HashSet<>();
+
+    @Override
+    public void recevoir(Commentaire commentaire, Participant auteur) {
+        // Logique de notification pour ce participant
+        String message = "Nouveau commentaire de " + auteur.getContributeur().getNom() +
+                ": " + commentaire.getContenu();
+
+       /* notificationService.sendNotification(
+                this,
+                "Nouveau commentaire dans le projet " + auteur.getProjet().getNom(),
+                message
+        );*/
+    }
 }

@@ -1,57 +1,51 @@
-package odk.groupe4.ApiCollabDev.service;
+// NotificationService.java
+/*package odk.groupe4.ApiCollabDev.service;
 
+import odk.groupe4.ApiCollabDev.models.Participant;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import odk.groupe4.ApiCollabDev.push.PushNotificationService;
 
 @Service
 public class NotificationService {
 
-    private NotificationDao notificationDao;
+    private final JavaMailSender emailSender;
+    private final PushNotificationService pushService;
 
     @Autowired
-    public NotificationService(NotificationDao notificationDao){
-        this.notificationDao = notificationDao;
+    public NotificationService(
+            JavaMailSender emailSender,
+            PushNotificationService pushService
+    ) {
+        this.emailSender = emailSender;
+        this.pushService = pushService;
     }
 
-    // SIMPO POST
+    public void sendNotification(Participant participant, String subject, String content) {
+        // Notification Email
+        sendEmailNotification(participant, subject, content);
 
-    public Notification creerNotification(NotificationDto dto){
-        //Initialisation d'un notification a partir du DTO
-        Notification notification = new Notification();
-
-        notification.setSujet(dto.getSujet());
-        notification.setContenu(dto.getContenu());
-        notification.setDestinataireEmail(dto.getDestinateurEmail());
-        notification.setContribution(dto.getContribution());
-
-        return notificationDao.save(notification);
+        // Notification Push
+        sendPushNotification(participant, subject, content);
     }
 
-    //SIMPO GET BY ID
-    public Notification afficherUneNotification(int id_notification){
-        return notificationDao.findById(id_notification)
-                .orElseThrow(() -> new RuntimeException("Notification not found with id: \" + id_notification"));
+    private void sendEmailNotification(Participant participant, String subject, String content) {
+        String email = participant.getContributeur().getEmail();
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject(subject);
+        message.setText(content);
+
+        emailSender.send(message);
     }
 
-
-    // SIMPO GET ALL
-    public List<Notification> afficherNotification(){
-
-        return notificationDao.findAll();
-    }
-
-
-    //SIMPO DELETE
-    public String supprimerNotification(int id_notification){
-        // Vérification de l'existence du notification avant la suppression
-        if (!notificationDao.existsById(id_notification)){
-            throw new RuntimeException("Notification not found with id : " + id_notification);
+    private void sendPushNotification(Participant participant, String title, String body) {
+        String deviceToken = participant.getContributeur().getDeviceToken();
+        if (deviceToken != null && !deviceToken.isEmpty()) {
+            pushService.sendPushNotification(deviceToken, title, body);
         }
-        //suppression du commentaire
-        notificationDao.deleteById(id_notification);
-        return "notification avec l'id " + id_notification + "a ete supprimer avec succes.";
     }
-
-}
+}*/

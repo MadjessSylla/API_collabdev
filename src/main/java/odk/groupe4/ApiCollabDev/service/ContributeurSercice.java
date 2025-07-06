@@ -2,6 +2,7 @@ package odk.groupe4.ApiCollabDev.service;
 
 import odk.groupe4.ApiCollabDev.dao.ContributeurDao;
 import odk.groupe4.ApiCollabDev.dto.ContributeurDto;
+import odk.groupe4.ApiCollabDev.dto.ContributeurSoldeDto;
 import odk.groupe4.ApiCollabDev.models.Contributeur;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,5 +24,14 @@ public class ContributeurSercice {
         contrib.setTotalCoin(contributeur.getTotalCoin());
         // Enregistrement de l'objet Contributeur
         return contributeurDao.save(contrib);
+    }
+
+    // Afficher le solde d'un contributeur
+    public ContributeurSoldeDto afficherSoldeContributeur(int id) {
+        // Vérification si le contributeur existe
+        if (!contributeurDao.existsById(id)) {
+            throw new RuntimeException("Contributeur non trouvé avec l'ID: " + id);
+        }
+        return contributeurDao.totalCoinContributeur(id);
     }
 }

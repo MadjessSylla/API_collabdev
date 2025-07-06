@@ -1,13 +1,11 @@
 package odk.groupe4.ApiCollabDev.controllers;
 
 import odk.groupe4.ApiCollabDev.dto.ContributeurDto;
+import odk.groupe4.ApiCollabDev.dto.ContributeurSoldeDto;
 import odk.groupe4.ApiCollabDev.models.Contributeur;
 import odk.groupe4.ApiCollabDev.service.ContributeurSercice;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController @RequestMapping ("/api/contributeurs")
 
@@ -19,5 +17,10 @@ public class ContributeurController {
     public Contributeur creerAbonner(@RequestBody ContributeurDto contributeur) {
        return contributeurSercice.ajouterContributeur(contributeur);
 
+    }
+    // Afficher le solde d'un contributeur - GET
+    @GetMapping("/{id}/solde")
+    public ContributeurSoldeDto afficherSoldeContributeur(@PathVariable int id) {
+        return contributeurSercice.afficherSoldeContributeur(id);
     }
 }

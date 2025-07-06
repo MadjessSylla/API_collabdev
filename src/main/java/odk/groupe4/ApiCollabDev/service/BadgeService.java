@@ -35,13 +35,6 @@ public class BadgeService {
 
     // GET By ID
     public Badge obtenirBadgeParId(int idBadge) {
-        /*Optional<Badge> badgeOpt = badgeDao.findById(idBadge);
-        if (badgeOpt.isPresent()){
-            return badgeOpt.get();
-        } else {
-            throw new RuntimeException("Badge not found with id: " + idBadge);
-        }*/
-
         return badgeDao.findById(idBadge)
                 .orElseThrow( () -> new RuntimeException("Badge not found with id: " + idBadge));
     }
@@ -58,6 +51,7 @@ public class BadgeService {
         // Mise à jour des champs du badge avec les valeurs du DTO
         badge.setType(dto.getType());
         badge.setDescription(dto.getDescription());
+        badge.setNombreContribution(dto.getNombreContribution());
         badge.setCoin_recompense(dto.getCoin_recompense());
 
         // Enregistrement des modifications

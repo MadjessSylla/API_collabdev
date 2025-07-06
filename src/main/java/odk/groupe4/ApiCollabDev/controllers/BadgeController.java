@@ -50,7 +50,7 @@ public class BadgeController {
     }
 
     // DELETE
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public String supprimerBadge(@PathVariable("id") int idBadge){
         return badgeService.supprimerBadge(idBadge);
     }
