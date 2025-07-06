@@ -23,8 +23,9 @@ public class ContributionController {
     }
     // Soumettre une contribution
     @PostMapping("/SoumettreUneContribution")
-    public ContributionDto SoumettreContribution(@RequestBody ContributionDto contribution){
-        return contributionService.SoumettreUneContribution(contribution);
+    public ContributionDto SoumettreContribution(@RequestHeader(value = "Date", required = false) String dateHeader,
+                                                 @RequestBody ContributionDto contributiondto){
+        return contributionService.SoumettreUneContribution(dateHeader,contributiondto);
     }
     // Afficher la liste de ses contributions
     @GetMapping("/user/{id}")

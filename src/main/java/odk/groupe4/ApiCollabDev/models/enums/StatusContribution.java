@@ -1,7 +1,7 @@
 package odk.groupe4.ApiCollabDev.models.enums;
 
 public enum StatusContribution {
-    EN_ATTENTE("En attente de validation"),
+    ENVOYE("En attente de validation"),
     VALIDEE("Validée"),
     REJETEE("Rejetée");
 
