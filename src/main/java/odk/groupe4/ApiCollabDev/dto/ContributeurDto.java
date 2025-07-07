@@ -12,6 +12,5 @@ public class ContributeurDto {
     private String telephone;
     private String email;
     private String password;
-    private int totalCoin;
 
 }

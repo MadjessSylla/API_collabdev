@@ -17,6 +17,7 @@ public class Badge {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_badge")
     private int id;
+    @Enumerated(EnumType.STRING)
     private TypeBadge type;
     private String description;
     private int nombreContribution;
