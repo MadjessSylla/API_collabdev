@@ -1,6 +1,7 @@
 package odk.groupe4.ApiCollabDev.controllers;
 
 import odk.groupe4.ApiCollabDev.dao.Participant_projetDao;
+import odk.groupe4.ApiCollabDev.dto.ContributionDto;
 import odk.groupe4.ApiCollabDev.dto.Participant_projetDto;
 import odk.groupe4.ApiCollabDev.models.Participant;
 import odk.groupe4.ApiCollabDev.service.Participant_projetService;
@@ -17,6 +18,13 @@ public class Participant_projetController {
     @PostMapping
     public Participant creerParticipant(@RequestBody Participant_projetDto participant){
         return participantProjetService.ajouterParticipant(participant);
+    }
+    // Soumettre une contribution
+    @PostMapping("/{idParticipant}/SoumettreUneContribution")
+    public ContributionDto SoumettreContribution(@RequestHeader(value = "Date", required = false) String dateHeader,
+                                                 @PathVariable int idParticipant,
+                                                 @RequestBody ContributionDto contributiondto) {
+        return participantProjetService.SoumettreUneContribution(dateHeader, idParticipant, contributiondto);
     }
     //Méthode pour reserver une fonctionnalité à un participant
     @PutMapping("/{idParticipant}/reserverFonctionnalite/{idFonctionnalite}")

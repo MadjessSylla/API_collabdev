@@ -21,21 +21,10 @@ public class ContributionController {
     public List<ContributionDto> afficherContributions() {
         return contributionService.afficherLaListeDesContribution();
     }
-    // Soumettre une contribution
-    @PostMapping("/SoumettreUneContribution")
-    public ContributionDto SoumettreContribution(@RequestHeader(value = "Date", required = false) String dateHeader,
-                                                 @RequestBody ContributionDto contributiondto){
-        return contributionService.SoumettreUneContribution(dateHeader,contributiondto);
-    }
     // Afficher la liste de ses contributions
     @GetMapping("/user/{id}")
-    public List<ContributionDto> afficherLaListeDesContributionParId(@PathVariable int id) {
-        return contributionService.afficherContributionsParUtilisateur(id);
-    }
-    // Methode pour valider ou refuser une contribution
-    @PutMapping("/validerOuRefuser/{id}")
-    public ContributionDto validerOuRefuserContribution(@PathVariable int id, @RequestParam StatusContribution status) {
-        return contributionService.validerOuRefuserContribution(id, status);
+    public List<ContributionDto> afficherLaListeDesContributionParId(@PathVariable int idParticipant) {
+        return contributionService.afficherContributionsParUtilisateur(idParticipant);
     }
 
 }
