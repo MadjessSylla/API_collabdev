@@ -34,6 +34,7 @@ public class Participant_projetService {
      private Participant_projetDto Participant_projetToParticipant_projetDto(Participant participant) {
         Participant_projetDto participantProjetDto = new Participant_projetDto();
         participantProjetDto.setProfil(participant.getProfil());
+        participantProjetDto.setContributions(participant.getContributions());
 
         participantProjetDto.setFonctionnalite(participant.getFonctionnalite());
         return participantProjetDto;

@@ -40,4 +40,8 @@ public class Contribution {
     @OneToOne
     @JoinColumn(name = "id_fonctionnalite")
     private Fonctionnalite fonctionnalite;
+    // Clé étrangère de la table Participant. La contribution est liée à un participant.
+    @ManyToOne
+    @JoinColumn(name = "id_participants")
+    private Participant participants;
 }

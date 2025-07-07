@@ -43,5 +43,8 @@ public class Participant {
     // Clé de référence vers la classe association Fonctionnalite_Participant
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "id_fonctionnalite")
+    // Clé de reférence vers la classe association contribution
     private Fonctionnalite fonctionnalite;
+    @OneToMany(mappedBy = "participants", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contribution> contributions = new ArrayList<>();
 }
