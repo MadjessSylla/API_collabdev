@@ -28,4 +28,7 @@ public class Fonctionnalite {
     @ManyToOne
     @JoinColumn(name = "id_projet")
     private Projet projet;
+
+    @OneToOne(mappedBy = "fonctionnalite", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Participant participant;
 }

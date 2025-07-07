@@ -13,7 +13,6 @@ import odk.groupe4.ApiCollabDev.models.enums.Profil;
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
 public class Participant_projetDto {
     private Profil profil;
-    private Projet projet;
-    private Contributeur contributeur;
+    private Fonctionnalite fonctionnalite;
 
 }
