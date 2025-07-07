@@ -18,11 +18,15 @@ public class Contributeur extends Utilisateur {
 
     @Column(length = 45)
     private String nom; // Nom de famille du contributeur
+
     @Column(length = 30)
     private String prenom; // Prénom du contributeur
+
     @Column(length = 15)
     private String telephone;  // Numéro de téléphone du contributeur
+
     private int pointExp;  // Points d'expérience du contributeur
+
     private int totalCoin; // Solde de Coin du contributeur
 
     // Un contributeur peut participer à plusieurs projets.

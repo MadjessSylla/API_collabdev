@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity @AllArgsConstructor @NoArgsConstructor @Getter @Setter
 /* L'annotation Inheritance permet de spécifier la stratégie d'héritage
 pour les entités JPA.
@@ -21,6 +24,11 @@ public class Utilisateur {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Spécifie que l'AUTO_Increment est géré par notre BD.
     @Column(name = "id_utilisateur")
     private int id;
+    @Column(length = 60, unique = true)
     private String email; // Adresse e-mail de l'utilisateur
+    @Column(length = 100, unique = true)
     private String password; // Mot de passe de l'utilisateur
+
+    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Notifications> notifications = new HashSet<>();
 }

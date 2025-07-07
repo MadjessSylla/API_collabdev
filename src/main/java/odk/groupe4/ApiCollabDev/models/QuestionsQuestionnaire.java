@@ -13,7 +13,7 @@ public class QuestionsQuestionnaire  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_questions")
-    private String id;
+    private int id;
     private String question; // Titre de la question
     private List<String> options; // Liste des options de réponse
     private int indexReponse; // Indice de la bonne réponse dans la liste des options

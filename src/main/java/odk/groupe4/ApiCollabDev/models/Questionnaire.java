@@ -15,7 +15,7 @@ public class Questionnaire {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_questionnaire")
-    private String id; // Identifiant du questionnaire
+    private int id; // Identifiant du questionnaire
     private String titre; // Titre du questionnaire
     private String description; // Description du questionnaire
     private LocalDate dateCreation; // Date de création du questionnaire
