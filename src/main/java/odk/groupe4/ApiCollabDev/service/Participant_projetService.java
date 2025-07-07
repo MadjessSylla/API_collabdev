@@ -7,6 +7,7 @@ import odk.groupe4.ApiCollabDev.models.Fonctionnalite;
 import odk.groupe4.ApiCollabDev.models.Participant;
 import odk.groupe4.ApiCollabDev.models.Projet;
 import odk.groupe4.ApiCollabDev.models.Utilisateur;
+import odk.groupe4.ApiCollabDev.models.enums.StatusFeatures;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,9 +48,13 @@ public class Participant_projetService {
     public Participant_projetDto reserverFonctionnalite(int idParticipant, int idFonctionnalite) {
         Participant participant = participantProjetDao.findById(idParticipant).orElseThrow(() -> new RuntimeException("Participant non trouvé"));
         Fonctionnalite fonctionnalite = fonctionnaliteDao.findById(idFonctionnalite).orElseThrow(() -> new RuntimeException("Fonctionnalite non trouvée"));
-
+        if(fonctionnalite.getStatusFeatures() != StatusFeatures.A_FAIRE) {
+            throw new RuntimeException("La fonctionnalité est déjà réservée");
+        }
         participant.setFonctionnalite(fonctionnalite);
         participantProjetDao.save(participant);
+
+
 
         return Participant_projetToParticipant_projetDto(participant);
     }
