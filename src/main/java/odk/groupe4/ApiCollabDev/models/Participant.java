@@ -42,6 +42,6 @@ public class Participant {
     private Set<Badge_participant> badgeParticipants = new HashSet<>();
     // Clé de référence vers la classe association Fonctionnalite_Participant
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "id_fonctionnalite", referencedColumnName = "id_contributeur")
+    @JoinColumn(name = "id_fonctionnalite")
     private Fonctionnalite fonctionnalite;
 }
