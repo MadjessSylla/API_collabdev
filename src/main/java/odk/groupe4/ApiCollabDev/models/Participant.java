@@ -20,6 +20,8 @@ public class Participant {
     @JoinColumn(name = "id_participant")
     private int id;
 
+    private Fonctionnalite fonctionnalite;
+
     @Enumerated(EnumType.STRING)
     private Profil profil;
 

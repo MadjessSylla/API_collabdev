@@ -18,4 +18,9 @@ public class Participant_projetController {
     public Participant creerParticipant(@RequestBody Participant_projetDto participant){
         return participantProjetService.ajouterParticipant(participant);
     }
+    //Méthode pour reserver une fonctionnalité à un participant
+    @PutMapping("/{idParticipant}/reserverFonctionnalite/{idFonctionnalite}")
+    public Participant_projetDto reserverFonctionnalite(@PathVariable int idParticipant, @PathVariable int idFonctionnalite) {
+        return participantProjetService.reserverFonctionnalite(idParticipant, idFonctionnalite);
+    }
 }

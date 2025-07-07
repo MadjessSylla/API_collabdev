@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import odk.groupe4.ApiCollabDev.models.Contributeur;
+import odk.groupe4.ApiCollabDev.models.Fonctionnalite;
 import odk.groupe4.ApiCollabDev.models.Projet;
 import odk.groupe4.ApiCollabDev.models.enums.Profil;
 
@@ -14,5 +15,6 @@ public class Participant_projetDto {
     private Profil profil;
     private Projet projet;
     private Contributeur contributeur;
+    private Fonctionnalite fonctionnalite;
 
 }
