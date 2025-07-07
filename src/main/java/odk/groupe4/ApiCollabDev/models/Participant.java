@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import odk.groupe4.ApiCollabDev.models.enums.DemandeParticipation;
 import odk.groupe4.ApiCollabDev.models.enums.Profil;
 
 import java.util.HashSet;
@@ -20,6 +21,12 @@ public class Participant {
 
     @Enumerated(EnumType.STRING)
     private Profil profil;
+
+    @Enumerated(EnumType.STRING)
+    private DemandeParticipation demande;
+
+    //les reponse des Quiz seront stockées dans cette variable
+    private String reponseQuiz;
 
     // Clé étrnagère de la table Projet
     @ManyToOne
