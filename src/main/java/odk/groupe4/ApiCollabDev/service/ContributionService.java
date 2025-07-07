@@ -41,13 +41,7 @@ public class ContributionService {
                 .collect(Collectors.toList());
     }
 
-    // Méthode pour afficher la liste des contributions d'un utilisateur
-    public List<ContributionDto> afficherContributionsParUtilisateur(int idParticipant) {
-        List<Contribution> contributions = contributionDao.findByUserId(idParticipant);
-        return contributions.stream()
-                .map(this::ContributionDaoToContributionDto)
-                .collect(Collectors.toList());
-    }
+
 
 
 

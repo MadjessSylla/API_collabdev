@@ -78,7 +78,7 @@ public class Participant_projetService {
         contribution.setStatus(status); // pour mettre le status par défaut à "En attente de validation"
         contribution.setDateCreation(dateCreation);
         contribution.setParticipant(participant);
-        contribution.setFonctionnalite(contribution.getFonctionnalite());
+        contribution.setFonctionnalite(contributiondto.getFonctionnalite());
 
         // Enregistrement du participant lié à la contribution
         participant.getContributions().add(contribution);
@@ -88,12 +88,12 @@ public class Participant_projetService {
         return ContributionDaoToContributionDto(contributionSaved);
     }
 
-
+// Méthode pour afficher la liste des participants d'un projet
     public List<Participant> afficherParticipantProjet() {
         return participantProjetDao.findAll();
     }
-    public Participant ajouterParticipant(Participant_projetDto participantProjet){
 
+    public Participant ajouterParticipant(Participant_projetDto participantProjet){
         Participant participant = new Participant();
         participant.setProfil(participantProjet.getProfil());
         return participantProjetDao.save(participant);

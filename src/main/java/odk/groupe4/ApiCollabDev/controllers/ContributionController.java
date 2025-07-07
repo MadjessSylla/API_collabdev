@@ -21,10 +21,5 @@ public class ContributionController {
     public List<ContributionDto> afficherContributions() {
         return contributionService.afficherLaListeDesContribution();
     }
-    // Afficher la liste de ses contributions
-    @GetMapping("/user/{id}")
-    public List<ContributionDto> afficherLaListeDesContributionParId(@PathVariable int idParticipant) {
-        return contributionService.afficherContributionsParUtilisateur(idParticipant);
-    }
 
 }
