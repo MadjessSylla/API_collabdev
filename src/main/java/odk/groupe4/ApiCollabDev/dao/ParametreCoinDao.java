@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ParametreCoinDao extends JpaRepository<ParametreCoin, Integer> {
@@ -16,4 +17,8 @@ public interface ParametreCoinDao extends JpaRepository<ParametreCoin, Integer> 
             "(p.nom, p.description, p.typeEvenementLien, p.valeur) " +
             "FROM ParametreCoin p ORDER BY p.id ASC")
     List<ParametreCoinDto> findAllByOrderByIdAsc();
+
+    // Méthode pour trouver un ParametreCoin par son typeEvenementLien
+    Optional<ParametreCoin> findByTypeEvenementLien(String typeEvenementLien);
+
 }
