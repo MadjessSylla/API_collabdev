@@ -22,6 +22,7 @@ public class ContributionService {
     private final FonctionnaliteDao fonctionnaliteDao;
     private final BadgeDao badgeDao;
     private final Badge_participantDao badgeParticipantDao;
+    private final NotificationService notificationService;
 
     @Autowired
     public ContributionService(ParametreCoinDao parametreCoinDao,
@@ -30,7 +31,8 @@ public class ContributionService {
                                  ContributionDao contributionDao,
                                  FonctionnaliteDao fonctionnaliteDao,
                                  BadgeDao badgeDao,
-                                 Badge_participantDao badgeParticipantDao) {
+                                 Badge_participantDao badgeParticipantDao,
+                                 NotificationService notificationService) {
         this.parametreCoinDao = parametreCoinDao;
         this.participantDao = participantDao;
         this.contributeurDao = contributeurDao;
@@ -38,6 +40,74 @@ public class ContributionService {
         this.fonctionnaliteDao = fonctionnaliteDao;
         this.badgeDao = badgeDao;
         this.badgeParticipantDao = badgeParticipantDao;
+        this.notificationService = notificationService;
+    }
+    // Méthode pour soumettre une contribution
+    public Contribution createContribution(Contribution contribution) {
+        // Vérifier que la contribution est soumise
+        if (contribution.getStatus() == StatusContribution.ENVOYER) {
+            // Sauvegarde de la contribution
+            Contribution savedContribution = contributionDao.save(contribution);
+
+            // Récupérer le gestionnaire assigné
+            Participant gestionnaire = savedContribution.getParticipantGestionnaire();
+            if (gestionnaire != null) {
+                // Envoyer une notification au gestionnaire
+                notificationService.createNotification(
+                        gestionnaire.getContributeur(),
+                        "Nouvelle contribution soumise",
+                        "Une nouvelle contribution a été soumise pour la fonctionnalité '" +
+                                savedContribution.getFonctionnalite().getTitre() + "'."
+                );
+            }
+            return savedContribution;
+        }
+        return contributionDao.save(contribution);
+    }
+    // Méthode permettant de valider ou rejeter une contribution
+    public Contribution updateContributionStatus(int contributionId, StatusContribution newStatus) {
+        Contribution contribution = contributionDao.findById(contributionId)
+                .orElseThrow(() -> new IllegalArgumentException("Contribution non trouvée"));
+
+        // Vérifier si le statut change vers VALIDER ou REJETER
+        if (newStatus == StatusContribution.VALIDER || newStatus == StatusContribution.REJETER) {
+            contribution.setStatus(newStatus);
+            Contribution updatedContribution = contributionDao.save(contribution);
+
+            // Notifier le participant soumetteur
+            Participant participant = updatedContribution.getParticipant();
+            String sujet = newStatus == StatusContribution.VALIDER
+                    ? "Contribution validée"
+                    : "Contribution rejetée";
+            String message = newStatus == StatusContribution.VALIDER
+                    ? "Votre contribution pour la fonctionnalité '" + updatedContribution.getFonctionnalite().getTitre() + "' a été validée."
+                    : "Votre contribution pour la fonctionnalité '" + updatedContribution.getFonctionnalite().getTitre() + "' a été rejetée.";
+
+            notificationService.createNotification(
+                    participant.getContributeur(),
+                    sujet,
+                    message
+            );
+
+            return updatedContribution;
+        }
+
+        return contribution;
+    }
+
+    public void refuseParticipation(int participantId) {
+        Participant participant = participantDao.findById(participantId)
+                .orElseThrow(() -> new IllegalArgumentException("Participant non trouvé"));
+
+        // Notifier le contributeur du participant
+        notificationService.createNotification(
+                participant.getContributeur(),
+                "Participation refusée",
+                "Votre demande de participation au projet '" + participant.getProjet().getTitre() + "' a été refusée."
+        );
+
+        // Supprimer le participant (ou gérer selon la logique métier)
+        participantDao.delete(participant);
     }
 
     @Transactional

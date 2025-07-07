@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import odk.groupe4.ApiCollabDev.models.enums.Profil;
+import odk.groupe4.ApiCollabDev.models.enums.StatusParticipant;
 import odk.groupe4.ApiCollabDev.models.interfaces.NotificationObserver;
 
 import java.util.HashSet;
@@ -21,6 +22,9 @@ public class Participant implements NotificationObserver {
 
     @Enumerated(EnumType.STRING)
     private Profil profil; // Profil du participant (Porteur de projet, Développeur, Designer, Gestionnaire, Testeur, etc.)
+
+    @Enumerated(EnumType.STRING)
+    private StatusParticipant statut; // EN_ATTENTE, ACCEPTE, REFUSE
 
     // Clé étrangère de la table Projet
     @ManyToOne
