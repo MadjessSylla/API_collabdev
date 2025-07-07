@@ -16,7 +16,7 @@ public class Participant implements NotificationObserver {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JoinColumn(name = "id_participant")
+    @Column(name = "id_participant")
     private int id;
 
     @Enumerated(EnumType.STRING)
@@ -33,7 +33,7 @@ public class Participant implements NotificationObserver {
     private Contributeur contributeur;
 
     // Liste des commentaires associés à ce participant
-    @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "auteur", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Commentaire> commentaires = new HashSet<>();
 
     // Les badges reçus par le participant

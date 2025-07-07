@@ -19,17 +19,28 @@ import java.util.Set;
 @Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Projet {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_projet")
     private int id;
 
     @Column(length = 50)
     private String titre; // Titre du projet
+
     private String description; // Description du projet
-    private DomaineProjet domaine; // Domaine du projet (ex: Web, Mobile, IA, etc.)
-    private SecteurProjet secteur; // Secteur du projet (ex: Santé, Éducation, Finance, etc.)
-    private String urlCahierDeCharge; // URL du cahier des charges du projet au format PDF
-    private NiveauProjet niveau; // Niveau de difficulté du projet (ex: Débutant, Intermédiaire, Avancé, Expert)
+
     @Enumerated(EnumType.STRING)
-    private StatusProject status; // Statut du projet (ex: En cours, Terminé, En attente, etc.)
+    private DomaineProjet domaine; // Domaine du projet (ex: Web, Mobile, IA, etc.)
+
+    @Enumerated(EnumType.STRING)
+    private SecteurProjet secteur; // Secteur du projet (ex: Santé, Éducation, Finance, etc.)
+
+    private String urlCahierDeCharge; // URL du cahier des charges du projet au format PDF
+
+    @Enumerated(EnumType.STRING)
+    private StatusProject status; // Statut du projet (ex: En attente, En cours, Terminé, etc.)
+
+    @Enumerated(EnumType.STRING)
+    private NiveauProjet niveau;
+
     private LocalDate dateCreation; // Date de création du projet
 
     // Clé étrangère vers l'entité Contributeur (Créateur du projet)

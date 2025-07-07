@@ -13,7 +13,7 @@ public class Badge_participant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JoinColumn(name = "id_badge_participant")
+    @Column(name = "id_badge_participant")
     private int id;
     private LocalDate dateAcquisition; // Date d'acquisition du badge par le participant
 

@@ -13,7 +13,7 @@ public class Commentaire {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JoinColumn(name = "id_commentaire")
+    @Column(name = "id_commentaire")
     private int id;
     private String contenu; // Contenu du commentaire
     private LocalDate date; // Date de création du commentaire

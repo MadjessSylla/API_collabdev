@@ -15,7 +15,7 @@ import java.util.Set;
 public class Contribution {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JoinColumn(name = "id_contribution")
+    @Column(name = "id_contribution")
     private int id;
     private String lienUrl; // Lien vers la contribution (par exemple, un lien vers un dépôt GitHub, une maquette figma, un document, etc.)
     private String fileUrl; // Lien vers un fichier de contribution (par exemple, un fichier de code, une image, un document, etc.) au format binaire

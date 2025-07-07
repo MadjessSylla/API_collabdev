@@ -49,6 +49,7 @@ public class ContributionService {
         Participant gestionnaire = participantDao.findById(gestionnaireId)
                 .orElseThrow(() -> new IllegalArgumentException("Gestionnaire avec ID " + gestionnaireId + " non trouvé"));
 
+        // Vérifier que le participant est un gestionnaire
         if (!gestionnaire.getProfil().equals(Profil.GESTIONNAIRE)) {
             throw new IllegalArgumentException("Seul un gestionnaire peut mettre à jour le statut d'une contribution");
         }
@@ -90,7 +91,7 @@ public class ContributionService {
         int NombreValidation = contributionDao.findByParticipantIdAndStatus(participant.getId(), StatusContribution.VALIDER).size();
 
         // Définition des seuils de badge (par exemple, 5, 10, 20, 50)
-        int[] plages = {5, 10, 20, 50};
+        int[] plages = {1, 5, 10, 20, 50};
 
         for (int plage : plages) {
             if (NombreValidation >= plage) {

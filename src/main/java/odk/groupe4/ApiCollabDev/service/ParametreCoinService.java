@@ -6,9 +6,11 @@ import odk.groupe4.ApiCollabDev.dto.ParametreCoinDto;
 import odk.groupe4.ApiCollabDev.models.Administrateur;
 import odk.groupe4.ApiCollabDev.models.ParametreCoin;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class ParametreCoinService {
     private final ParametreCoinDao parametreCoinDao;
     private final AdministrateurDao administrateurDao;

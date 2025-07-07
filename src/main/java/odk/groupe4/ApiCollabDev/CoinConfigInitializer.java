@@ -15,6 +15,7 @@ public class CoinConfigInitializer {
     public CoinConfigInitializer(ParametreCoinDao parametreCoinDao) {
         this.parametreCoinDao = parametreCoinDao;
     }
+
     // Méthode pour initialiser les paramètres de coins par défaut
     @PostConstruct
     public void init() {

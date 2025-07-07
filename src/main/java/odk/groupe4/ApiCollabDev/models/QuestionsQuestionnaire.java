@@ -12,7 +12,7 @@ import java.util.List;
 public class QuestionsQuestionnaire  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JoinColumn(name = "id_questions")
+    @Column(name = "id_questions")
     private String id;
     private String question; // Titre de la question
     private List<String> options; // Liste des options de réponse
