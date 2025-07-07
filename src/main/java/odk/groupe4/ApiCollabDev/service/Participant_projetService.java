@@ -80,6 +80,9 @@ public class Participant_projetService {
         contribution.setParticipant(participant);
         contribution.setFonctionnalite(contribution.getFonctionnalite());
 
+        // Enregistrement du participant lié à la contribution
+        participant.getContributions().add(contribution);
+        participantProjetDao.save(participant);
         // Enregistrement de la contribution dans la base de données
         Contribution contributionSaved = contributionDao.save(contribution);
         return ContributionDaoToContributionDto(contributionSaved);
@@ -110,8 +113,14 @@ public class Participant_projetService {
             participant.setFonctionnalite(fonctionnalite);
             return Participant_projetToParticipant_projetDto( participantProjetDao.save(participant));
         }
-
-
-
+    }
+    // Méthode pour afficher les contributions d'un participant
+    public List<ContributionDto> afficherContributionsParticipant(int idParticipant) {
+        Participant participant = participantProjetDao.findById(idParticipant)
+                .orElseThrow(() -> new RuntimeException("Participant non trouvé"));
+        List<Contribution> contributions = participant.getContributions();
+        return contributions.stream()
+                .map(this::ContributionDaoToContributionDto)
+                .toList();
     }
 }
