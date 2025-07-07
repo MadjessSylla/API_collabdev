@@ -15,6 +15,5 @@ public class Participant_projetDto {
     private Profil profil;
     private Projet projet;
     private Contributeur contributeur;
-    private Fonctionnalite fonctionnalite;
 
 }
