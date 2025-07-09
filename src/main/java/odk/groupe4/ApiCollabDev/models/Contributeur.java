@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity @Getter @Setter @AllArgsConstructor @NoArgsConstructor
@@ -37,4 +38,6 @@ public class Contributeur extends Utilisateur {
     @ManyToMany(mappedBy = "contributeurs")
     private Set<Projet> projetsDebloques = new HashSet<>();
 
+    @OneToMany(mappedBy = "contributeur", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> historiqueNotifications;
 }

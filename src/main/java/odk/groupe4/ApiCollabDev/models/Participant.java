@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import odk.groupe4.ApiCollabDev.models.enums.Profil;
 import odk.groupe4.ApiCollabDev.models.enums.StatusParticipant;
-import odk.groupe4.ApiCollabDev.models.interfaces.NotificationObserver;
 
 import java.util.HashSet;
 import java.util.Set;

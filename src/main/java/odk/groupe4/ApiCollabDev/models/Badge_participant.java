@@ -17,12 +17,12 @@ public class Badge_participant {
     private int id;
     private LocalDate dateAcquisition; // Date d'acquisition du badge par le participant
 
-    // Clé étrangère de Badge (ManyToMany)
+    // Clé étrangère de la table Badge
     @ManyToOne
     @JoinColumn(name = "id_bagde")
     private Badge badge;
 
-    // Clé étrangère de Participant (ManyToMany)
+    // Clé étrangère de la table Participant
     @ManyToOne
     @JoinColumn(name = "id_participant")
     private Participant participant;
