@@ -27,7 +27,7 @@ public class Participant_projetController {
         return participantProjetService.SoumettreUneContribution(dateHeader, idParticipant, contributiondto);
     }
     //Méthode pour reserver une fonctionnalité à un participant
-    @PutMapping("{idParticipant}/reserverFonctionnalite/{idFonctionnalite}")
+    @PatchMapping("{idParticipant}/{idFonctionnalite}/reserverFonctionnalite")
     public Participant_projetDto reserverFonctionnalite(@PathVariable int idParticipant, @PathVariable int idFonctionnalite) {
         return participantProjetService.reserverFonctionnalite(idParticipant, idFonctionnalite);
     }

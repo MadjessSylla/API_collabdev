@@ -24,12 +24,10 @@ public class FonctionnaliteService {
     public Fonctionnalite ajouterFonctionnalite(FonctionnaliteDto fonctionnalite){
 
         Fonctionnalite fonctionnalite1 = new Fonctionnalite();
-        //
         fonctionnalite1.setTitre(fonctionnalite.getTitre());
         fonctionnalite1.setContenu(fonctionnalite.getContenu());
         fonctionnalite1.setStatusFeatures(fonctionnalite.getStatusFeatures());
         fonctionnalite1.setProjet(fonctionnalite.getProjet());
-
         return fonctionnaliteDao.save(fonctionnalite1);
     }
 }

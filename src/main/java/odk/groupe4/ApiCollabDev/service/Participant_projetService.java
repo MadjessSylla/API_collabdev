@@ -35,7 +35,6 @@ public class Participant_projetService {
         Participant_projetDto participantProjetDto = new Participant_projetDto();
         participantProjetDto.setProfil(participant.getProfil());
         participantProjetDto.setContributions(participant.getContributions());
-
         participantProjetDto.setFonctionnalite(participant.getFonctionnalite());
         return participantProjetDto;
      }
@@ -73,7 +72,7 @@ public class Participant_projetService {
             // Fallback à la date actuelle si l'en-tête Date est absent
             System.out.println("En-tête Date absent, utilisation de la date actuelle : " + dateCreation);
         }
-        contribution.setLienUrl(contribution.getLienUrl());
+        contribution.setLienUrl(contributiondto.getLienUrl());
         contribution.setFileUrl(contributiondto.getFileUrl());
         contribution.setStatus(status); // pour mettre le status par défaut à "En attente de validation"
         contribution.setDateCreation(dateCreation);
