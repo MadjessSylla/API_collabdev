@@ -67,8 +67,10 @@ public class Projet {
     @OneToMany(mappedBy = "projet")
     private Set<Participant> participants = new HashSet<>();
 
-    // Clé étrangère vers l'entité Administrateur (Celui qui valide le projet)
-    @ManyToOne
-    @JoinColumn(name = "id_validateur")
-    private Administrateur validateur;
+    //clé étrangère de la table administrateur
+    @ManyToOne @JoinColumn(name="id_validateur")
+  private Administrateur administrateur;
+
+    @ManyToOne @JoinColumn(name="id_contributeur")
+    private Contributeur contributeur;
 }

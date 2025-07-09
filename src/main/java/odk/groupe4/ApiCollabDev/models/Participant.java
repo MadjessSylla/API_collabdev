@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import odk.groupe4.ApiCollabDev.models.enums.DemandeParticipation;
 import odk.groupe4.ApiCollabDev.models.enums.Profil;
 import odk.groupe4.ApiCollabDev.models.enums.StatusParticipant;
 
@@ -25,7 +26,14 @@ public class Participant {
     @Enumerated(EnumType.STRING)
     private StatusParticipant statut; // EN_ATTENTE, ACCEPTE, REFUSE
 
-    // Clé étrangère de la table Projet
+    private DemandeParticipation demande;
+
+    //les reponse des Quiz seront stockées dans cette variable
+    private String reponseQuiz;
+
+    //par defaut L'accès débloquer est false
+    private boolean accesDebloquer=false;
+
     @ManyToOne
     @JoinColumn(name = "id_projet")
     private Projet projet;

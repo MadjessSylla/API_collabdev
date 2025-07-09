@@ -2,7 +2,6 @@ package odk.groupe4.ApiCollabDev.controllers;
 
 import odk.groupe4.ApiCollabDev.dto.ContributeurDto;
 import odk.groupe4.ApiCollabDev.dto.ContributeurSoldeDto;
-import odk.groupe4.ApiCollabDev.dto.ProjetDto;
 import odk.groupe4.ApiCollabDev.models.Contributeur;
 import odk.groupe4.ApiCollabDev.models.enums.StatusProject;
 import odk.groupe4.ApiCollabDev.service.ContributeurSercice;
