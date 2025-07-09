@@ -10,6 +10,11 @@ import odk.groupe4.ApiCollabDev.models.enums.StatusParticipant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,7 +28,7 @@ public class Participant_projetService {
     private final ParametreCoinDao parametreCoinDao;
     private final FonctionnaliteDao fonctionnaliteDao;
 
-
+    @Autowired
     public Participant_projetService(Participant_projetDao participantProjetDao,
                                      ProjetDao projetDao,
                                      ContributionDao contributionDao,
@@ -40,8 +45,28 @@ public class Participant_projetService {
         this.fonctionnaliteDao = fonctionnaliteDao;
     }
 
-    @Autowired
 
+    //Méthode pour transformer un Participant_projet en Participant_projetDto
+     private Participant_projetDto Participant_projetToParticipant_projetDto(Participant participant) {
+        Participant_projetDto participantProjetDto = new Participant_projetDto();
+        participantProjetDto.setProfil(participant.getProfil());
+        participantProjetDto.setContributions(participant.getContributions());
+        participantProjetDto.setFonctionnalite(participant.getFonctionnalite());
+        return participantProjetDto;
+     }
+
+     // Méthode contrionDAOtoDTO
+    private ContributionDto ContributionDaoToContributionDto(Contribution contribution) {
+        ContributionDto contributionDto = new ContributionDto();
+        contributionDto.setLienUrl(contribution.getLienUrl());
+        contributionDto.setFileUrl(contribution.getFileUrl());
+        contributionDto.setStatus(contribution.getStatus());
+        contributionDto.setDateCreation(contribution.getDateCreation());
+        contributionDto.setParticipant(contribution.getParticipant());
+        contributionDto.setGestionnaire(contribution.getGestionnaire());
+        contributionDto.setFonctionnalite(contribution.getFonctionnalite());
+        return contributionDto;
+    }
 
     // Méthode pour récupérer l'historique d'acquisition d'un participant
     public HistAcquisitionDto getHistAcquisition(int idParticipant) {
@@ -70,6 +95,7 @@ public class Participant_projetService {
                 badgeDTOs
         );
     }
+
     // Méthode pour inscrire un participant dans un projet
     public Participant creerParticipant(Participant participant) {
         // Sauvegarde du participant
@@ -92,6 +118,7 @@ public class Participant_projetService {
 
         return savedParticipant;
     }
+
     // Méthode pour refuser une demande de participation
     public void updateParticipantStatus(int participantId, StatusParticipant newStatus) {
         Participant participant = participantProjetDao.findById(participantId)
@@ -107,6 +134,7 @@ public class Participant_projetService {
             );
         }
     }
+
     // Méthode pour mapper une Contribution vers un ContributionDto
     private ContributionDto mapToContributionDTO(Contribution contribution) {
         return new ContributionDto(
@@ -151,7 +179,8 @@ public class Participant_projetService {
      return participantDao.save(participant);
 
     }
-  // Methode pour debloquer l'accés à un projet
+
+    // Methode pour debloquer l'accés à un projet
      public String debloquerAcces(int idParticipant){
         Participant participant= participantDao.findById(idParticipant)
                 .orElseThrow(()->new RuntimeException("Participant introuvable"));
@@ -226,4 +255,76 @@ public class Participant_projetService {
         return dto;
     }
 
+    // Methode pour soumettre une contribution
+    public ContributionDto SoumettreUneContribution(String dateHeader, int idParticipant, ContributionDto contributiondto){
+        Contribution contribution = new Contribution();
+        StatusContribution status = StatusContribution.ENVOYE;
+        Participant participant = participantProjetDao.findById(idParticipant)
+                .orElseThrow(() -> new RuntimeException("Participant non trouvé"));
+        LocalDate dateCreation = LocalDate.now(ZoneOffset.UTC);;
+        if(dateHeader != null) {
+            try {
+                // Parser l'en-tête Date au format RFC 1123
+                DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
+                ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateHeader, formatter);
+                // Convertir ZonedDateTime en java.util.Date
+                dateCreation = zonedDateTime.toLocalDate();
+            } catch (DateTimeParseException e) {
+                System.out.println("Erreur de parsing de l'en-tête Date, utilisation de la date actuelle : " + dateCreation);
+            }
+        }else {
+            // Fallback à la date actuelle si l'en-tête Date est absent
+            System.out.println("En-tête Date absent, utilisation de la date actuelle : " + dateCreation);
+        }
+        contribution.setLienUrl(contributiondto.getLienUrl());
+        contribution.setFileUrl(contributiondto.getFileUrl());
+        contribution.setStatus(status); // pour mettre le status par défaut à "En attente de validation"
+        contribution.setDateCreation(dateCreation);
+        contribution.setParticipant(participant);
+        contribution.setFonctionnalite(contributiondto.getFonctionnalite());
+
+        // Enregistrement du participant lié à la contribution
+        participant.getContributions().add(contribution);
+        participantProjetDao.save(participant);
+        // Enregistrement de la contribution dans la base de données
+        Contribution contributionSaved = contributionDao.save(contribution);
+        return ContributionDaoToContributionDto(contributionSaved);
+    }
+
+    // Méthode pour afficher la liste des participants d'un projet
+    public List<Participant> afficherParticipantProjet() {
+        return participantProjetDao.findAll();
+    }
+
+    public Participant ajouterParticipant(Participant_projetDto participantProjet){
+        Participant participant = new Participant();
+        participant.setProfil(participantProjet.getProfil());
+        return participantProjetDao.save(participant);
+    }
+
+    //Méthode pour reserver une fonctionnalité à un participant
+    public Participant_projetDto reserverFonctionnalite(int idParticipant, int idFonctionnalite) {
+        Participant participant = participantProjetDao.findById(idParticipant).orElseThrow(() -> new RuntimeException("Participant non trouvé"));
+        Fonctionnalite fonctionnalite = fonctionnaliteDao.findById(idFonctionnalite).orElseThrow(() -> new RuntimeException("Fonctionnalité non trouvée"));
+        // Vérifier si la fonctionnalité est déjà réservée
+        if (fonctionnalite.getStatusFeatures() == StatusFeatures.EN_COURS || fonctionnalite.getStatusFeatures() == StatusFeatures.TERMINEE) {
+            throw new RuntimeException("La fonctionnalité est déjà réservée");
+        }
+        // Réserver la fonctionnalité
+        else {
+            fonctionnalite.setStatusFeatures(StatusFeatures.EN_COURS);
+            participant.setFonctionnalite(fonctionnalite);
+            return Participant_projetToParticipant_projetDto( participantProjetDao.save(participant));
+        }
+    }
+
+    // Méthode pour afficher les contributions d'un participant
+    public List<ContributionDto> afficherContributionsParticipant(int idParticipant) {
+        Participant participant = participantProjetDao.findById(idParticipant)
+                .orElseThrow(() -> new RuntimeException("Participant non trouvé"));
+        List<Contribution> contributions = participant.getContributions();
+        return contributions.stream()
+                .map(this::ContributionDaoToContributionDto)
+                .toList();
+    }
 }

@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import odk.groupe4.ApiCollabDev.dao.AdministrateurDao;
 
 @Getter @Setter // Permet d’éviter d’écrire manuellement getEmail(), setEmail()...
 public class AdministrateurDto extends UtilisateurDto{
