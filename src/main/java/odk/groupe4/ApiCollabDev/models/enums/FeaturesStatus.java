@@ -1,6 +1,6 @@
 package odk.groupe4.ApiCollabDev.models.enums;
 
-public enum StatusFeatures {
+public enum FeaturesStatus {
     A_FAIRE,
     EN_COURS,
     TERMINEE

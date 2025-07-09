@@ -1,6 +1,6 @@
 package odk.groupe4.ApiCollabDev.models.enums;
 
-public enum SecteurProjet {
+public enum ProjectSector {
     INFORMATIQUE,
     TELECOMMUNICATIONS,
     FINANCE,

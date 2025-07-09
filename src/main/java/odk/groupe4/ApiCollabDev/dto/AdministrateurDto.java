@@ -1,16 +1,10 @@
 package odk.groupe4.ApiCollabDev.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter @Setter // Permet d’éviter d’écrire manuellement getEmail(), setEmail()...
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class AdministrateurDto extends UtilisateurDto{
-
-    @NotBlank(message = "L’email est obligatoire.")
-    private String email; // L’email de l’administrateur
-
-    @Size(min = 6, max = 20, message = "Le mot de passe doit contenir entre 6 et 20 caractères.")
-    private String password; // Son mot de passe
 }

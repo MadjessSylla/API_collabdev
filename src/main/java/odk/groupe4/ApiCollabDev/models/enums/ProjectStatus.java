@@ -1,6 +1,6 @@
 package odk.groupe4.ApiCollabDev.models.enums;
 
-public enum StatusProject {
+public enum ProjectStatus {
     EN_ATTENTE,
     OUVERT,
     EN_COURS,

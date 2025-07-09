@@ -3,18 +3,18 @@ package odk.groupe4.ApiCollabDev.controllers;
 import odk.groupe4.ApiCollabDev.dto.FonctionnaliteDto;
 import odk.groupe4.ApiCollabDev.dto.HistAcquisitionDto;
 import odk.groupe4.ApiCollabDev.models.Participant;
-import odk.groupe4.ApiCollabDev.service.Participant_projetService;
+import odk.groupe4.ApiCollabDev.service.ParticipantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/participant_projet")
-public class Participant_projetController {
-    private final Participant_projetService participantProjetService;
+public class ParticipantController {
+    private final ParticipantService participantProjetService;
 
     @Autowired
-    public Participant_projetController(Participant_projetService participantProjetService) {
+    public ParticipantController(ParticipantService participantProjetService) {
         this.participantProjetService = participantProjetService;
     }
 

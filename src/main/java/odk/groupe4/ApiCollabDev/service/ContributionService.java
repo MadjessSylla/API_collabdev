@@ -5,9 +5,9 @@ import jakarta.transaction.Transactional;
 import odk.groupe4.ApiCollabDev.dao.*;
 import odk.groupe4.ApiCollabDev.dto.ContributionDto;
 import odk.groupe4.ApiCollabDev.models.*;
-import odk.groupe4.ApiCollabDev.models.enums.Profil;
-import odk.groupe4.ApiCollabDev.models.enums.StatusContribution;
-import odk.groupe4.ApiCollabDev.models.enums.StatusFeatures;
+import odk.groupe4.ApiCollabDev.models.enums.ParticipantProfil;
+import odk.groupe4.ApiCollabDev.models.enums.ContributionStatus;
+import odk.groupe4.ApiCollabDev.models.enums.FeaturesStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,22 +18,22 @@ import java.util.stream.Collectors;
 @Service
 public class ContributionService {
     private final ParametreCoinDao parametreCoinDao;
-    private final Participant_projetDao participantDao;
+    private final ParticipantDao participantDao;
     private final ContributeurDao contributeurDao;
     private final ContributionDao contributionDao;
     private final FonctionnaliteDao fonctionnaliteDao;
     private final BadgeDao badgeDao;
-    private final Badge_participantDao badgeParticipantDao;
+    private final BadgeParticipantDao badgeParticipantDao;
     private final NotificationService notificationService;
 
     @Autowired
     public ContributionService(ParametreCoinDao parametreCoinDao,
-                                 Participant_projetDao participantDao,
+                                 ParticipantDao participantDao,
                                  ContributeurDao contributeurDao,
                                  ContributionDao contributionDao,
                                  FonctionnaliteDao fonctionnaliteDao,
                                  BadgeDao badgeDao,
-                                 Badge_participantDao badgeParticipantDao,
+                                 BadgeParticipantDao badgeParticipantDao,
                                  NotificationService notificationService) {
         this.parametreCoinDao = parametreCoinDao;
         this.participantDao = participantDao;
@@ -47,7 +47,7 @@ public class ContributionService {
     // Méthode pour soumettre une contribution
     public Contribution createContribution(Contribution contribution) {
         // Vérifier que la contribution est soumise
-        if (contribution.getStatus() == StatusContribution.ENVOYER) {
+        if (contribution.getStatus() == ContributionStatus.ENVOYER) {
             // Sauvegarde de la contribution
             Contribution savedContribution = contributionDao.save(contribution);
 
@@ -68,21 +68,21 @@ public class ContributionService {
     }
 
     // Méthode permettant de valider ou rejeter une contribution
-    public Contribution updateContributionStatus(int contributionId, StatusContribution newStatus) {
+    public Contribution updateContributionStatus(int contributionId, ContributionStatus newStatus) {
         Contribution contribution = contributionDao.findById(contributionId)
                 .orElseThrow(() -> new IllegalArgumentException("Contribution non trouvée"));
 
         // Vérifier si le statut change vers VALIDER ou REJETER
-        if (newStatus == StatusContribution.VALIDER || newStatus == StatusContribution.REJETER) {
+        if (newStatus == ContributionStatus.VALIDER || newStatus == ContributionStatus.REJETER) {
             contribution.setStatus(newStatus);
             Contribution updatedContribution = contributionDao.save(contribution);
 
             // Notifier le participant soumetteur
             Participant participant = updatedContribution.getParticipant();
-            String sujet = newStatus == StatusContribution.VALIDER
+            String sujet = newStatus == ContributionStatus.VALIDER
                     ? "Contribution validée"
                     : "Contribution rejetée";
-            String message = newStatus == StatusContribution.VALIDER
+            String message = newStatus == ContributionStatus.VALIDER
                     ? "Votre contribution pour la fonctionnalité '" + updatedContribution.getFonctionnalite().getTitre() + "' a été validée."
                     : "Votre contribution pour la fonctionnalité '" + updatedContribution.getFonctionnalite().getTitre() + "' a été rejetée.";
 
@@ -134,7 +134,7 @@ public class ContributionService {
     }
 
     @Transactional
-    public Contribution MiseAJourStatutContribution(int contributionId, StatusContribution newStatus, int gestionnaireId) {
+    public Contribution MiseAJourStatutContribution(int contributionId, ContributionStatus newStatus, int gestionnaireId) {
         // Récupérer la contribution et valider
         Contribution contribution = contributionDao.findById(contributionId)
                 .orElseThrow(() -> new IllegalArgumentException("Contribution avec ID " + contributionId + " non trouvée"));
@@ -143,7 +143,7 @@ public class ContributionService {
                 .orElseThrow(() -> new IllegalArgumentException("Gestionnaire avec ID " + gestionnaireId + " non trouvé"));
 
         // Vérifier que le participant est un gestionnaire
-        if (!gestionnaire.getProfil().equals(Profil.GESTIONNAIRE)) {
+        if (!gestionnaire.getProfil().equals(ParticipantProfil.GESTIONNAIRE)) {
             throw new IllegalArgumentException("Seul un gestionnaire peut mettre à jour le statut d'une contribution");
         }
 
@@ -152,7 +152,7 @@ public class ContributionService {
         contribution.setParticipantGestionnaire(gestionnaire);
 
         // Si la contribution est validée, récompenser les coins et mettre à jour le statut de la fonctionnalité
-        if (newStatus == StatusContribution.VALIDER) {
+        if (newStatus == ContributionStatus.VALIDER) {
             recompenseCoins(contribution.getParticipant());
             MiseAJourStatutFonctionnalite(contribution.getFonctionnalite());
             assignerBadges(contribution.getParticipant());
@@ -174,14 +174,14 @@ public class ContributionService {
 
     private void MiseAJourStatutFonctionnalite(Fonctionnalite fonctionnalite) {
         if (fonctionnalite != null) {
-            fonctionnalite.setStatusFeatures(StatusFeatures.TERMINE);
+            fonctionnalite.setStatusFeatures(FeaturesStatus.TERMINE);
             fonctionnaliteDao.save(fonctionnalite);
         }
     }
 
     private void assignerBadges(Participant participant) {
         // Compter le nombre de contributions validées
-        int NombreValidation = contributionDao.findByParticipantIdAndStatus(participant.getId(), StatusContribution.VALIDER).size();
+        int NombreValidation = contributionDao.findByParticipantIdAndStatus(participant.getId(), ContributionStatus.VALIDER).size();
 
         // Définition des seuils de badge (par exemple, 5, 10, 20, 50)
         int[] plages = {1, 5, 10, 20, 50};

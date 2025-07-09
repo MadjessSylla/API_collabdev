@@ -1,9 +1,9 @@
 package odk.groupe4.ApiCollabDev.controllers;
 
-import odk.groupe4.ApiCollabDev.dao.Badge_participantDao;
-import odk.groupe4.ApiCollabDev.dto.Badge_participantDto;
+import odk.groupe4.ApiCollabDev.dao.BadgeParticipantDao;
+import odk.groupe4.ApiCollabDev.dto.BadgeParticipantDto;
 import odk.groupe4.ApiCollabDev.models.BadgeParticipant;
-import odk.groupe4.ApiCollabDev.service.Badge_participantService;
+import odk.groupe4.ApiCollabDev.service.BadgeParticipantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("api/Badge_participant")
-public class Badge_participantController {
+public class BadgeParticipantController {
     @Autowired
-    private Badge_participantService badgeParticipantService;
-    private Badge_participantDao badgeParticipantDao;
+    private BadgeParticipantService badgeParticipantService;
+    private BadgeParticipantDao badgeParticipantDao;
 
     @PostMapping
-    public BadgeParticipant creerBadgeParticipant(@RequestBody Badge_participantDto badgeParticipant ){
+    public BadgeParticipant creerBadgeParticipant(@RequestBody BadgeParticipantDto badgeParticipant ){
         return badgeParticipantService.ajouterBadgeParticipant(badgeParticipant);
     }
 }

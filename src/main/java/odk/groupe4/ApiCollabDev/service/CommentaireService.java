@@ -1,7 +1,7 @@
 package odk.groupe4.ApiCollabDev.service;
 
 import odk.groupe4.ApiCollabDev.dao.CommentaireDao;
-import odk.groupe4.ApiCollabDev.dao.Participant_projetDao;
+import odk.groupe4.ApiCollabDev.dao.ParticipantDao;
 import odk.groupe4.ApiCollabDev.dto.CommentaireDto;
 import odk.groupe4.ApiCollabDev.models.Commentaire;
 import odk.groupe4.ApiCollabDev.models.Participant;
@@ -16,14 +16,14 @@ import java.util.Set;
 public class CommentaireService {
 
     private final  CommentaireDao commentaireDao ;
-    private final Participant_projetDao participantDao;
+    private final ParticipantDao participantDao;
 
     // Ensemble pour stocker les observateurs (participants abonnés aux notifications)
     private final Set<Participant> observers = new HashSet<>();
 
 
     @Autowired
-    public CommentaireService(CommentaireDao commentaireDao, Participant_projetDao participantDao) {
+    public CommentaireService(CommentaireDao commentaireDao, ParticipantDao participantDao) {
         this.commentaireDao = commentaireDao;
         this.participantDao = participantDao;
     }

@@ -8,21 +8,28 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController // Gère les requêtes HTTP REST (JSON)
-@RequestMapping ("/api/admin") // Préfixe commun : http://localhost:8080/admin
-//@CrossOrigin // Autorise les requêtes depuis le front (CORS)
+@RestController @RequestMapping ("/api/admin")
 public class AdministrateurController {
+    private final AdministrateurService administrateurService;
 
     @Autowired
-    private AdministrateurService administrateurService;
+    public AdministrateurController(AdministrateurService administrateurService) {
+        this.administrateurService = administrateurService;
+    }
 
-    // Ajouter un administrateur (POST /admin)
+    // Afficher tous les admins (GET /admin)
+    @GetMapping
+    public List<Administrateur> getAllAdmins() {
+        return administrateurService.getAll();
+    }
+
+    // Créer un admin (POST /admin)
     @PostMapping
     public Administrateur createAdmin(@RequestBody AdministrateurDto adminDto) {
         return administrateurService.create(adminDto);
     }
 
-    // Modifier un admin (PUT /admin/{id})
+    // Mettre à jour un admin (PUT /admin/{id})
     @PutMapping("/{id}")
     public Administrateur updateAdmin(@PathVariable Integer id, @RequestBody AdministrateurDto dto) {
         return administrateurService.update(id, dto);
@@ -45,11 +52,4 @@ public class AdministrateurController {
     public Administrateur unblockAdmin(@PathVariable Integer id) {
         return administrateurService.unblock(id);
     }
-
-    // Afficher tous les admins (GET /admin)
-    @GetMapping
-    public List<Administrateur> getAllAdmins() {
-        return administrateurService.getAll();
-    }
-
 }

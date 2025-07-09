@@ -1,6 +1,6 @@
 package odk.groupe4.ApiCollabDev.models.enums;
 
-public enum DomaineProjet {
+public enum ProjectDomain {
     WEB,
     MOBILE,
     IA,

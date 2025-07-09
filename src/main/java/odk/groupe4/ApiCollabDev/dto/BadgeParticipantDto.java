@@ -10,7 +10,7 @@ import odk.groupe4.ApiCollabDev.models.Participant;
 import java.time.LocalDate;
 
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor
-public class Badge_participantDto {
+public class BadgeParticipantDto {
     LocalDate dateAcquisition;
     Badge badge;
     Participant participant;

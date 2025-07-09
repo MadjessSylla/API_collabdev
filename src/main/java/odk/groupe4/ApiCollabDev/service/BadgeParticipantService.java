@@ -1,7 +1,7 @@
 package odk.groupe4.ApiCollabDev.service;
 
-import odk.groupe4.ApiCollabDev.dao.Badge_participantDao;
-import odk.groupe4.ApiCollabDev.dto.Badge_participantDto;
+import odk.groupe4.ApiCollabDev.dao.BadgeParticipantDao;
+import odk.groupe4.ApiCollabDev.dto.BadgeParticipantDto;
 import odk.groupe4.ApiCollabDev.models.BadgeParticipant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,16 +9,16 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class Badge_participantService {
+public class BadgeParticipantService {
     @Autowired
-    private Badge_participantDao badgeParticipantDao;
+    private BadgeParticipantDao badgeParticipantDao;
 
 
     public List<BadgeParticipant> afficherBadgeParticipant() {
         return badgeParticipantDao.findAll();
     }
 
-    public BadgeParticipant ajouterBadgeParticipant(Badge_participantDto badgeParticipant){
+    public BadgeParticipant ajouterBadgeParticipant(BadgeParticipantDto badgeParticipant){
        BadgeParticipant badge_participant = new BadgeParticipant();
 
        //

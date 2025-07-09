@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import odk.groupe4.ApiCollabDev.models.enums.StatusContribution;
+import odk.groupe4.ApiCollabDev.models.enums.ContributionStatus;
 
 import java.time.LocalDate;
 
@@ -21,7 +21,7 @@ public class Contribution {
     private String fileUrl; // Lien vers un fichier de contribution (par exemple, un fichier de code, une image, un document, etc.) au format binaire
 
     @Enumerated(EnumType.STRING)
-    private StatusContribution status; // Statut de la contribution (En attente, Acceptée, Rejetée)
+    private ContributionStatus status; // Statut de la contribution (En attente, Acceptée, Rejetée)
 
     private LocalDate dateSoumission; // Date de soumission de la contribution.
 

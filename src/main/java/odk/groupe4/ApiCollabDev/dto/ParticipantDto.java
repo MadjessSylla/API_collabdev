@@ -5,13 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import odk.groupe4.ApiCollabDev.models.Contributeur;
-import odk.groupe4.ApiCollabDev.models.enums.Profil;
+import odk.groupe4.ApiCollabDev.models.enums.ParticipantProfil;
 
 @Getter
 @Setter @NoArgsConstructor
 @AllArgsConstructor
-public class Participant_projetDto {
+public class ParticipantDto {
     private Contributeur contributeur;
-    private Profil profil;
+    private ParticipantProfil profil;
     private String reponseQuiz;
 }

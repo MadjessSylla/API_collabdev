@@ -1,6 +1,6 @@
 package odk.groupe4.ApiCollabDev.models.enums;
 
-public enum Profil {
+public enum ParticipantProfil {
     PORTEUR_DE_PROJET,
     GESTIONNAIRE,
     DEVELOPPEUR,

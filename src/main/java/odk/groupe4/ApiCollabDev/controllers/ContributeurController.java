@@ -3,7 +3,7 @@ package odk.groupe4.ApiCollabDev.controllers;
 import odk.groupe4.ApiCollabDev.dto.ContributeurDto;
 import odk.groupe4.ApiCollabDev.dto.ContributeurSoldeDto;
 import odk.groupe4.ApiCollabDev.models.Contributeur;
-import odk.groupe4.ApiCollabDev.models.enums.StatusProject;
+import odk.groupe4.ApiCollabDev.models.enums.ProjectStatus;
 import odk.groupe4.ApiCollabDev.service.ContributeurSercice;
 import odk.groupe4.ApiCollabDev.service.ProjetService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +26,5 @@ public class ContributeurController {
     public ContributeurSoldeDto afficherSoldeContributeur(@PathVariable int id) {
         return contributeurSercice.afficherSoldeContributeur(id);
     }
-    // Méthode pour recuperer l'avancement d'un projet
-    @GetMapping("/projets/{id}/avancement")
-    public StatusProject recupererAvancementProjet(@PathVariable int id) {
-        return projetService.suivreAvancementProjet(id);
-    }
+
 }

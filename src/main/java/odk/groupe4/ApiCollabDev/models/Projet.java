@@ -5,10 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import odk.groupe4.ApiCollabDev.models.enums.DomaineProjet;
-import odk.groupe4.ApiCollabDev.models.enums.NiveauProjet;
-import odk.groupe4.ApiCollabDev.models.enums.SecteurProjet;
-import odk.groupe4.ApiCollabDev.models.enums.StatusProject;
+import odk.groupe4.ApiCollabDev.models.enums.ProjectDomain;
+import odk.groupe4.ApiCollabDev.models.enums.ProjectLevel;
+import odk.groupe4.ApiCollabDev.models.enums.ProjectSector;
+import odk.groupe4.ApiCollabDev.models.enums.ProjectStatus;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -28,18 +28,18 @@ public class Projet {
     private String description; // Description du projet
 
     @Enumerated(EnumType.STRING)
-    private DomaineProjet domaine; // Domaine du projet (ex: Web, Mobile, IA, etc.)
+    private ProjectDomain domaine; // Domaine du projet (ex: Web, Mobile, IA, etc.)
 
     @Enumerated(EnumType.STRING)
-    private SecteurProjet secteur; // Secteur du projet (ex: Santé, Éducation, Finance, etc.)
+    private ProjectSector secteur; // Secteur du projet (ex: Santé, Éducation, Finance, etc.)
 
     private String urlCahierDeCharge; // URL du cahier des charges du projet au format PDF
 
     @Enumerated(EnumType.STRING)
-    private StatusProject status; // Statut du projet (ex: En attente, En cours, Terminé, etc.)
+    private ProjectStatus status; // Statut du projet (ex: En attente, En cours, Terminé, etc.)
 
     @Enumerated(EnumType.STRING)
-    private NiveauProjet niveau;
+    private ProjectLevel niveau;
 
     private LocalDate dateCreation; // Date de création du projet
 

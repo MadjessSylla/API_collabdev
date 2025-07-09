@@ -1,19 +1,19 @@
 package odk.groupe4.ApiCollabDev.service;
 
 import odk.groupe4.ApiCollabDev.dao.AdministrateurDao;
-import odk.groupe4.ApiCollabDev.dao.Participant_projetDao;
+import odk.groupe4.ApiCollabDev.dao.ParticipantDao;
 import odk.groupe4.ApiCollabDev.dao.ProjetDao;
 import odk.groupe4.ApiCollabDev.dto.ContributeurDto;
 import odk.groupe4.ApiCollabDev.dto.ProjetDto;
 import odk.groupe4.ApiCollabDev.models.Contributeur;
 import odk.groupe4.ApiCollabDev.models.Participant;
 import odk.groupe4.ApiCollabDev.models.Projet;
-import odk.groupe4.ApiCollabDev.models.enums.Profil;
+import odk.groupe4.ApiCollabDev.models.enums.ParticipantProfil;
 import odk.groupe4.ApiCollabDev.dao.ContributeurDao;
 import odk.groupe4.ApiCollabDev.dto.ProjetCahierDto;
 import odk.groupe4.ApiCollabDev.models.Administrateur;
-import odk.groupe4.ApiCollabDev.models.enums.NiveauProjet;
-import odk.groupe4.ApiCollabDev.models.enums.StatusProject;
+import odk.groupe4.ApiCollabDev.models.enums.ProjectLevel;
+import odk.groupe4.ApiCollabDev.models.enums.ProjectStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +23,7 @@ public class ProjetService {
     private final ProjetDao projetDao;
     private final NotificationService notificationService;
     private final AdministrateurDao administrateurDao;
-    private final Participant_projetDao participantDao;
+    private final ParticipantDao participantDao;
     private final ContributeurDao contributeurDao;
 
 
@@ -32,7 +32,7 @@ public class ProjetService {
     private ProjetService (ProjetDao projetDao,
                            NotificationService notificationService,
                            AdministrateurDao administrateurDao,
-                           Participant_projetDao participantDao,
+                           ParticipantDao participantDao,
                            ContributeurDao contributeurDao) {
         this.projetDao = projetDao;
         this.notificationService = notificationService;
@@ -46,7 +46,7 @@ public class ProjetService {
         Projet savedProjet = projetDao.save(projet);
 
         // Vérifier si le projet soumis est en attente
-        if (savedProjet.getStatus() == StatusProject.EN_ATTENTE) {
+        if (savedProjet.getStatus() == ProjectStatus.EN_ATTENTE) {
             // Récupérer tous les administrateurs
             administrateurDao.findAll().forEach(administrateur -> {
                 notificationService.createNotification(
@@ -71,7 +71,7 @@ public class ProjetService {
 
         // Vérification qu'il existe au moins un participant de type Ideateur de ce projet
         boolean hasIdeateur = projet.getParticipants().stream()
-                .anyMatch(participant -> participant.getProfil().equals(Profil.PORTEUR_DE_PROJET));
+                .anyMatch(participant -> participant.getProfil().equals(ParticipantProfil.PORTEUR_DE_PROJET));
 
         if (!hasIdeateur) {
             throw new RuntimeException("Aucun participant de type Porteur de Projet trouvé pour le projet ID: " + idProjet);
@@ -79,7 +79,7 @@ public class ProjetService {
 
         // Vérifier si le projet a déjà un gestionnaire
         boolean hasGestionnaire = projet.getParticipants().stream()
-                .anyMatch(participant -> participant.getProfil().equals(Profil.GESTIONNAIRE));
+                .anyMatch(participant -> participant.getProfil().equals(ParticipantProfil.GESTIONNAIRE));
 
         if (hasGestionnaire) {
             throw new RuntimeException("Le projet ID: " + idProjet + " a déjà un gestionnaire.");
@@ -88,7 +88,7 @@ public class ProjetService {
         // S'assurer que le participant existe et qu'il a un profil de type Gestionnaire
         Participant gestionnaire = participantDao.findById(idContributeur)
                 .orElseThrow(() -> new RuntimeException("Participant non trouvé avec l'ID: " + idContributeur));
-        if (!gestionnaire.getProfil().equals(Profil.GESTIONNAIRE)) {
+        if (!gestionnaire.getProfil().equals(ParticipantProfil.GESTIONNAIRE)) {
             throw new RuntimeException("Le participant ID: " + idContributeur + " n'est pas un gestionnaire.");
         }
 
@@ -193,7 +193,7 @@ public class ProjetService {
 
     // Methode permettant d'attribuer un niveau de complexité au projet
 
-    public Projet attribuerNiveau (int idProjet, int idadministrateur, NiveauProjet niveau){
+    public Projet attribuerNiveau (int idProjet, int idadministrateur, ProjectLevel niveau){
         // On récupère l'objet projet dans la base de donnnées à partir de son id
         Projet projet= projetDao.findById(idProjet)
                 .orElseThrow(()->new RuntimeException("Projet introuvable"));

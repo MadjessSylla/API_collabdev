@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import odk.groupe4.ApiCollabDev.models.enums.Profil;
-import odk.groupe4.ApiCollabDev.models.enums.StatusParticipant;
+import odk.groupe4.ApiCollabDev.models.enums.ParticipantProfil;
+import odk.groupe4.ApiCollabDev.models.enums.ParticipantStatus;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,10 +22,10 @@ public class Participant {
     private int id;
 
     @Enumerated(EnumType.STRING)
-    private Profil profil; // Profil du participant (Porteur de projet, Développeur, Designer, Gestionnaire, Testeur, etc.)
+    private ParticipantProfil profil; // Profil du participant (Porteur de projet, Développeur, Designer, Gestionnaire, Testeur, etc.)
 
     @Enumerated(EnumType.STRING)
-    private StatusParticipant statut; // EN_ATTENTE, ACCEPTE, REFUSE
+    private ParticipantStatus statut; // EN_ATTENTE, ACCEPTE, REFUSE
 
     //les reponse des Quiz seront stockées dans cette variable
     private String reponseQuiz;

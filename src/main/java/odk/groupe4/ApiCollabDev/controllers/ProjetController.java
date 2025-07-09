@@ -4,7 +4,7 @@ package odk.groupe4.ApiCollabDev.controllers;
 import odk.groupe4.ApiCollabDev.dto.ProjetCahierDto;
 import odk.groupe4.ApiCollabDev.dto.ProjetDto;
 import odk.groupe4.ApiCollabDev.models.Projet;
-import odk.groupe4.ApiCollabDev.models.enums.NiveauProjet;
+import odk.groupe4.ApiCollabDev.models.enums.ProjectLevel;
 import odk.groupe4.ApiCollabDev.service.ProjetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +45,7 @@ public class ProjetController {
 
    // Attribuer un niveau au projet
     @PatchMapping("/{idProjet}/admin/{idadmin}")
-    public ResponseEntity<Projet> attribuerNiveau(@PathVariable("idProjet") int idProjet, @PathVariable("idAdmin") int idadministrateur,@RequestParam NiveauProjet niveau){
+    public ResponseEntity<Projet> attribuerNiveau(@PathVariable("idProjet") int idProjet, @PathVariable("idAdmin") int idadministrateur,@RequestParam ProjectLevel niveau){
         Projet p = projetService.attribuerNiveau(idProjet, idadministrateur, niveau);
         return  ResponseEntity.ok(p);
     }

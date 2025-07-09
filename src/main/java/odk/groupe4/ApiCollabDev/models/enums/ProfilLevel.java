@@ -1,6 +1,6 @@
 package odk.groupe4.ApiCollabDev.models.enums;
 
-public enum NiveauProfil {
+public enum ProfilLevel {
     DEBUTANT,
     INTERMEDIAIRE,
     AVANCE,

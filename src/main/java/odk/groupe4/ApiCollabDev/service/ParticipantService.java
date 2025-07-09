@@ -3,9 +3,9 @@ package odk.groupe4.ApiCollabDev.service;
 import odk.groupe4.ApiCollabDev.dao.*;
 import odk.groupe4.ApiCollabDev.dto.*;
 import odk.groupe4.ApiCollabDev.models.*;
-import odk.groupe4.ApiCollabDev.models.enums.Profil;
-import odk.groupe4.ApiCollabDev.models.enums.StatusContribution;
-import odk.groupe4.ApiCollabDev.models.enums.StatusParticipant;
+import odk.groupe4.ApiCollabDev.models.enums.ParticipantProfil;
+import odk.groupe4.ApiCollabDev.models.enums.ContributionStatus;
+import odk.groupe4.ApiCollabDev.models.enums.ParticipantStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class Participant_projetService {
-    private final Participant_projetDao participantProjetDao;
+public class ParticipantService {
+    private final ParticipantDao participantProjetDao;
     private final ProjetDao projetDao;
     private final ContributionDao contributionDao;
     private final NotificationService notificationService;
@@ -28,13 +28,13 @@ public class Participant_projetService {
     private final FonctionnaliteDao fonctionnaliteDao;
 
     @Autowired
-    public Participant_projetService(Participant_projetDao participantProjetDao,
-                                     ProjetDao projetDao,
-                                     ContributionDao contributionDao,
-                                     NotificationService notificationService,
-                                     ContributeurDao contributeurDao,
-                                     ParametreCoinDao parametreCoinDao,
-                                     FonctionnaliteDao fonctionnaliteDao) {
+    public ParticipantService(ParticipantDao participantProjetDao,
+                              ProjetDao projetDao,
+                              ContributionDao contributionDao,
+                              NotificationService notificationService,
+                              ContributeurDao contributeurDao,
+                              ParametreCoinDao parametreCoinDao,
+                              FonctionnaliteDao fonctionnaliteDao) {
         this.participantProjetDao = participantProjetDao;
         this.projetDao = projetDao;
         this.contributionDao = contributionDao;
@@ -46,8 +46,8 @@ public class Participant_projetService {
 
 
     //Méthode pour transformer un Participant_projet en Participant_projetDto
-     private Participant_projetDto Participant_projetToParticipant_projetDto(Participant participant) {
-        Participant_projetDto participantProjetDto = new Participant_projetDto();
+     private ParticipantDto Participant_projetToParticipant_projetDto(Participant participant) {
+        ParticipantDto participantProjetDto = new ParticipantDto();
         participantProjetDto.setProfil(participant.getProfil());
         participantProjetDto.setContributions(participant.getContributions());
         participantProjetDto.setFonctionnalite(participant.getFonctionnalite());
@@ -74,7 +74,7 @@ public class Participant_projetService {
             throw new IllegalArgumentException("Participant avec l'ID " + idParticipant + " n'existe pas.");
         }
         // Récupération des contributions validées du participant
-        List<Contribution> contributions = contributionDao.findByParticipantIdAndStatus(idParticipant, StatusContribution.VALIDER);
+        List<Contribution> contributions = contributionDao.findByParticipantIdAndStatus(idParticipant, ContributionStatus.VALIDER);
         // Conversion des contributions vers des DTOs
         List<ContributionDto> contributionDTOs = contributions.stream()
                 .map(this::mapToContributionDTO)
@@ -105,7 +105,7 @@ public class Participant_projetService {
 
         // Récupérer tous les participants du projet avec le profil GESTIONNAIRE
         projet.getParticipants().stream()
-                .filter(p -> p.getProfil() == Profil.GESTIONNAIRE)
+                .filter(p -> p.getProfil() == ParticipantProfil.GESTIONNAIRE)
                 .forEach(gestionnaire -> {
                     // Envoyer une notification à l'utilisateur du contributeur du gestionnaire
                     notificationService.createNotification(
@@ -119,13 +119,13 @@ public class Participant_projetService {
     }
 
     // Méthode pour refuser une demande de participation
-    public void updateParticipantStatus(int participantId, StatusParticipant newStatus) {
+    public void updateParticipantStatus(int participantId, ParticipantStatus newStatus) {
         Participant participant = participantProjetDao.findById(participantId)
                 .orElseThrow(() -> new IllegalArgumentException("Participant non trouvé"));
         participant.setStatut(newStatus);
         participantProjetDao.save(participant);
 
-        if (newStatus == StatusParticipant.REFUSE) {
+        if (newStatus == ParticipantStatus.REFUSE) {
             notificationService.createNotification(
                     participant.getContributeur(),
                     "Participation refusée",
@@ -159,7 +159,7 @@ public class Participant_projetService {
     }
 
   //Methode pour participer à un projet
-    public Participant envoyerDemande(int idProjet, Participant_projetDto demandeDTO, int idContributeur){
+    public Participant envoyerDemande(int idProjet, ParticipantDto demandeDTO, int idContributeur){
         Projet projet = projetDao.findById(idProjet)
                 .orElseThrow(()-> new RuntimeException("Projet introuvable"));
    //on recuperer le contributeur
@@ -257,7 +257,7 @@ public class Participant_projetService {
     // Methode pour soumettre une contribution
     public ContributionDto SoumettreUneContribution(String dateHeader, int idParticipant, ContributionDto contributiondto){
         Contribution contribution = new Contribution();
-        StatusContribution status = StatusContribution.ENVOYE;
+        ContributionStatus status = ContributionStatus.ENVOYE;
         Participant participant = participantProjetDao.findById(idParticipant)
                 .orElseThrow(() -> new RuntimeException("Participant non trouvé"));
         LocalDate dateCreation = LocalDate.now(ZoneOffset.UTC);;
@@ -295,14 +295,14 @@ public class Participant_projetService {
         return participantProjetDao.findAll();
     }
 
-    public Participant ajouterParticipant(Participant_projetDto participantProjet){
+    public Participant ajouterParticipant(ParticipantDto participantProjet){
         Participant participant = new Participant();
         participant.setProfil(participantProjet.getProfil());
         return participantProjetDao.save(participant);
     }
 
     //Méthode pour reserver une fonctionnalité à un participant
-    public Participant_projetDto reserverFonctionnalite(int idParticipant, int idFonctionnalite) {
+    public ParticipantDto reserverFonctionnalite(int idParticipant, int idFonctionnalite) {
         Participant participant = participantProjetDao.findById(idParticipant).orElseThrow(() -> new RuntimeException("Participant non trouvé"));
         Fonctionnalite fonctionnalite = fonctionnaliteDao.findById(idFonctionnalite).orElseThrow(() -> new RuntimeException("Fonctionnalité non trouvée"));
         // Vérifier si la fonctionnalité est déjà réservée

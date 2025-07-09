@@ -12,41 +12,24 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ContributeurSercice {
-    private ContributeurDao contributeurDao;
-    private ParametreCoinDao parametreCoinDao;
-    private AdministrateurDao administrateurDao;
-
+    private final ContributeurDao contributeurDao;
 
     @Autowired
-    public ContributeurSercice (ContributeurDao contributeurDao, ParametreCoinDao parametreCoinDao, AdministrateurDao administrateurDao ) {
+    public ContributeurSercice (ContributeurDao contributeurDao) {
         this.contributeurDao = contributeurDao;
-        this.parametreCoinDao = parametreCoinDao;
-        this.administrateurDao = administrateurDao;
     }
 
-    public Contributeur ajouterContributeur(ContributeurDto contributeur) {
-
-        Contributeur contrib = new Contributeur();
-        // Conversion de l'objet ContributeurDAO en Contributeur
-        contrib.setNom(contributeur.getNom());
-        contrib.setPrenom(contributeur.getPrenom());
-        contrib.setTelephone(contributeur.getTelephone());
-        contrib.setEmail(contributeur.getEmail());
-        contrib.setPassword(contributeur.getPassword());
-        contrib.setPointExp(10); // Initialisation du point d'expérience à 10
-        ParametreCoin coin = parametreCoinDao.findByTypeEvenementLien("INSCRIPTION")
-                .orElseThrow(() -> new RuntimeException("Paramètre de coin pour l'inscription non trouvé"));
-        contrib.setTotalCoin(contrib.getTotalCoin() + coin.getValeur()); // Ajout des coins d'inscription
-        // Enregistrement de l'objet Contributeur
-        return contributeurDao.save(contrib);
-    }
-
-    // Afficher le solde d'un contributeur
+    /** Afficher le solde d'un contributeur
+     * @param id l'ID du contributeur
+     * @return un objet ContributeurSoldeDto contenant le solde du contributeur
+     * @throws RuntimeException si le contributeur n'existe pas
+     */
     public ContributeurSoldeDto afficherSoldeContributeur(int id) {
-        // Vérification si le contributeur existe
+        // Vérification de l'existence du contributeur
         if (!contributeurDao.existsById(id)) {
             throw new RuntimeException("Contributeur non trouvé avec l'ID: " + id);
         }
+        // Récupération du contributeur
         return contributeurDao.totalCoinContributeur(id);
     }
 }
