@@ -7,5 +7,5 @@ import odk.groupe4.ApiCollabDev.models.interfaces.NotificationObserver;
 public interface NotificationDiffuseur {
     void sabonner(NotificationObserver observer);
     void seDesabonner(NotificationObserver observer);
-    void notifierParticipants(Commentaire commentaire, Participant auteur);
+    void notifierParticipants(NotificationObserver exp, String message);
 }

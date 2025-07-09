@@ -25,4 +25,8 @@ public class Fonctionnalite {
     @ManyToOne
     @JoinColumn(name = "id_projet")
     private Projet projet;
+
+    @ManyToOne
+    @JoinColumn(name = "id_participant")
+    private Participant participant;
 }
