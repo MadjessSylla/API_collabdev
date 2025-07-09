@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import odk.groupe4.ApiCollabDev.models.enums.NiveauProfil;
 
 @Entity @AllArgsConstructor @NoArgsConstructor @Getter @Setter
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -20,4 +21,8 @@ public class Utilisateur {
 
     @Column(nullable = false, length = 80)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    private NiveauProfil niveauProfil;
+
 }
