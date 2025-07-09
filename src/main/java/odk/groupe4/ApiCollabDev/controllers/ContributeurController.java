@@ -14,9 +14,10 @@ import org.springframework.web.bind.annotation.*;
 public class ContributeurController {
     @Autowired
     private ProjetService projetService;
+    @Autowired
     private ContributeurSercice contributeurSercice;
 
-    @PostMapping
+    @PostMapping("creerAbonner")
     public Contributeur creerAbonner(@RequestBody ContributeurDto contributeur) {
        return contributeurSercice.ajouterContributeur(contributeur);
 
@@ -30,5 +31,10 @@ public class ContributeurController {
     @GetMapping("/projets/{id}/avancement")
     public StatusProject recupererAvancementProjet(@PathVariable int id) {
         return projetService.suivreAvancementProjet(id);
+    }
+    //Méthode pour choisir un gestionnaire de projet
+    @PatchMapping("{idProjet},{idGestionnaire}/selectionnerGestionnaire")
+    public void selectionnerGestionnaire(int idProjet, int idGesionnaire){
+        projetService.selectGestionnaire(idProjet,idGesionnaire);
     }
 }

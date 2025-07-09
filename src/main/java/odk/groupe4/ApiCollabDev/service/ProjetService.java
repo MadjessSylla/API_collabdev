@@ -10,10 +10,13 @@ import odk.groupe4.ApiCollabDev.models.Projet;
 import odk.groupe4.ApiCollabDev.models.enums.Profil;
 import odk.groupe4.ApiCollabDev.models.enums.StatusProject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ProjetService {
-
+    @Autowired
     private final ProjetDao projetDao;
+    @Autowired
     private final Participant_projetDao participantDao;
 
     @Autowired
@@ -60,7 +63,7 @@ public class ProjetService {
         return ProjetDaoToDto(projetDao.save(projet));
     }
     // suivre l'avancement d'un projet
-   /* public StatusProject suivreAvancementProjet(int idProjet) {
+    public StatusProject suivreAvancementProjet(int idProjet) {
         ProjetDto projetDto = new ProjetDto();
         Projet projet = projetDao.findById(idProjet).orElse(null);
         if (projet != null) {
@@ -68,7 +71,7 @@ public class ProjetService {
             return projetDto.getStatus();
         }
         return null;
-    }*/
+    }
 
     // M&thode permettant de selectionner un participant de type Gestionnaire
     public void selectGestionnaire(int idProjet, int idContributeur) {
