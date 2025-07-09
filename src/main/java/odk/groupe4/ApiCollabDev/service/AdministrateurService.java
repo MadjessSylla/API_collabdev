@@ -52,6 +52,17 @@ public class AdministrateurService {
         return null;
     }
 
+    // Débloquer un compte admin
+    public Administrateur unblock(Integer id) {
+        Optional<Administrateur> adminOpt = adminDao.findById(id);
+        if (adminOpt.isPresent()) {
+            Administrateur admin = adminOpt.get();
+            admin.setActif(true); // On le réactive
+            return adminDao.save(admin);
+        }
+        return null;
+    }
+
     // Afficher tous les admins
     public List<Administrateur> getAll() {
         return adminDao.findAll();

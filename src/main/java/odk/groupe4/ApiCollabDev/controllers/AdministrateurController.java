@@ -40,6 +40,12 @@ public class AdministrateurController {
         return administrateurService.block(id);
     }
 
+    // Débloquer un admin (PUT /admin/unblock/{id})
+    @PutMapping("/unblock/{id}")
+    public Administrateur unblockAdmin(@PathVariable Integer id) {
+        return administrateurService.unblock(id);
+    }
+
     // Afficher tous les admins (GET /admin)
     @GetMapping
     public List<Administrateur> getAllAdmins() {
