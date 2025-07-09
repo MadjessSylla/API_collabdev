@@ -1,5 +1,6 @@
 package odk.groupe4.ApiCollabDev.service;
 
+import odk.groupe4.ApiCollabDev.dao.AdministrateurDao;
 import odk.groupe4.ApiCollabDev.dao.ContributeurDao;
 import odk.groupe4.ApiCollabDev.dao.ParametreCoinDao;
 import odk.groupe4.ApiCollabDev.dto.ContributeurDto;
@@ -13,11 +14,14 @@ import org.springframework.stereotype.Service;
 public class ContributeurSercice {
     private ContributeurDao contributeurDao;
     private ParametreCoinDao parametreCoinDao;
+    private AdministrateurDao administrateurDao;
+
 
     @Autowired
-    public ContributeurSercice (ContributeurDao contributeurDao, ParametreCoinDao parametreCoinDao) {
+    public ContributeurSercice (ContributeurDao contributeurDao, ParametreCoinDao parametreCoinDao, AdministrateurDao administrateurDao ) {
         this.contributeurDao = contributeurDao;
         this.parametreCoinDao = parametreCoinDao;
+        this.administrateurDao = administrateurDao;
     }
 
     public Contributeur ajouterContributeur(ContributeurDto contributeur) {

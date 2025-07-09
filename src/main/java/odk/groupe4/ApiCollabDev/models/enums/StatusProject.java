@@ -4,5 +4,5 @@ public enum StatusProject {
     EN_ATTENTE,
     OUVERT,
     EN_COURS,
-    TERMINER
+    EN_ATTENTE, TERMINER
 }
