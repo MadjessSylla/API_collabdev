@@ -37,7 +37,5 @@ public class Contributeur extends Utilisateur {
     // Un contributeur peut débloquer plusieurs projets.
     @ManyToMany(mappedBy = "contributeurs")
     private Set<Projet> projetsDebloques = new HashSet<>();
-
-    @OneToMany(mappedBy = "contributeur", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Notification> historiqueNotifications;
+    
 }

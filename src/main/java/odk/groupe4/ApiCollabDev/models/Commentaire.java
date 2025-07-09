@@ -15,7 +15,9 @@ public class Commentaire {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_commentaire")
     private int id;
+
     private String contenu; // Contenu du commentaire
+
     private LocalDate date; // Date de création du commentaire
 
     // Auteur du commentaire

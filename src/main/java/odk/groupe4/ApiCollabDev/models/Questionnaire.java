@@ -16,8 +16,11 @@ public class Questionnaire {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_questionnaire")
     private int id; // Identifiant du questionnaire
+
     private String titre; // Titre du questionnaire
+
     private String description; // Description du questionnaire
+
     private LocalDate dateCreation; // Date de création du questionnaire
 
     @OneToMany(mappedBy = "questionnaire", cascade = CascadeType.ALL, orphanRemoval = true)

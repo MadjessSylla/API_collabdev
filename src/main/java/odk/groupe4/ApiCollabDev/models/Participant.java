@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import odk.groupe4.ApiCollabDev.models.enums.DemandeParticipation;
 import odk.groupe4.ApiCollabDev.models.enums.Profil;
 import odk.groupe4.ApiCollabDev.models.enums.StatusParticipant;
 
@@ -28,8 +27,6 @@ public class Participant {
     @Enumerated(EnumType.STRING)
     private StatusParticipant statut; // EN_ATTENTE, ACCEPTE, REFUSE
 
-    private DemandeParticipation demande;
-
     //les reponse des Quiz seront stockées dans cette variable
     private String reponseQuiz;
 
@@ -51,13 +48,13 @@ public class Participant {
 
     // Les badges reçus par le participant
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Badge_participant> badgeParticipants = new HashSet<>();
+    private Set<BadgeParticipant> badgeParticipants = new HashSet<>();
 
     // Clé de référence vers la classe association Fonctionnalite_Participant
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "id_fonctionnalite")
-    // Clé de reférence vers la classe association contribution
     private Fonctionnalite fonctionnalite;
+
     @OneToMany(mappedBy = "participants", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contribution> contributions = new ArrayList<>();
 }

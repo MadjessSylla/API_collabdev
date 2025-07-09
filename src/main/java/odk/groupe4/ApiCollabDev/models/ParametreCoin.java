@@ -14,9 +14,13 @@ public class ParametreCoin {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_parametre_coin")
     private int id;
+
     private String nom;
+
     private String description;
+
     private String typeEvenementLien;
+
     private int valeur;
 
     @ManyToOne

@@ -3,7 +3,6 @@ package odk.groupe4.ApiCollabDev.service;
 import odk.groupe4.ApiCollabDev.dao.*;
 import odk.groupe4.ApiCollabDev.dto.*;
 import odk.groupe4.ApiCollabDev.models.*;
-import odk.groupe4.ApiCollabDev.models.enums.DemandeParticipation;
 import odk.groupe4.ApiCollabDev.models.enums.Profil;
 import odk.groupe4.ApiCollabDev.models.enums.StatusContribution;
 import odk.groupe4.ApiCollabDev.models.enums.StatusParticipant;
@@ -82,7 +81,7 @@ public class Participant_projetService {
                 .collect(Collectors.toList());
 
         // Récupération des badges acquis par le participant
-        List<Badge_participant> badgeParticipants = participantProjetDao.findById(idParticipant)
+        List<BadgeParticipant> badgeParticipants = participantProjetDao.findById(idParticipant)
                 .get().getBadgeParticipants().stream().toList();
         // Conversion des badges vers des DTOs
         List<BadgeRewardDto> badgeDTOs = badgeParticipants.stream()
@@ -148,7 +147,7 @@ public class Participant_projetService {
     }
 
     // Méthode pour mapper un Badge_participant vers un BadgeRewardDto
-    private BadgeRewardDto mapToBadgeDTO(Badge_participant badgeParticipant) {
+    private BadgeRewardDto mapToBadgeDTO(BadgeParticipant badgeParticipant) {
         return new BadgeRewardDto(
                 badgeParticipant.getBadge().getId(),
                 badgeParticipant.getBadge().getType(),

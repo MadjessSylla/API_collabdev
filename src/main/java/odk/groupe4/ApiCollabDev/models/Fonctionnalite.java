@@ -17,7 +17,9 @@ public class Fonctionnalite {
     private int id;
 
     private String titre; // Titre de la fonctionnalité
+
     private String contenu; // Contenu de la fonctionnalité (description détaillée)
+
     @Enumerated(EnumType.STRING)
     private StatusFeatures statusFeatures; // Statut de la fonctionnalité (ex: En attente, En cours, Terminé, etc.)
 

@@ -15,10 +15,14 @@ public class Contribution {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_contribution")
     private int id;
+
     private String lienUrl; // Lien vers la contribution (par exemple, un lien vers un dépôt GitHub, une maquette figma, un document, etc.)
+
     private String fileUrl; // Lien vers un fichier de contribution (par exemple, un fichier de code, une image, un document, etc.) au format binaire
+
     @Enumerated(EnumType.STRING)
     private StatusContribution status; // Statut de la contribution (En attente, Acceptée, Rejetée)
+
     private LocalDate dateSoumission; // Date de soumission de la contribution.
 
     // La fonctionnalité à laquelle la contribution est associée.
@@ -34,6 +38,6 @@ public class Contribution {
 
     // Un participant Gestionnaire peut valider plusieurs contributions, mais une contribution est validée par un seul participant Gestionnaire.
     @ManyToOne
-    @JoinColumn(name = "id_participant_gestionnaire")
-    private Participant participantGestionnaire;
+    @JoinColumn(name = "id_gestionnaire")
+    private Participant gestionnaire;
 }

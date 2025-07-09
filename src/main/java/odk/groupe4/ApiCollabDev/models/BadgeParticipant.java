@@ -9,7 +9,7 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 @Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
-public class Badge_participant {
+public class BadgeParticipant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

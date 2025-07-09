@@ -196,7 +196,7 @@ public class ContributionService {
                     boolean hasBadge = badgeParticipantDao.findByParticipantIdAndBadgeId(participant.getId(), badge.getId()).isPresent();
                     if (!hasBadge) {
                         // Attribution du badge au participant
-                        Badge_participant badgeParticipant = new Badge_participant();
+                        BadgeParticipant badgeParticipant = new BadgeParticipant();
                         badgeParticipant.setBadge(badge);
                         badgeParticipant.setParticipant(participant);
                         badgeParticipant.setDateAcquisition(LocalDate.now());
