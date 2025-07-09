@@ -8,7 +8,9 @@ import lombok.Setter;
 import odk.groupe4.ApiCollabDev.models.enums.DemandeParticipation;
 import odk.groupe4.ApiCollabDev.models.enums.Profil;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity @Getter  @Setter @NoArgsConstructor @AllArgsConstructor
@@ -28,6 +30,9 @@ public class Participant {
     //les reponse des Quiz seront stockées dans cette variable
     private String reponseQuiz;
 
+    //par defaut L'accès débloquer est false
+    private boolean accesDebloquer=false;
+
     // Clé étrnagère de la table Projet
     @ManyToOne
     @JoinColumn(name = "id_projet")
@@ -45,4 +50,7 @@ public class Participant {
     // Clé de reference vers la classe association Badge_Participation
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Badge_participant> badgeParticipants = new HashSet<>();
+
+    //on creer une listes des fonctionalitées traitées par le participant
+    private List<Fonctionnalite> fonctionnaliteList= new ArrayList<>();
 }

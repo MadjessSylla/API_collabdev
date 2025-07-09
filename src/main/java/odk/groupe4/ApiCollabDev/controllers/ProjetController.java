@@ -1,7 +1,9 @@
 package odk.groupe4.ApiCollabDev.controllers;
 
+import odk.groupe4.ApiCollabDev.dto.ProjetCahierDto;
 import odk.groupe4.ApiCollabDev.dto.ProjetDto;
 import odk.groupe4.ApiCollabDev.models.Projet;
+import odk.groupe4.ApiCollabDev.models.enums.NiveauProjet;
 import odk.groupe4.ApiCollabDev.service.ProjetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,5 +34,19 @@ public class ProjetController {
         return ResponseEntity.ok("Projet supprimé avec succès");
     }
 
+//Methode pour editer un cahier de charge
+   @PatchMapping("/{idProjet}/editer-cahier")
+   public ResponseEntity<String> editerCahierDeCharge(@PathVariable("idProjet") int idprojet, ProjetCahierDto projetCahierDto){
+        projetService.editerCahierDeCharge(projetCahierDto,idprojet);
+        return ResponseEntity.ok("cahier de charge edité avec succès");
+
+   }
+
+   // Attribuer un niveau au projet
+    @PatchMapping("/{idProjet}/admin/{idadmin}")
+    public ResponseEntity<Projet> attribuerNiveau(@PathVariable("idProjet") int idProjet, @PathVariable("idAdmin") int idadministrateur,@RequestParam NiveauProjet niveau){
+        Projet p = projetService.attribuerNiveau(idProjet, idadministrateur, niveau);
+        return  ResponseEntity.ok(p);
+    }
 
 }

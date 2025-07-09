@@ -5,10 +5,12 @@ import jakarta.persistence.Entity;
 import odk.groupe4.ApiCollabDev.dao.AdministrateurDao;
 import odk.groupe4.ApiCollabDev.dao.ContributeurDao;
 import odk.groupe4.ApiCollabDev.dao.ProjetDao;
+import odk.groupe4.ApiCollabDev.dto.ProjetCahierDto;
 import odk.groupe4.ApiCollabDev.dto.ProjetDto;
 import odk.groupe4.ApiCollabDev.models.Administrateur;
 import odk.groupe4.ApiCollabDev.models.Contributeur;
 import odk.groupe4.ApiCollabDev.models.Projet;
+import odk.groupe4.ApiCollabDev.models.enums.NiveauProjet;
 import odk.groupe4.ApiCollabDev.models.enums.StatusProject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -81,5 +83,36 @@ public class ProjetService {
     // on supprime le projet de la bd
          projetDao.delete(p);
     }
+
+    //Methode pour mettre à jour le cahier de charge
+    public Projet editerCahierDeCharge(ProjetCahierDto projetCahierDto, int idProjet){
+      Projet projet= projetDao.findById(idProjet)
+              .orElseThrow(()->new RuntimeException("Projet introuvable"));
+
+      //on va mettre à jour l'URL du cahier de charge
+        projet.setUrlCahierDeCharge(projetCahierDto.getUrlCahierDeCharge());
+
+      return projetDao.save(projet);
+    }
+
+    // Methode permettant d'attribuer un niveau de complexité au projet
+
+    public Projet attribuerNiveau (int idProjet, int idadministrateur, NiveauProjet niveau){
+        // On récupère l'objet projet dans la base de donnnées à partir de son id
+        Projet projet= projetDao.findById(idProjet)
+                .orElseThrow(()->new RuntimeException("Projet introuvable"));
+
+        // On récupère l'objet admin dans la base de donnnées à partir de son id
+        Administrateur admin = administrateurDao.findById(idadministrateur)
+                .orElseThrow(()->new RuntimeException("admin introuvable"));
+
+        projet.setNiveauProjet(niveau); // affectation du niveau a l'objet projet
+
+        projet.setAdministrateur(admin); // affectation de l'admin qui valide a l'objet projet
+
+        return projetDao.save(projet); // On a enregistré dans la base de données
+    }
+
+
 
 }

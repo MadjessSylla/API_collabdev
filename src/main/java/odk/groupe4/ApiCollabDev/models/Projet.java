@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import odk.groupe4.ApiCollabDev.models.enums.DomaineProjet;
+import odk.groupe4.ApiCollabDev.models.enums.NiveauProjet;
 import odk.groupe4.ApiCollabDev.models.enums.SecteurProjet;
 import odk.groupe4.ApiCollabDev.models.enums.StatusProject;
 
@@ -32,6 +33,10 @@ public class Projet {
 
     @Enumerated(EnumType.STRING)
     private SecteurProjet secteur;
+
+    @Enumerated(EnumType.STRING)
+    private NiveauProjet niveauProjet;
+
 
     // Liste des fonctionnalités de la classe fonctionnalités
     // OprhanRemoval = true permet d'indiquer que les objects fonctionnalités seront supprimés avec l'objet projet concerné
