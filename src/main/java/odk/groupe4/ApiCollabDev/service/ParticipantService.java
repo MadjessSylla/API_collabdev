@@ -44,78 +44,36 @@ public class ParticipantService {
         this.fonctionnaliteDao = fonctionnaliteDao;
     }
 
+    // Methode pour participer à un projet
+    public Participant envoyerDemande(int idProjet, int idContributeur){
+        // on va recuperer l'objet projet dans le Dao
+        Projet projet = projetDao.findById(idProjet)
+                .orElseThrow(()-> new RuntimeException("Projet introuvable"));
 
-    //Méthode pour transformer un Participant_projet en Participant_projetDto
-     private ParticipantDto Participant_projetToParticipant_projetDto(Participant participant) {
-        ParticipantDto participantProjetDto = new ParticipantDto();
-        participantProjetDto.setProfil(participant.getProfil());
-        participantProjetDto.setContributions(participant.getContributions());
-        participantProjetDto.setFonctionnalite(participant.getFonctionnalite());
-        return participantProjetDto;
-     }
+        // on va recuperer l'objet contributeur dans le Dao
+        Contributeur contributeur=contributeurDao.findById(idContributeur)
+                .orElseThrow(()-> new RuntimeException("Contributeur introuvable"));
 
-     // Méthode contrionDAOtoDTO
-    private ContributionDto ContributionDaoToContributionDto(Contribution contribution) {
-        ContributionDto contributionDto = new ContributionDto();
-        contributionDto.setLienUrl(contribution.getLienUrl());
-        contributionDto.setFileUrl(contribution.getFileUrl());
-        contributionDto.setStatus(contribution.getStatus());
-        contributionDto.setDateCreation(contribution.getDateCreation());
-        contributionDto.setParticipant(contribution.getParticipant());
-        contributionDto.setGestionnaire(contribution.getGestionnaire());
-        contributionDto.setFonctionnalite(contribution.getFonctionnalite());
-        return contributionDto;
-    }
-
-    // Méthode pour récupérer l'historique d'acquisition d'un participant
-    public HistAcquisitionDto getHistAcquisition(int idParticipant) {
-        // Vérification de l'existence du participant
-        if (!participantProjetDao.existsById(idParticipant)) {
-            throw new IllegalArgumentException("Participant avec l'ID " + idParticipant + " n'existe pas.");
+        // on va verifier si le contributeur a deja envoyé une demande de participation
+        if(participantProjetDao.existsByProjetAndContributeur(projet, contributeur)){
+            throw new RuntimeException("Le contributeur a déjà envoyé une demande pour ce projet.");
         }
-        // Récupération des contributions validées du participant
-        List<Contribution> contributions = contributionDao.findByParticipantIdAndStatus(idParticipant, ContributionStatus.VALIDER);
-        // Conversion des contributions vers des DTOs
-        List<ContributionDto> contributionDTOs = contributions.stream()
-                .map(this::mapToContributionDTO)
-                .collect(Collectors.toList());
+        // on va verifier si le contributeur est le gestionnaire du projet
+        if(projet.getGestionnaire().getId() == idContributeur){
+            throw new RuntimeException("Le gestionnaire du projet ne peut pas envoyer une demande de participation.");
+        }
+        Participant participant = new Participant();
+     // on va recuperer les données qui se trouve demandeDTO et les affecter à participant
+        participant.setProjet(projet);
+        participant.setContributeur(contributeur);
+        participant.setProfil(demandeDTO.getProfil());
+        participant.setReponseQuiz(demandeDTO.getReponseQuiz());
 
-        // Récupération des badges acquis par le participant
-        List<BadgeParticipant> badgeParticipants = participantProjetDao.findById(idParticipant)
-                .get().getBadgeParticipants().stream().toList();
-        // Conversion des badges vers des DTOs
-        List<BadgeRewardDto> badgeDTOs = badgeParticipants.stream()
-                .map(this::mapToBadgeDTO)
-                .collect(Collectors.toList());
-        // Création et retour de l'objet HistAcquisitionDto
-        return new HistAcquisitionDto(
-                idParticipant,
-                contributionDTOs,
-                badgeDTOs
-        );
-    }
+     // par defaut la demande est en attente
+        participant.setDemande(EN_ATTENTE);
 
-    // Méthode pour inscrire un participant dans un projet
-    public Participant creerParticipant(Participant participant) {
-        // Sauvegarde du participant
-        Participant savedParticipant = participantProjetDao.save(participant);
+     return participantDao.save(participant);
 
-        // Récupérer le projet associé
-        Projet projet = savedParticipant.getProjet();
-
-        // Récupérer tous les participants du projet avec le profil GESTIONNAIRE
-        projet.getParticipants().stream()
-                .filter(p -> p.getProfil() == ParticipantProfil.GESTIONNAIRE)
-                .forEach(gestionnaire -> {
-                    // Envoyer une notification à l'utilisateur du contributeur du gestionnaire
-                    notificationService.createNotification(
-                            gestionnaire.getContributeur(),
-                            "Nouvelle demande de participation",
-                            "Un contributeur a demandé à participer au projet '" + projet.getTitre() + "'."
-                    );
-                });
-
-        return savedParticipant;
     }
 
     // Méthode pour refuser une demande de participation
@@ -132,51 +90,6 @@ public class ParticipantService {
                     "Votre demande de participation au projet '" + participant.getProjet().getTitre() + "' a été refusée."
             );
         }
-    }
-
-    // Méthode pour mapper une Contribution vers un ContributionDto
-    private ContributionDto mapToContributionDTO(Contribution contribution) {
-        return new ContributionDto(
-                contribution.getId(),
-                contribution.getLienUrl(),
-                contribution.getFileUrl(),
-                contribution.getStatus(),
-                contribution.getDateSoumission(),
-                contribution.getFonctionnalite() != null ? contribution.getFonctionnalite().getId() : 0
-        );
-    }
-
-    // Méthode pour mapper un Badge_participant vers un BadgeRewardDto
-    private BadgeRewardDto mapToBadgeDTO(BadgeParticipant badgeParticipant) {
-        return new BadgeRewardDto(
-                badgeParticipant.getBadge().getId(),
-                badgeParticipant.getBadge().getType(),
-                badgeParticipant.getBadge().getDescription(),
-                badgeParticipant.getBadge().getNombreContribution(),
-                badgeParticipant.getBadge().getCoin_recompense(),
-                badgeParticipant.getDateAcquisition()
-        );
-    }
-
-  //Methode pour participer à un projet
-    public Participant envoyerDemande(int idProjet, ParticipantDto demandeDTO, int idContributeur){
-        Projet projet = projetDao.findById(idProjet)
-                .orElseThrow(()-> new RuntimeException("Projet introuvable"));
-   //on recuperer le contributeur
-        Contributeur contributeur=contributeurDao.findById(idContributeur)
-                .orElseThrow(()-> new RuntimeException("Contributeur introuvable"));
-        Participant participant = new Participant();
-     // on va recuperer les données qui se trouve demandeDTO et les affecter à participant
-        participant.setProjet(projet);
-        participant.setContributeur(contributeur);
-        participant.setProfil(demandeDTO.getProfil());
-        participant.setReponseQuiz(demandeDTO.getReponseQuiz());
-
-     // par defaut la demande est en attente
-        participant.setDemande(EN_ATTENTE);
-
-     return participantDao.save(participant);
-
     }
 
     // Methode pour debloquer l'accés à un projet
@@ -223,7 +136,38 @@ public class ParticipantService {
         return "Projet débloqué avec succès";
      }
 
-    //Methode pour attribuer une tache à un participant
+    // Méthode pour inscrire un participant dans un projet
+    public Participant creerParticipant(Participant participant) {
+        // Sauvegarde du participant
+        Participant savedParticipant = participantProjetDao.save(participant);
+
+        // Récupérer le projet associé
+        Projet projet = savedParticipant.getProjet();
+
+        // Récupérer tous les participants du projet avec le profil GESTIONNAIRE
+        projet.getParticipants().stream()
+                .filter(p -> p.getProfil() == ParticipantProfil.GESTIONNAIRE)
+                .forEach(gestionnaire -> {
+                    // Envoyer une notification à l'utilisateur du contributeur du gestionnaire
+                    notificationService.createNotification(
+                            gestionnaire.getContributeur(),
+                            "Nouvelle demande de participation",
+                            "Un contributeur a demandé à participer au projet '" + projet.getTitre() + "'."
+                    );
+                });
+
+        return savedParticipant;
+    }
+
+    // Méthode pour ajouter un participant à un projet
+    public Participant ajouterParticipant(ParticipantDto participantProjet){
+        Participant participant = new Participant();
+        participant.setProfil(participantProjet.getProfil());
+        return participantProjetDao.save(participant);
+    }
+
+
+    // Methode pour attribuer une tache à un participant
     public FonctionnaliteDto attribuerTache(int idParticipant, int idProjet, int idFonctionnalite){
         Projet projet= projetDao.findById(idProjet)
                 .orElseThrow(()->new RuntimeException("Projet introuvable"));
@@ -241,17 +185,20 @@ public class ParticipantService {
         return fonctionnaliteToDto(f,participant);
     }
 
-    // Methode permettant de convertir Fonctionnalite en fonctionnalite DTO
-    public FonctionnaliteDto fonctionnaliteToDto(Fonctionnalite f, Participant p){
-        FonctionnaliteDto dto = new FonctionnaliteDto();
-        dto.setId(f.getId());
-        dto.setIdProjet(f.getProjet().getId());
-        dto.setTitre(f.getTitre());
-        dto.setContenu(f.getContenu());
-        dto.setNom(p.getContributeur().getNom());
-        dto.setPrenom(p.getContributeur().getPrenom());
-        dto.setEmail(p.getContributeur().getEmail());
-        return dto;
+    //Méthode pour reserver une fonctionnalité à un participant
+    public ParticipantDto reserverFonctionnalite(int idParticipant, int idFonctionnalite) {
+        Participant participant = participantProjetDao.findById(idParticipant).orElseThrow(() -> new RuntimeException("Participant non trouvé"));
+        Fonctionnalite fonctionnalite = fonctionnaliteDao.findById(idFonctionnalite).orElseThrow(() -> new RuntimeException("Fonctionnalité non trouvée"));
+        // Vérifier si la fonctionnalité est déjà réservée
+        if (fonctionnalite.getStatusFeatures() == StatusFeatures.EN_COURS || fonctionnalite.getStatusFeatures() == StatusFeatures.TERMINEE) {
+            throw new RuntimeException("La fonctionnalité est déjà réservée");
+        }
+        // Réserver la fonctionnalité
+        else {
+            fonctionnalite.setStatusFeatures(StatusFeatures.EN_COURS);
+            participant.setFonctionnalite(fonctionnalite);
+            return Participant_projetToParticipant_projetDto( participantProjetDao.save(participant));
+        }
     }
 
     // Methode pour soumettre une contribution
@@ -295,26 +242,41 @@ public class ParticipantService {
         return participantProjetDao.findAll();
     }
 
-    public Participant ajouterParticipant(ParticipantDto participantProjet){
-        Participant participant = new Participant();
-        participant.setProfil(participantProjet.getProfil());
-        return participantProjetDao.save(participant);
-    }
+    /**
+     * Méthode pour récupérer l'historique d'acquisition des badges et contributions d'un participant.
+     *
+     * @param idParticipant L'ID du participant dont on veut récupérer l'historique.
+     * @return Un objet HistAcquisitionDto contenant les contributions et badges acquis par le participant.
+     */
+    public HistAcquisitionDto getHistAcquisition(int idParticipant) {
+        // Vérification de l'existence du participant
+        if (!participantProjetDao.existsById(idParticipant)) {
+            throw new IllegalArgumentException("Participant avec l'ID " + idParticipant + " n'existe pas.");
+        }
 
-    //Méthode pour reserver une fonctionnalité à un participant
-    public ParticipantDto reserverFonctionnalite(int idParticipant, int idFonctionnalite) {
-        Participant participant = participantProjetDao.findById(idParticipant).orElseThrow(() -> new RuntimeException("Participant non trouvé"));
-        Fonctionnalite fonctionnalite = fonctionnaliteDao.findById(idFonctionnalite).orElseThrow(() -> new RuntimeException("Fonctionnalité non trouvée"));
-        // Vérifier si la fonctionnalité est déjà réservée
-        if (fonctionnalite.getStatusFeatures() == StatusFeatures.EN_COURS || fonctionnalite.getStatusFeatures() == StatusFeatures.TERMINEE) {
-            throw new RuntimeException("La fonctionnalité est déjà réservée");
-        }
-        // Réserver la fonctionnalité
-        else {
-            fonctionnalite.setStatusFeatures(StatusFeatures.EN_COURS);
-            participant.setFonctionnalite(fonctionnalite);
-            return Participant_projetToParticipant_projetDto( participantProjetDao.save(participant));
-        }
+        // Récupération des contributions validées du participant
+        List<Contribution> contributions = contributionDao.findByParticipantIdAndStatus(idParticipant, ContributionStatus.VALIDER);
+
+        // Conversion des contributions vers des DTOs
+        List<ContributionDto> contributionDTOs = contributions.stream()
+                .map(this::mapToContributionDTO)
+                .collect(Collectors.toList());
+
+        // Récupération des badges acquis par le participant
+        List<BadgeParticipant> badgeParticipants = participantProjetDao.findById(idParticipant)
+                .orElseThrow(() -> new IllegalArgumentException("Participant avec l'ID " + idParticipant + " n'existe pas."))
+                .getBadgeParticipants().stream().toList();
+
+        // Conversion des badges vers des DTOs
+        List<BadgeRewardDto> badgeDTOs = badgeParticipants.stream()
+                .map(this::mapToBadgeDTO)
+                .collect(Collectors.toList());
+        // Création et retour de l'objet HistAcquisitionDto
+        return new HistAcquisitionDto(
+                idParticipant,
+                contributionDTOs,
+                badgeDTOs
+        );
     }
 
     // Méthode pour afficher les contributions d'un participant
@@ -325,5 +287,64 @@ public class ParticipantService {
         return contributions.stream()
                 .map(this::ContributionDaoToContributionDto)
                 .toList();
+    }
+
+    // Methode permettant de convertir Fonctionnalite en fonctionnalite DTO
+    public FonctionnaliteDto fonctionnaliteToDto(Fonctionnalite f, Participant p){
+        FonctionnaliteDto dto = new FonctionnaliteDto();
+        dto.setId(f.getId());
+        dto.setIdProjet(f.getProjet().getId());
+        dto.setTitre(f.getTitre());
+        dto.setContenu(f.getContenu());
+        dto.setNom(p.getContributeur().getNom());
+        dto.setPrenom(p.getContributeur().getPrenom());
+        dto.setEmail(p.getContributeur().getEmail());
+        return dto;
+    }
+
+    // Méthode pour mapper une Contribution vers un ContributionDto
+    private ContributionDto mapToContributionDTO(Contribution contribution) {
+        return new ContributionDto(
+                contribution.getId(),
+                contribution.getLienUrl(),
+                contribution.getFileUrl(),
+                contribution.getStatus(),
+                contribution.getDateSoumission(),
+                contribution.getFonctionnalite() != null ? contribution.getFonctionnalite().getId() : 0
+        );
+    }
+
+    // Méthode pour mapper un Badge_participant vers un BadgeRewardDto
+    private BadgeRewardDto mapToBadgeDTO(BadgeParticipant badgeParticipant) {
+        return new BadgeRewardDto(
+                badgeParticipant.getBadge().getId(),
+                badgeParticipant.getBadge().getType(),
+                badgeParticipant.getBadge().getDescription(),
+                badgeParticipant.getBadge().getNombreContribution(),
+                badgeParticipant.getBadge().getCoin_recompense(),
+                badgeParticipant.getDateAcquisition()
+        );
+    }
+
+    //Méthode pour transformer un Participant_projet en Participant_projetDto
+    private ParticipantDto Participant_projetToParticipant_projetDto(Participant participant) {
+        ParticipantDto participantProjetDto = new ParticipantDto();
+        participantProjetDto.setProfil(participant.getProfil());
+        participantProjetDto.setContributions(participant.getContributions());
+        participantProjetDto.setFonctionnalite(participant.getFonctionnalite());
+        return participantProjetDto;
+    }
+
+    // Méthode contrionDAOtoDTO
+    private ContributionDto ContributionDaoToContributionDto(Contribution contribution) {
+        ContributionDto contributionDto = new ContributionDto();
+        contributionDto.setLienUrl(contribution.getLienUrl());
+        contributionDto.setFileUrl(contribution.getFileUrl());
+        contributionDto.setStatus(contribution.getStatus());
+        contributionDto.setDateCreation(contribution.getDateCreation());
+        contributionDto.setParticipant(contribution.getParticipant());
+        contributionDto.setGestionnaire(contribution.getGestionnaire());
+        contributionDto.setFonctionnalite(contribution.getFonctionnalite());
+        return contributionDto;
     }
 }
