@@ -3,7 +3,6 @@ package odk.groupe4.ApiCollabDev.service;
 import odk.groupe4.ApiCollabDev.dao.BadgeDao;
 import odk.groupe4.ApiCollabDev.dao.BadgeParticipantDao;
 import odk.groupe4.ApiCollabDev.dao.ParticipantDao;
-import odk.groupe4.ApiCollabDev.dto.BadgeParticipantDto;
 import odk.groupe4.ApiCollabDev.models.Badge;
 import odk.groupe4.ApiCollabDev.models.BadgeParticipant;
 import odk.groupe4.ApiCollabDev.models.Participant;

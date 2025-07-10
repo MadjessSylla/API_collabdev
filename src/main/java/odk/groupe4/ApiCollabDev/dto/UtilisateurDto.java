@@ -14,5 +14,4 @@ public class UtilisateurDto {
 
     @Size(min = 6, max = 20, message = "Le mot de passe doit contenir entre 6 et 20 caractères.")
     private String password;
-
 }

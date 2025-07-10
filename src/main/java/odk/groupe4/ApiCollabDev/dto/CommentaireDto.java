@@ -1,8 +1,6 @@
 package odk.groupe4.ApiCollabDev.dto;
 
-
 import lombok.*;
-import odk.groupe4.ApiCollabDev.models.Participant;
 
 import java.time.LocalDate;
 
