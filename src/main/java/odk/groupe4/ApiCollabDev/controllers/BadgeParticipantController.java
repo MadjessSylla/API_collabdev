@@ -19,6 +19,6 @@ public class BadgeParticipantController {
 
     @PostMapping
     public BadgeParticipant creerBadgeParticipant(@RequestBody BadgeParticipantDto badgeParticipant ){
-        return badgeParticipantService.ajouterBadgeParticipant(badgeParticipant);
+        return badgeParticipantService.attribuerBadge(badgeParticipant);
     }
 }

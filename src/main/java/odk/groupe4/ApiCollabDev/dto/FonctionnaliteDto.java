@@ -1,9 +1,5 @@
 package odk.groupe4.ApiCollabDev.dto;
 
-<<<<<<< HEAD
-import jakarta.validation.constraints.NotBlank;
-=======
->>>>>>> Gestions_Projets
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

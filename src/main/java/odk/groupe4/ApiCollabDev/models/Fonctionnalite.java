@@ -28,6 +28,7 @@ public class Fonctionnalite {
     @JoinColumn(name = "id_projet")
     private Projet projet;
 
+    // Clé étrangère vers l'entité Participant (Participant attribué à la fonctionnalité)
     @ManyToOne
     @JoinColumn(name = "id_participant")
     private Participant participant;

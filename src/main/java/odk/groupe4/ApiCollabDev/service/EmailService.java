@@ -15,6 +15,14 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String expediteur;
 
+    /**
+     * Envoie un email simple.
+     *
+     * @param to      L'adresse email du destinataire.
+     * @param sujet   Le sujet de l'email.
+     * @param contenu Le contenu de l'email.
+     * @return Un message indiquant le succès ou l'échec de l'envoi.
+     */
     public String envoyerEmail(String to, String sujet, String contenu){
         try {
             SimpleMailMessage message = new SimpleMailMessage();

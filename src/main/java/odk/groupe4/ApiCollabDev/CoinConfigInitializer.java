@@ -22,8 +22,9 @@ public class CoinConfigInitializer {
         // Initialiation des paramètres de coins par défaut
         creerParametreCoinParDefaut("INSCRIPTION", "Coins attribuées lors de l'inscription de l'utilisateur", 100);
         creerParametreCoinParDefaut("CONTRIBUTION_VALIDEE", "Coins attribuées pour une contribution validée", 10);
-        creerParametreCoinParDefaut("DEVERROUILLAGE_PROJET_INTERMEDIAIRE", "Coins réduit pour débloquer un projet intermédiaire", -20);
-        creerParametreCoinParDefaut("DEVERROUILLAGE_PROJET_DIFFICILE", "Coins réduit pour débloquer un projet difficile", -50);
+        creerParametreCoinParDefaut("DEVERROUILLAGE_PROJET_INTERMEDIAIRE", "Coins réduit pour débloquer un projet intermédiaire", 20);
+        creerParametreCoinParDefaut("DEVERROUILLAGE_PROJET_DIFFICILE", "Coins réduit pour débloquer un projet difficile", 50);
+        creerParametreCoinParDefaut("DEVERROUILLAGE_PROJET_EXPERT", "Coins réduit pour débloquer un projet expert", 70);
     }
     // Méthode pour créer un paramètre de coin par défaut si il n'existe pas déjà
     private void creerParametreCoinParDefaut(String type, String description, int valeur) {

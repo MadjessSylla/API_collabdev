@@ -28,10 +28,10 @@ public class Participant {
     private ParticipantStatus statut; // EN_ATTENTE, ACCEPTE, REFUSE
 
     //les reponse des Quiz seront stockées dans cette variable
-    private String reponseQuiz;
+    private String scoreQuiz;
 
     //par defaut L'accès débloquer est false
-    private boolean accesDebloquer=false;
+    private boolean estDebloque;
 
     @ManyToOne
     @JoinColumn(name = "id_projet")
@@ -51,9 +51,8 @@ public class Participant {
     private Set<BadgeParticipant> badgeParticipants = new HashSet<>();
 
     // Clé de référence vers la classe association Fonctionnalite_Participant
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "id_fonctionnalite")
-    private Fonctionnalite fonctionnalite;
+    @OneToMany(mappedBy = "participant")
+    private Set<Fonctionnalite> fonctionnalite;
 
     @OneToMany(mappedBy = "participants", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contribution> contributions = new ArrayList<>();

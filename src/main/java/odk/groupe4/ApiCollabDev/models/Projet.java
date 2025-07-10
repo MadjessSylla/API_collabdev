@@ -69,7 +69,7 @@ public class Projet {
 
     //clé étrangère de la table administrateur
     @ManyToOne @JoinColumn(name="id_validateur")
-  private Administrateur validateur;
+    private Administrateur validateur;
 
     @ManyToOne @JoinColumn(name="id_contributeur")
     private Contributeur contributeur;

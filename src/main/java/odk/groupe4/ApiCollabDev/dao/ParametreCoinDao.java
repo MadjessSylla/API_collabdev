@@ -19,6 +19,7 @@ public interface ParametreCoinDao extends JpaRepository<ParametreCoin, Integer> 
     List<ParametreCoinDto> findAllByOrderByIdAsc();
 
     // Méthode pour trouver un ParametreCoin par son typeEvenementLien
+    // SQL: SELECT * FROM parametre_coin WHERE type_evenement_lien = ?1
     Optional<ParametreCoin> findByTypeEvenementLien(String typeEvenementLien);
 
 }

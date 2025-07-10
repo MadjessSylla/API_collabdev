@@ -18,11 +18,21 @@ public class NotificationService {
         this.emailService = emailService;
     }
 
+    /**
+     * Crée une notification pour un utilisateur et envoie un email.
+     *
+     * @param utilisateur L'utilisateur à notifier.
+     * @param sujet       Le sujet de la notification.
+     * @param message     Le message de la notification.
+     */
     public void createNotification(Utilisateur utilisateur, String sujet, String message) {
+        // Vérification de l'existence de l'utilisateur
         Notifications notification = new Notifications();
+        // Remplissage des champs de la notification
         notification.setUtilisateur(utilisateur);
         notification.setSujet(sujet);
         notification.setMessage(message);
+        // Enregistrement de la notification dans la base de données
         notificationRepository.save(notification);
 
         // Envoie de la notification par email :

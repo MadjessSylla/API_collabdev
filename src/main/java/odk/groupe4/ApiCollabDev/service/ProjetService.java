@@ -3,7 +3,6 @@ package odk.groupe4.ApiCollabDev.service;
 import odk.groupe4.ApiCollabDev.dao.AdministrateurDao;
 import odk.groupe4.ApiCollabDev.dao.ParticipantDao;
 import odk.groupe4.ApiCollabDev.dao.ProjetDao;
-import odk.groupe4.ApiCollabDev.dto.ContributeurDto;
 import odk.groupe4.ApiCollabDev.dto.ProjetDto;
 import odk.groupe4.ApiCollabDev.models.Contributeur;
 import odk.groupe4.ApiCollabDev.models.Participant;

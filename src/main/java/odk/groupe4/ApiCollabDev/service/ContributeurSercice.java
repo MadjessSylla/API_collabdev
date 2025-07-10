@@ -1,12 +1,7 @@
 package odk.groupe4.ApiCollabDev.service;
 
-import odk.groupe4.ApiCollabDev.dao.AdministrateurDao;
 import odk.groupe4.ApiCollabDev.dao.ContributeurDao;
-import odk.groupe4.ApiCollabDev.dao.ParametreCoinDao;
-import odk.groupe4.ApiCollabDev.dto.ContributeurDto;
 import odk.groupe4.ApiCollabDev.dto.ContributeurSoldeDto;
-import odk.groupe4.ApiCollabDev.models.Contributeur;
-import odk.groupe4.ApiCollabDev.models.ParametreCoin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -64,6 +64,7 @@ public class UtilisateurService {
         // Sauvegarde du contributeur dans la base de données
         return utilisateurDao.save(contributeur);
     }
+
     /**
      * Connecte un utilisateur en vérifiant ses identifiants.
      *

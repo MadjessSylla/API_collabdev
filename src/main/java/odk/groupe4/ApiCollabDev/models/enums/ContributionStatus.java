@@ -2,6 +2,6 @@ package odk.groupe4.ApiCollabDev.models.enums;
 
 public enum ContributionStatus {
     ENVOYE,
-    VALIDEE,
-    REJETEE
+    VALIDE,
+    REJETE
 }

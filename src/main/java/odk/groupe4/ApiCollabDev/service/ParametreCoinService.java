@@ -21,7 +21,12 @@ public class ParametreCoinService {
         this.administrateurDao = administrateurDao;
     }
 
-    //Méthode pour créer un nouveau paramètre de coin
+    /**
+     * Méthode pour créer un nouveau paramètre de coin.
+     * @param idAdmin L'ID de l'administrateur qui crée le paramètre.
+     * @param dto Le DTO contenant les informations du paramètre de coin.
+     * @return Le paramètre de coin créé.
+     */
     public ParametreCoin creerParametreCoin(int idAdmin, ParametreCoinDto dto) {
         // Vérifier si l'administrateur existe (vous pouvez ajouter une vérification ici si nécessaire)
         Administrateur admin = administrateurDao.findById(idAdmin)
@@ -34,7 +39,9 @@ public class ParametreCoinService {
         return parametreCoinDao.save(dtoToModel(dto));
     }
 
-    // Méthode pour obtenir tous les paramètres de coins
+    /** Méthode pour retourner la liste de tous les paramètres de coin.
+     * @return La liste des paramètres de coin.
+     */
     public List<ParametreCoin> obtenirTousLesParametresCoins() {
         // Récupérer la liste de ParametreCoinDto depuis le DAO
         List<ParametreCoinDto> parametreCoinDtos = parametreCoinDao.findAllByOrderByIdAsc();
@@ -44,7 +51,11 @@ public class ParametreCoinService {
                 .map(this::dtoToModel)
                 .toList();
     }
-    // Méthode pour modifier un paramètre de coin
+    /** Méthode pour mettre à jour un paramètre de coin.
+     * @param id L'ID du paramètre de coin à mettre à jour.
+     * @param dto Le DTO contenant les nouvelles informations du paramètre de coin.
+     * @return Le paramètre de coin mis à jour.
+     */
     public ParametreCoin modifierParametreCoin(int id, ParametreCoinDto dto) {
         // Vérifier si le paramètre de coin existe
         if (!parametreCoinDao.existsById(id)) {
@@ -55,7 +66,12 @@ public class ParametreCoinService {
         parametreCoin.setId(id); // Assigner l'ID pour la mise à jour
         return parametreCoinDao.save(parametreCoin);
     }
-    // Méthode pour supprimer un paramètre de coin
+
+    /**
+     * Méthode pour supprimer un paramètre de coin.
+     * @param id L'ID du paramètre de coin à supprimer.
+     * @return Un message indiquant le résultat de la suppression.
+     */
     public String supprimerParametreCoin(int id) {
         // Vérifier si le paramètre de coin existe
         if (!parametreCoinDao.existsById(id)) {
