@@ -35,5 +35,5 @@ public class Utilisateur {
     private boolean actif = true; // actif par défaut
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Notifications> notifications = new HashSet<>();
+    private Set<Notification> notifications = new HashSet<>();
 }

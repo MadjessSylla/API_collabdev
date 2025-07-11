@@ -1,6 +1,7 @@
 package odk.groupe4.ApiCollabDev.controllers;
 
 
+import jakarta.validation.Valid;
 import odk.groupe4.ApiCollabDev.dao.NotificationDao;
 import odk.groupe4.ApiCollabDev.dto.NotificationDto;
 import odk.groupe4.ApiCollabDev.models.Notification;
@@ -20,7 +21,7 @@ public class NotificationController {
 
 
     @PostMapping
-    public Notification creerNotifcation(@RequestBody NotificationDto notification){
+    public Notification creerNotifcation(@Valid @RequestBody NotificationDto notification) {
         return notificationService.ajouterNotification(notification);
     }
 }

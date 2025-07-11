@@ -1,7 +1,8 @@
 package odk.groupe4.ApiCollabDev.service;
 
 import odk.groupe4.ApiCollabDev.dao.NotificationDao;
-import odk.groupe4.ApiCollabDev.models.Notifications;
+import odk.groupe4.ApiCollabDev.dto.NotificationDto;
+import odk.groupe4.ApiCollabDev.models.Notification;
 import odk.groupe4.ApiCollabDev.models.Utilisateur;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class NotificationService {
      */
     public void createNotification(Utilisateur utilisateur, String sujet, String message) {
         // Vérification de l'existence de l'utilisateur
-        Notifications notification = new Notifications();
+        Notification notification = new Notification();
         // Remplissage des champs de la notification
         notification.setUtilisateur(utilisateur);
         notification.setSujet(sujet);
@@ -39,5 +40,30 @@ public class NotificationService {
         System.out.println(
                 emailService.envoyerEmail(utilisateur.getEmail(), sujet, message)
         );
+    }
+    /**
+     * Ajoute une notification à partir d'un DTO et envoie un email.
+     *
+     * @param notificationDto Le DTO contenant les informations de la notification.
+     * @return La notification créée et enregistrée.
+     */
+    public Notification ajouterNotification(NotificationDto notificationDto) {
+        // Map NotificationDto to Notification entity
+        Notification notification = new Notification();
+        notification.setSujet(notificationDto.getSujet());
+        notification.setMessage(notificationDto.getContenu());
+        notification.setUtilisateur(notificationDto.getContributeur());
+
+        // Save the notification to the database
+        Notification savedNotification = notificationRepository.save(notification);
+
+        // Send an email notification
+        emailService.envoyerEmail(
+                notificationDto.getContributeur().getEmail(),
+                notificationDto.getSujet(),
+                notificationDto.getContenu()
+        );
+
+        return savedNotification;
     }
 }

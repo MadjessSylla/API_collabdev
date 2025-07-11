@@ -12,13 +12,14 @@ import java.util.List;
 
 @Repository
 public interface ContributionDao extends JpaRepository<Contribution, Integer> {
-    // Méthode pour trouver les contributions par participant et statut
-    // Equivalent en SQL : SELECT * FROM contribution WHERE participant_id = ? AND status = ?
     List<Contribution> findByParticipantIdAndStatus(int participantId, ContributionStatus status);
+    
     @Query("SELECT c FROM Contribution c WHERE c.participant.contributeur.id = :idUtilisateur")
     List<Contribution> findByUserId(@Param("idUtilisateur") Integer idUtilisateur);
 
-    // Méthode pour trouver les contributions par participant
-    // SQL équivalent : SELECT * FROM contribution WHERE participant_id = ?
     List<Contribution> findByParticipant(Participant participant);
+    
+    List<Contribution> findByStatus(ContributionStatus status);
+    
+    List<Contribution> findByFonctionnaliteId(int fonctionnaliteId);
 }

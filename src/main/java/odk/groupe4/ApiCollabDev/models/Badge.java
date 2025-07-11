@@ -1,5 +1,6 @@
 package odk.groupe4.ApiCollabDev.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,9 +31,11 @@ public class Badge {
     // Administrateur qui a créé le badge
     @ManyToOne
     @JoinColumn(name = "id_administrateur")
+    @JsonIgnore
     private Administrateur createur;
 
     // Clé de reference vers la classe association Badge_Participation
     @OneToMany(mappedBy = "badge", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Set<BadgeParticipant> badgeParticipants = new HashSet<>();
 }

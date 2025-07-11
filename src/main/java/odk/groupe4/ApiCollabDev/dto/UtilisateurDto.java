@@ -1,14 +1,11 @@
 package odk.groupe4.ApiCollabDev.dto;
 
 import jakarta.validation.constraints.Email;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-@Getter @Setter @AllArgsConstructor @NoArgsConstructor
+@Data @NoArgsConstructor @AllArgsConstructor
 public class UtilisateurDto {
     @NotBlank(message = "L’email est obligatoire.") @Email
     private String email;
