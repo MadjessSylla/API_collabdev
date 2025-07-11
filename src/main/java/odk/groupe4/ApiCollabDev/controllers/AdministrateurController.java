@@ -11,7 +11,7 @@ import java.util.List;
 @RestController @RequestMapping ("/api/admin")
 public class AdministrateurController {
     private final AdministrateurService administrateurService;
-
+    
     @Autowired
     public AdministrateurController(AdministrateurService administrateurService) {
         this.administrateurService = administrateurService;
