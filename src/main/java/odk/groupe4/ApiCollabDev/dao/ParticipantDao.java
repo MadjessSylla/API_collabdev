@@ -6,11 +6,13 @@ import odk.groupe4.ApiCollabDev.models.Projet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ParticipantDao extends JpaRepository<Participant, Integer>  {
-    //Equivalent SQL : SELECT * FROM participant WHERE projet_id = ? AND contributeur_id = ?;
     boolean existsByProjetAndContributeur(Projet projet, Contributeur contributeur);
-    // Méthode qui retourne la liste des contributions d'un participant
-    // Equivalent SQL : SELECT * FROM participant WHERE projet_id = ? AND id = ?;
+    
     Participant findByProjetAndId(Projet projet, int id);
+    
+    List<Participant> findByProjetId(int projetId);
 }

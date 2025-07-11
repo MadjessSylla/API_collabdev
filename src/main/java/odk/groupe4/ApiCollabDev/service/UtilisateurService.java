@@ -4,10 +4,13 @@ import odk.groupe4.ApiCollabDev.dao.ContributeurDao;
 import odk.groupe4.ApiCollabDev.dao.ParametreCoinDao;
 import odk.groupe4.ApiCollabDev.dao.UtilisateurDao;
 import odk.groupe4.ApiCollabDev.dto.ContributeurDto;
+import odk.groupe4.ApiCollabDev.dto.LoginResponseDto;
+import odk.groupe4.ApiCollabDev.dto.UtilisateurDto;
+import odk.groupe4.ApiCollabDev.dto.UtilisateurResponseDto;
+import odk.groupe4.ApiCollabDev.models.Administrateur;
 import odk.groupe4.ApiCollabDev.models.Contributeur;
 import odk.groupe4.ApiCollabDev.models.ParametreCoin;
 import odk.groupe4.ApiCollabDev.models.Utilisateur;
-import odk.groupe4.ApiCollabDev.dto.UtilisateurDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,63 +32,122 @@ public class UtilisateurService {
         this.parametreCoinDao = parametreCoinDao;
     }
 
-    /**
-     * Inscrit un nouveau contributeur.
-     *
-     * @param dto les informations du contributeur à inscrire
-     * @return l'utilisateur inscrit
-     * @throws ResponseStatusException si l'email ou le téléphone est déjà utilisé
-     */
-    public Utilisateur inscrire(ContributeurDto dto) {
-        // Récupération des informations du contributeur
+    public UtilisateurResponseDto inscrire(ContributeurDto dto) {
         Optional<Utilisateur> existingUser = utilisateurDao.findByEmail(dto.getEmail());
-        // Vérification de l'unicité de l'email
         if (existingUser.isPresent()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cet email est déjà utilisé.");
         }
-        // Récupération des informations du contributeur par téléphone
+
         Optional<Contributeur> existTelephone = contributeurDao.findByTelephone(dto.getTelephone());
-        // Vérification de l'unicité du téléphone
         if (existTelephone.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cet numéro est déjà utilisé.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce numéro est déjà utilisé.");
         }
-        // Récupération du paramètre de coin pour l'inscription
+
         ParametreCoin soldeCoin = parametreCoinDao.findByTypeEvenementLien("INSCRIPTION")
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Paramètre de coin non trouvé pour l'inscription."));
-        // Création du contributeur
+
         Contributeur contributeur = new Contributeur();
-        contributeur.setNom(dto.getNom()); // Nom du contributeur
-        contributeur.setPrenom(dto.getPrenom()); // Prénom du contributeur
-        contributeur.setTelephone(dto.getTelephone()); // Téléphone du contributeur
-        contributeur.setEmail(dto.getEmail()); // Email du contributeur
-        contributeur.setPassword(dto.getPassword()); // Mot de passe du contributeur
-        contributeur.setTotalCoin(soldeCoin.getValeur()); // Solde de Coin initial du contributeur
-        contributeur.setPointExp(10); // Points d'expérience initial du contributeur
-        // Sauvegarde du contributeur dans la base de données
-        return utilisateurDao.save(contributeur);
+        contributeur.setNom(dto.getNom());
+        contributeur.setPrenom(dto.getPrenom());
+        contributeur.setTelephone(dto.getTelephone());
+        contributeur.setEmail(dto.getEmail());
+        contributeur.setPassword(dto.getPassword());
+        contributeur.setTotalCoin(soldeCoin.getValeur());
+        contributeur.setPointExp(10);
+        contributeur.setActif(true);
+
+        Utilisateur savedUser = utilisateurDao.save(contributeur);
+        return mapToUtilisateurResponseDto(savedUser);
     }
 
-    /**
-     * Connecte un utilisateur en vérifiant ses identifiants.
-     *
-     * @param utilisateurDto les informations de connexion de l'utilisateur
-     * @return l'utilisateur connecté
-     * @throws ResponseStatusException si l'utilisateur n'est pas trouvé ou si le mot de passe est incorrect
-     */
-    public Utilisateur connecter(UtilisateurDto utilisateurDto) {
-        // Récupération de l'utilisateur par email
+    public LoginResponseDto connecter(UtilisateurDto utilisateurDto) {
         Optional<Utilisateur> utilisateurOpt = utilisateurDao.findByEmail(utilisateurDto.getEmail());
-        // Vérification si l'utilisateur existe
         if (utilisateurOpt.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Utilisateur non trouvé.");
         }
-        // Récupération de l'utilisateur
+
         Utilisateur utilisateur = utilisateurOpt.get();
-        // Vérification du mot de passe
         if (!utilisateurDto.getPassword().equals(utilisateur.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Mot de passe incorrect.");
         }
-        // Renvoi de l'utilisateur connecté
-        return utilisateur;
+
+        if (!utilisateur.isActif()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Compte désactivé.");
+        }
+
+        return mapToLoginResponseDto(utilisateur);
+    }
+
+    public UtilisateurResponseDto getProfile(int id) {
+        Utilisateur utilisateur = utilisateurDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + id));
+        return mapToUtilisateurResponseDto(utilisateur);
+    }
+
+    public void changerMotDePasse(int id, String ancienMotDePasse, String nouveauMotDePasse) {
+        Utilisateur utilisateur = utilisateurDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + id));
+
+        if (!utilisateur.getPassword().equals(ancienMotDePasse)) {
+            throw new IllegalArgumentException("Ancien mot de passe incorrect");
+        }
+
+        if (nouveauMotDePasse == null || nouveauMotDePasse.length() < 6) {
+            throw new IllegalArgumentException("Le nouveau mot de passe doit contenir au moins 6 caractères");
+        }
+
+        utilisateur.setPassword(nouveauMotDePasse);
+        utilisateurDao.save(utilisateur);
+    }
+
+    private UtilisateurResponseDto mapToUtilisateurResponseDto(Utilisateur utilisateur) {
+        String type = utilisateur instanceof Contributeur ? "CONTRIBUTEUR" : "ADMINISTRATEUR";
+        
+        if (utilisateur instanceof Contributeur contributeur) {
+            return new UtilisateurResponseDto(
+                    utilisateur.getId(),
+                    utilisateur.getEmail(),
+                    type,
+                    utilisateur.isActif(),
+                    contributeur.getNom(),
+                    contributeur.getPrenom(),
+                    contributeur.getTelephone(),
+                    contributeur.getPointExp(),
+                    contributeur.getTotalCoin()
+            );
+        } else {
+            return new UtilisateurResponseDto(
+                    utilisateur.getId(),
+                    utilisateur.getEmail(),
+                    type,
+                    utilisateur.isActif(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
+        }
+    }
+
+    private LoginResponseDto mapToLoginResponseDto(Utilisateur utilisateur) {
+        String type = utilisateur instanceof Contributeur ? "CONTRIBUTEUR" : "ADMINISTRATEUR";
+        String nom = null;
+        String prenom = null;
+        
+        if (utilisateur instanceof Contributeur contributeur) {
+            nom = contributeur.getNom();
+            prenom = contributeur.getPrenom();
+        }
+
+        return new LoginResponseDto(
+                utilisateur.getId(),
+                utilisateur.getEmail(),
+                type,
+                nom,
+                prenom,
+                utilisateur.isActif(),
+                "Connexion réussie"
+        );
     }
 }

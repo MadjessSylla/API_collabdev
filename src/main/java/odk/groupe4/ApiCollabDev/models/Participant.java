@@ -54,6 +54,6 @@ public class Participant {
     @OneToMany(mappedBy = "participant")
     private Set<Fonctionnalite> fonctionnalite;
 
-    @OneToMany(mappedBy = "participants", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contribution> contributions = new ArrayList<>();
 }

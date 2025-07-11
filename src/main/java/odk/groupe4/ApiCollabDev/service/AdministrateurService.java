@@ -1,118 +1,98 @@
 package odk.groupe4.ApiCollabDev.service;
 
 import odk.groupe4.ApiCollabDev.dao.AdministrateurDao;
+import odk.groupe4.ApiCollabDev.dao.UtilisateurDao;
 import odk.groupe4.ApiCollabDev.dto.AdministrateurDto;
+import odk.groupe4.ApiCollabDev.dto.AdministrateurResponseDto;
 import odk.groupe4.ApiCollabDev.models.Administrateur;
+import odk.groupe4.ApiCollabDev.models.Utilisateur;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AdministrateurService {
-    private AdministrateurDao adminDao;
+    private final AdministrateurDao adminDao;
+    private final UtilisateurDao utilisateurDao;
 
     @Autowired
-    public AdministrateurService(AdministrateurDao adminDao) {
+    public AdministrateurService(AdministrateurDao adminDao, UtilisateurDao utilisateurDao) {
         this.adminDao = adminDao;
+        this.utilisateurDao = utilisateurDao;
     }
 
-    /**
-     * Créer un nouvel administrateur
-     * @param dto : DTO contenant les informations de l'administrateur
-     * @return l'administrateur créé
-     * Cette méthode crée un nouvel administrateur à partir des données fournies dans le DTO.
-     * Elle initialise l'administrateur avec un email, un mot de passe et le statut actif par défaut.
-    */
-    public Administrateur create(AdministrateurDto dto) {
-        // Création d'un nouvel administrateur à partir du DTO
-        Administrateur admin = new Administrateur();
-        admin.setEmail(dto.getEmail()); // Email de l'administrateur
-        admin.setPassword(dto.getPassword()); // Mot de passe de l'administrateur
-        admin.setActif(true); // L'administrateur est actif par défaut
-        // Enregistrement de l'administrateur dans la base de données
-        return adminDao.save(admin);
-    }
-
-    /**
-     * Mettre à jour un administrateur existant
-     * @param id : ID de l'administrateur à mettre à jour
-     * @param dto : DTO contenant les nouvelles informations de l'administrateur
-     * @return l'administrateur mis à jour ou null si l'administrateur n'existe pas
-     * Cette méthode met à jour les informations d'un administrateur existant
-     * en fonction de l'ID fourni.
-     * */
-    public Administrateur update(Integer id, AdministrateurDto dto) {
-        // Recherche de l'administrateur par ID
-        Optional<Administrateur> adminOpt = adminDao.findById(id);
-        // Si l'administrateur existe, on met à jour ses informations
-        if (adminOpt.isPresent()) {
-            Administrateur admin = adminOpt.get(); // Récupération de l'administrateur existant
-            admin.setEmail(dto.getEmail()); // Mise à jour de l'email
-            admin.setPassword(dto.getPassword()); // Mise à jour du mot de passe
-            // Mise à jour de l'administrateur dans la base de données
-            return adminDao.save(admin);
+    public AdministrateurResponseDto create(AdministrateurDto dto) {
+        // Vérifier l'unicité de l'email
+        Optional<Utilisateur> existingUser = utilisateurDao.findByEmail(dto.getEmail());
+        if (existingUser.isPresent()) {
+            throw new IllegalArgumentException("Cet email est déjà utilisé.");
         }
-        // Si l'administrateur n'existe pas, on retourne null
-        return null;
+
+        Administrateur admin = new Administrateur();
+        admin.setEmail(dto.getEmail());
+        admin.setPassword(dto.getPassword());
+        admin.setActif(true);
+        
+        Administrateur savedAdmin = adminDao.save(admin);
+        return mapToResponseDto(savedAdmin);
     }
 
-    /**Supprimer un administrateur par ID
-     * @param id : ID de l'administrateur à supprimer
-     * Cette méthode supprime un administrateur de la base de données en fonction de son ID.
-     */
+    public AdministrateurResponseDto getById(Integer id) {
+        Administrateur admin = adminDao.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Administrateur avec l'ID " + id + " n'existe pas."));
+        return mapToResponseDto(admin);
+    }
+
+    public AdministrateurResponseDto update(Integer id, AdministrateurDto dto) {
+        Administrateur admin = adminDao.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Administrateur avec l'ID " + id + " n'existe pas."));
+        
+        admin.setEmail(dto.getEmail());
+        admin.setPassword(dto.getPassword());
+        
+        Administrateur updatedAdmin = adminDao.save(admin);
+        return mapToResponseDto(updatedAdmin);
+    }
+
     public void delete(Integer id) {
         if (!adminDao.existsById(id)){
             throw new IllegalArgumentException("Administrateur avec l'ID " + id + " n'existe pas.");
         }
-        // Suppression de l'administrateur par ID
         adminDao.deleteById(id);
     }
 
-    /** Bloquer un compte administrateur
-     * @param id : ID de l'administrateur à bloquer
-     * @return l'administrateur bloqué ou null si l'administrateur n'existe pas
-     * Cette méthode bloque un administrateur en le désactivant.
-     */
-    public Administrateur block(Integer id) {
-        // Recherche de l'administrateur par ID
-        Optional<Administrateur> adminOpt = adminDao.findById(id);
-        // Si l'administrateur existe, on le désactive
-        if (adminOpt.isPresent()) {
-            Administrateur admin = adminOpt.get();
-            admin.setActif(false); // On le désactive
-            // Mise à jour de l'administrateur dans la base de données
-            return adminDao.save(admin);
-        }
-        // Si l'administrateur n'existe pas, on retourne null
-        return null;
+    public AdministrateurResponseDto block(Integer id) {
+        Administrateur admin = adminDao.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Administrateur avec l'ID " + id + " n'existe pas."));
+        
+        admin.setActif(false);
+        Administrateur blockedAdmin = adminDao.save(admin);
+        return mapToResponseDto(blockedAdmin);
     }
 
-    /** Débloquer un compte administrateur
-     * @param id : ID de l'administrateur à débloquer
-     * @return l'administrateur débloqué ou null si l'administrateur n'existe pas
-     * Cette méthode réactive un administrateur en le rendant actif.
-     */
-    public Administrateur unblock(Integer id) {
-        // Recherche de l'administrateur par ID
-        Optional<Administrateur> adminOpt = adminDao.findById(id);
-        // Si l'administrateur existe, on le réactive
-        if (adminOpt.isPresent()) {
-            Administrateur admin = adminOpt.get();
-            admin.setActif(true); // On le réactive
-            // Mise à jour de l'administrateur dans la base de données
-            return adminDao.save(admin);
-        }
-        // Si l'administrateur n'existe pas, on retourne null
-        return null;
+    public AdministrateurResponseDto unblock(Integer id) {
+        Administrateur admin = adminDao.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Administrateur avec l'ID " + id + " n'existe pas."));
+        
+        admin.setActif(true);
+        Administrateur unblockedAdmin = adminDao.save(admin);
+        return mapToResponseDto(unblockedAdmin);
     }
 
-    /** Récupérer tous les administrateurs
-     * @return la liste de tous les administrateurs
-     * Cette méthode retourne une liste de tous les administrateurs présents dans la base de données.
-     */
-    public List<Administrateur> getAll() {
-        return adminDao.findAll();
+    public List<AdministrateurResponseDto> getAll() {
+        return adminDao.findAll().stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    private AdministrateurResponseDto mapToResponseDto(Administrateur admin) {
+        return new AdministrateurResponseDto(
+                admin.getId(),
+                admin.getEmail(),
+                admin.isActif()
+        );
     }
 }
