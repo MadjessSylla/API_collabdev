@@ -105,7 +105,7 @@ public class ContributionService {
     }
 
     @Transactional
-    public ContributionResponseDto MiseAJourStatutContribution(int contributionId, ContributionStatus newStatus, int gestionnaireId) {
+    public ContributionResponseDto validateOrRejetContribution(int contributionId, ContributionStatus newStatus, int gestionnaireId) {
         Contribution contribution = contributionDao.findById(contributionId)
                 .orElseThrow(() -> new IllegalArgumentException("Contribution avec ID " + contributionId + " non trouvée"));
 
