@@ -31,7 +31,7 @@ public class ParametreCoinController {
         this.parametreCoinService = parametreCoinService;
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Récupérer tous les paramètres de coins",
         description = "Retourne la liste complète de tous les paramètres de coins configurés dans le système"
     )
@@ -42,7 +42,7 @@ public class ParametreCoinController {
             mediaType = "application/json",
             schema = @Schema(implementation = ParametreCoinResponseDto.class)
         )
-    )*/
+    )
     // Affiche tous les paramètres de coins
     @GetMapping
     public ResponseEntity<List<ParametreCoinResponseDto>> getAllParametresCoins() {
@@ -50,7 +50,7 @@ public class ParametreCoinController {
         return ResponseEntity.ok(parametres);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Récupérer un paramètre de coin par ID",
         description = "Retourne les détails d'un paramètre de coin spécifique"
     )
@@ -71,7 +71,7 @@ public class ParametreCoinController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     // Récupère un paramètre de coin par son ID
     @GetMapping("/{id}")
     public ResponseEntity<ParametreCoinResponseDto> getParametreCoinById(
@@ -81,7 +81,7 @@ public class ParametreCoinController {
         return ResponseEntity.ok(parametre);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Créer un nouveau paramètre de coin",
         description = "Crée un nouveau paramètre de coin dans le système. Seuls les administrateurs peuvent créer des paramètres."
     )
@@ -110,7 +110,7 @@ public class ParametreCoinController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     // Crée un nouveau paramètre de coin
     @PostMapping("/admin/{idAdmin}")
     public ResponseEntity<ParametreCoinResponseDto> createParametreCoin(
@@ -122,7 +122,7 @@ public class ParametreCoinController {
         return new ResponseEntity<>(parametre, HttpStatus.CREATED);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Mettre à jour un paramètre de coin",
         description = "Met à jour les informations d'un paramètre de coin existant"
     )
@@ -151,7 +151,7 @@ public class ParametreCoinController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     // Met à jour un paramètre de coin existant
     @PutMapping("/{id}")
     public ResponseEntity<ParametreCoinResponseDto> updateParametreCoin(
@@ -163,7 +163,7 @@ public class ParametreCoinController {
         return ResponseEntity.ok(parametre);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Supprimer un paramètre de coin",
         description = "Supprime définitivement un paramètre de coin du système"
     )
@@ -180,7 +180,7 @@ public class ParametreCoinController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     // Supprime un paramètre de coin par son ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteParametreCoin(

@@ -3,7 +3,7 @@ package odk.groupe4.ApiCollabDev.service;
 import odk.groupe4.ApiCollabDev.dao.AdministrateurDao;
 import odk.groupe4.ApiCollabDev.dao.BadgeDao;
 import odk.groupe4.ApiCollabDev.dto.BadgeCoinDescDto;
-import odk.groupe4.ApiCollabDev.dto.BadgeDto;
+import odk.groupe4.ApiCollabDev.dto.BadgeRequestDto;
 import odk.groupe4.ApiCollabDev.dto.BadgeResponseDto;
 import odk.groupe4.ApiCollabDev.models.Administrateur;
 import odk.groupe4.ApiCollabDev.models.Badge;
@@ -31,7 +31,7 @@ public class BadgeService {
      * @param idAdmin l'ID de l'administrateur créateur
      * @return les détails du badge créé
      */
-    public BadgeResponseDto creerBadge(BadgeDto dto, int idAdmin){
+    public BadgeResponseDto creerBadge(BadgeRequestDto dto, int idAdmin){
         // Vérification de l'existence de l'administrateur
         Administrateur admin = administrateurDao.findById(idAdmin)
                 .orElseThrow(() -> new RuntimeException("Administrateur non trouvé avec l'id: " + idAdmin));
@@ -82,7 +82,7 @@ public class BadgeService {
      * @param dto les nouvelles informations du badge
      * @return les détails du badge mis à jour
      */
-    public BadgeResponseDto mettreAJourBagde(int idBadge, BadgeDto dto) {
+    public BadgeResponseDto mettreAJourBagde(int idBadge, BadgeRequestDto dto) {
         // Vérification de l'existence du badge
         Badge badge = badgeDao.findById(idBadge)
                 .orElseThrow(() -> new RuntimeException("Badge non trouvé avec l'id: " + idBadge));

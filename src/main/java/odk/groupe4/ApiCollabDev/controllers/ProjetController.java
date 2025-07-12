@@ -12,7 +12,9 @@ import odk.groupe4.ApiCollabDev.dto.ProjetCahierDto;
 import odk.groupe4.ApiCollabDev.dto.ProjetDto;
 import odk.groupe4.ApiCollabDev.dto.ProjetResponseDto;
 import odk.groupe4.ApiCollabDev.exception.GlobalExceptionHandler;
+import odk.groupe4.ApiCollabDev.models.enums.ProjectDomain;
 import odk.groupe4.ApiCollabDev.models.enums.ProjectLevel;
+import odk.groupe4.ApiCollabDev.models.enums.ProjectSector;
 import odk.groupe4.ApiCollabDev.models.enums.ProjectStatus;
 import odk.groupe4.ApiCollabDev.service.ProjetService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +56,54 @@ public class ProjetController {
             @Parameter(description = "Filtrer par statut du projet", required = false)
             @RequestParam(required = false) ProjectStatus status) {
         List<ProjetResponseDto> projets = projetService.getAllProjets(status);
+        return ResponseEntity.ok(projets);
+    }
+
+    @Operation(
+            summary = "Récupérer tous les projets ouverts",
+            description = "Retourne la liste de tous les projets avec le statut OUVERT, avec possibilité de filtrage par domaine et secteur"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Liste des projets ouverts récupérée avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProjetResponseDto.class)
+                    )
+            )
+    })
+    @GetMapping("/ouverts")
+    public ResponseEntity<List<ProjetResponseDto>> getProjetsOuverts(
+            @Parameter(description = "Filtrer par domaine du projet", required = false)
+            @RequestParam(required = false) ProjectDomain domaine,
+            @Parameter(description = "Filtrer par secteur du projet", required = false)
+            @RequestParam(required = false) ProjectSector secteur) {
+        List<ProjetResponseDto> projets = projetService.getProjetsOuverts(domaine, secteur);
+        return ResponseEntity.ok(projets);
+    }
+
+    @Operation(
+            summary = "Filtrer les projets par domaine",
+            description = "Retourne tous les projets d'un domaine spécifique"
+    )
+    @GetMapping("/domaine/{domaine}")
+    public ResponseEntity<List<ProjetResponseDto>> getProjetsByDomaine(
+            @Parameter(description = "Domaine du projet", required = true)
+            @PathVariable ProjectDomain domaine) {
+        List<ProjetResponseDto> projets = projetService.getProjetsByDomaine(domaine);
+        return ResponseEntity.ok(projets);
+    }
+
+    @Operation(
+            summary = "Filtrer les projets par secteur",
+            description = "Retourne tous les projets d'un secteur spécifique"
+    )
+    @GetMapping("/secteur/{secteur}")
+    public ResponseEntity<List<ProjetResponseDto>> getProjetsBySecteur(
+            @Parameter(description = "Secteur du projet", required = true)
+            @PathVariable ProjectSector secteur) {
+        List<ProjetResponseDto> projets = projetService.getProjetsBySecteur(secteur);
         return ResponseEntity.ok(projets);
     }
 

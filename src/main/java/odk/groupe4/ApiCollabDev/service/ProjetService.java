@@ -10,7 +10,9 @@ import odk.groupe4.ApiCollabDev.dto.ProjetResponseDto;
 import odk.groupe4.ApiCollabDev.models.Administrateur;
 import odk.groupe4.ApiCollabDev.models.Contributeur;
 import odk.groupe4.ApiCollabDev.models.Projet;
+import odk.groupe4.ApiCollabDev.models.enums.ProjectDomain;
 import odk.groupe4.ApiCollabDev.models.enums.ProjectLevel;
+import odk.groupe4.ApiCollabDev.models.enums.ProjectSector;
 import odk.groupe4.ApiCollabDev.models.enums.ProjectStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,6 +75,41 @@ public class ProjetService {
         // On récupère tous les projets créés par ce contributeur.
         List<Projet> projets = projetDao.findByCreateur(contributeur);
         // On mappe chaque projet en ProjetResponseDto pour la réponse.
+        return projets.stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    // Affiche tous les projets par filtres (Secteur et Domaine)
+    public List<ProjetResponseDto> getProjetsOuverts(ProjectDomain domaine, ProjectSector secteur) {
+        List<Projet> projets;
+
+        if (domaine != null && secteur != null) {
+            projets = projetDao.findByStatusAndDomaineAndSecteur(ProjectStatus.OUVERT, domaine, secteur);
+        } else if (domaine != null) {
+            projets = projetDao.findByStatusAndDomaine(ProjectStatus.OUVERT, domaine);
+        } else if (secteur != null) {
+            projets = projetDao.findByStatusAndSecteur(ProjectStatus.OUVERT, secteur);
+        } else {
+            projets = projetDao.findByStatus(ProjectStatus.OUVERT);
+        }
+
+        return projets.stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    // Affiche tous les projets par domaine
+    public List<ProjetResponseDto> getProjetsByDomaine(ProjectDomain domaine) {
+        List<Projet> projets = projetDao.findByDomaine(domaine);
+        return projets.stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    // Affiche tous les projets par Secteur
+    public List<ProjetResponseDto> getProjetsBySecteur(ProjectSector secteur) {
+        List<Projet> projets = projetDao.findBySecteur(secteur);
         return projets.stream()
                 .map(this::mapToResponseDto)
                 .collect(Collectors.toList());

@@ -6,10 +6,12 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Data @NoArgsConstructor @AllArgsConstructor
-public class AdministrateurDto{
-    @NotBlank(message = "L’email est obligatoire.") @Email
+public class AdministrateurRequestDto {
+    @NotBlank(message = "L’email est obligatoire.")
+    @Email
     private String email;
 
-    @NotBlank @Size(min = 6, max = 20, message = "Le mot de passe doit contenir entre 6 et 20 caractères.")
+    @NotBlank
+    @Size(min = 8, max = 20, message = "Le mot de passe doit contenir entre 6 et 20 caractères.")
     private String password;
 }

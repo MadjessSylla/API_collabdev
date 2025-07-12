@@ -2,7 +2,7 @@ package odk.groupe4.ApiCollabDev.service;
 
 import odk.groupe4.ApiCollabDev.dao.AdministrateurDao;
 import odk.groupe4.ApiCollabDev.dao.UtilisateurDao;
-import odk.groupe4.ApiCollabDev.dto.AdministrateurDto;
+import odk.groupe4.ApiCollabDev.dto.AdministrateurRequestDto;
 import odk.groupe4.ApiCollabDev.dto.AdministrateurResponseDto;
 import odk.groupe4.ApiCollabDev.models.Administrateur;
 import odk.groupe4.ApiCollabDev.models.Utilisateur;
@@ -31,7 +31,7 @@ public class AdministrateurService {
      * @return les détails de l'administrateur créé
      * @throws IllegalArgumentException si l'email est déjà utilisé
      */
-    public AdministrateurResponseDto create(AdministrateurDto dto) {
+    public AdministrateurResponseDto create(AdministrateurRequestDto dto) {
         // Vérifier l'unicité de l'email
         Optional<Utilisateur> existingUser = utilisateurDao.findByEmail(dto.getEmail());
         if (existingUser.isPresent()) {
@@ -73,7 +73,7 @@ public class AdministrateurService {
      * @return les détails de l'administrateur mis à jour
      * @throws IllegalArgumentException si l'administrateur n'existe pas
      */
-    public AdministrateurResponseDto update(Integer id, AdministrateurDto dto) {
+    public AdministrateurResponseDto update(Integer id, AdministrateurRequestDto dto) {
         // Vérifier si l'administrateur existe
         Administrateur admin = adminDao.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Administrateur avec l'ID " + id + " n'existe pas."));

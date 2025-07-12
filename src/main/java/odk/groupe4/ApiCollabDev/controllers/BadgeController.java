@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import odk.groupe4.ApiCollabDev.dto.BadgeCoinDescDto;
-import odk.groupe4.ApiCollabDev.dto.BadgeDto;
+import odk.groupe4.ApiCollabDev.dto.BadgeRequestDto;
 import odk.groupe4.ApiCollabDev.dto.BadgeResponseDto;
 import odk.groupe4.ApiCollabDev.exception.GlobalExceptionHandler;
 import odk.groupe4.ApiCollabDev.service.BadgeService;
@@ -32,7 +32,7 @@ public class BadgeController {
         this.badgeService = badgeService;
     }
 
-   /* @Operation(
+   @Operation(
         summary = "Récupérer tous les badges",
         description = "Retourne la liste complète de tous les badges disponibles dans le système"
     )
@@ -43,7 +43,7 @@ public class BadgeController {
             mediaType = "application/json",
             schema = @Schema(implementation = BadgeResponseDto.class)
         )
-    )*/
+    )
     // Affiche tous les badges
     @GetMapping
     public ResponseEntity<List<BadgeResponseDto>> getAllBadges() {
@@ -51,7 +51,7 @@ public class BadgeController {
         return ResponseEntity.ok(badges);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Récupérer un badge par ID",
         description = "Retourne les détails d'un badge spécifique"
     )
@@ -72,7 +72,7 @@ public class BadgeController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     // Récupère un badge par son ID
     @GetMapping("/{id}")
     public ResponseEntity<BadgeResponseDto> getBadgeById(
@@ -82,7 +82,7 @@ public class BadgeController {
         return ResponseEntity.ok(badge);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Créer un nouveau badge",
         description = "Crée un nouveau badge de récompense. Seuls les administrateurs peuvent créer des badges."
     )
@@ -111,19 +111,19 @@ public class BadgeController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     // Crée un nouveau badge
     @PostMapping("/admin/{idAdmin}")
     public ResponseEntity<BadgeResponseDto> createBadge(
             @Parameter(description = "ID de l'administrateur créateur", required = true, example = "1")
             @PathVariable int idAdmin,
             @Parameter(description = "Données du badge à créer", required = true)
-            @Valid @RequestBody BadgeDto badgeDto) {
+            @Valid @RequestBody BadgeRequestDto badgeDto) {
         BadgeResponseDto createdBadge = badgeService.creerBadge(badgeDto, idAdmin);
         return new ResponseEntity<>(createdBadge, HttpStatus.CREATED);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Mettre à jour un badge",
         description = "Met à jour toutes les informations d'un badge existant"
     )
@@ -152,19 +152,19 @@ public class BadgeController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     // Met à jour un badge existant
     @PutMapping("/{id}")
     public ResponseEntity<BadgeResponseDto> updateBadge(
             @Parameter(description = "ID du badge à modifier", required = true, example = "1")
             @PathVariable int id,
             @Parameter(description = "Nouvelles données du badge", required = true)
-            @Valid @RequestBody BadgeDto badgeDto) {
+            @Valid @RequestBody BadgeRequestDto badgeDto) {
         BadgeResponseDto badge = badgeService.mettreAJourBagde(id, badgeDto);
         return ResponseEntity.ok(badge);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Mettre à jour partiellement un badge",
         description = "Met à jour uniquement la description et les coins de récompense d'un badge"
     )
@@ -193,7 +193,7 @@ public class BadgeController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     // Met à jour partiellement un badge (description et coins)
     @PatchMapping("/{id}")
     public ResponseEntity<BadgeResponseDto> updateBadgePartial(
@@ -205,7 +205,7 @@ public class BadgeController {
         return ResponseEntity.ok(badge);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Supprimer un badge",
         description = "Supprime définitivement un badge du système"
     )
@@ -222,7 +222,7 @@ public class BadgeController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     // Supprime un badge par son ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBadge(
