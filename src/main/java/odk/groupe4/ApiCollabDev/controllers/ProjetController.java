@@ -34,7 +34,7 @@ public class ProjetController {
         this.projetService = projetService;
     }
 
-   /* @Operation(
+   @Operation(
         summary = "Récupérer tous les projets",
         description = "Retourne la liste complète de tous les projets avec possibilité de filtrage par statut"
     )
@@ -47,8 +47,9 @@ public class ProjetController {
                 schema = @Schema(implementation = ProjetResponseDto.class)
             )
         )
-    })*/
+    })
     @GetMapping
+    // Récupérer tous les projets avec option de filtrage par statut
     public ResponseEntity<List<ProjetResponseDto>> getAllProjets(
             @Parameter(description = "Filtrer par statut du projet", required = false)
             @RequestParam(required = false) ProjectStatus status) {
@@ -56,7 +57,7 @@ public class ProjetController {
         return ResponseEntity.ok(projets);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Récupérer un projet par ID",
         description = "Retourne les détails complets d'un projet spécifique"
     )
@@ -77,7 +78,8 @@ public class ProjetController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
+    // Récupérer un projet par son ID
     @GetMapping("/{id}")
     public ResponseEntity<ProjetResponseDto> getProjetById(
             @Parameter(description = "ID unique du projet", required = true, example = "1")
@@ -86,7 +88,38 @@ public class ProjetController {
         return ResponseEntity.ok(projet);
     }
 
-    /*@Operation(
+    @Operation(
+            summary = "Afficher les projets par contributeur",
+            description = "Retourne la liste des projets créés par un contributeur spécifique"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Liste des projets récupérée avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProjetResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Aucun projet trouvé pour ce contributeur",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            )
+    })
+    // Afficher la liste des projets créés par un contributeur
+    @GetMapping("/contributeur/{idContributeur}")
+    public ResponseEntity<List<ProjetResponseDto>> getProjetsByContributeur(
+            @Parameter(description = "ID du contributeur", required = true, example = "1")
+            @PathVariable int idContributeur) {
+        List<ProjetResponseDto> projets = projetService.getProjetsByContributeur(idContributeur);
+        return ResponseEntity.ok(projets);
+    }
+
+    @Operation(
         summary = "Proposer un nouveau projet",
         description = "Permet à un contributeur de proposer un nouveau projet collaboratif"
     )
@@ -115,7 +148,8 @@ public class ProjetController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
+    // Proposer un nouveau projet par un contributeur
     @PostMapping("/contributeur/{idPorteurProjet}")
     public ResponseEntity<ProjetResponseDto> proposerProjet(
             @Parameter(description = "ID du contributeur porteur du projet", required = true, example = "1")
@@ -126,7 +160,7 @@ public class ProjetController {
         return new ResponseEntity<>(projet, HttpStatus.CREATED);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Valider un projet",
         description = "Permet à un administrateur de valider un projet proposé (change le statut à OUVERT)"
     )
@@ -155,7 +189,8 @@ public class ProjetController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
+    // Valider un projet proposé par un contributeur
     @PatchMapping("/{id}/validate/admin/{idAdmin}")
     public ResponseEntity<ProjetResponseDto> validerProjet(
             @Parameter(description = "ID du projet à valider", required = true, example = "1")
@@ -166,7 +201,7 @@ public class ProjetController {
         return ResponseEntity.ok(projet);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Rejeter un projet",
         description = "Permet à un administrateur de rejeter un projet proposé (supprime le projet)"
     )
@@ -183,7 +218,8 @@ public class ProjetController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
+    // Rejeter un projet proposé par un contributeur
     @DeleteMapping("/{id}/reject/admin/{idAdmin}")
     public ResponseEntity<Void> rejeterProjet(
             @Parameter(description = "ID du projet à rejeter", required = true, example = "1")
@@ -194,7 +230,7 @@ public class ProjetController {
         return ResponseEntity.noContent().build();
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Éditer le cahier des charges",
         description = "Met à jour l'URL du cahier des charges d'un projet"
     )
@@ -223,7 +259,8 @@ public class ProjetController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
+    // Éditer le cahier des charges d'un projet
     @PatchMapping("/{id}/cahier-charges")
     public ResponseEntity<ProjetResponseDto> editerCahierDeCharge(
             @Parameter(description = "ID du projet", required = true, example = "1")
@@ -234,7 +271,7 @@ public class ProjetController {
         return ResponseEntity.ok(projet);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Attribuer un niveau de complexité",
         description = "Permet à un administrateur d'attribuer un niveau de complexité à un projet"
     )
@@ -263,7 +300,8 @@ public class ProjetController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
+    // Attribuer un niveau de complexité à un projet
     @PatchMapping("/{id}/niveau/admin/{idAdmin}")
     public ResponseEntity<ProjetResponseDto> attribuerNiveau(
             @Parameter(description = "ID du projet", required = true, example = "1")
@@ -276,7 +314,7 @@ public class ProjetController {
         return ResponseEntity.ok(projet);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Démarrer un projet",
         description = "Change le statut d'un projet validé vers EN_COURS"
     )
@@ -305,7 +343,8 @@ public class ProjetController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
+    // Démarrer un projet en changeant son statut à EN_COURS
     @PatchMapping("/{id}/start")
     public ResponseEntity<ProjetResponseDto> demarrerProjet(
             @Parameter(description = "ID du projet à démarrer", required = true, example = "1")
@@ -314,7 +353,7 @@ public class ProjetController {
         return ResponseEntity.ok(projet);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Terminer un projet",
         description = "Marque un projet comme terminé"
     )
@@ -325,7 +364,8 @@ public class ProjetController {
             mediaType = "application/json",
             schema = @Schema(implementation = ProjetResponseDto.class)
         )
-    )*/
+    )
+    // Terminer un projet en changeant son statut à TERMINÉ
     @PatchMapping("/{id}/complete")
     public ResponseEntity<ProjetResponseDto> terminerProjet(
             @Parameter(description = "ID du projet à terminer", required = true, example = "1")

@@ -25,14 +25,19 @@ public class EmailService {
      */
     public String envoyerEmail(String to, String sujet, String contenu){
         try {
+            // Création du message email
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(expediteur);
-            message.setTo(to);
-            message.setSubject(sujet);
-            message.setText(contenu);
+            // Configuration des champs de l'email
+            message.setFrom(expediteur); // L'expéditeur est défini à partir de la propriété spring.mail.username
+            message.setTo(to); // Le destinataire est passé en paramètre
+            message.setSubject(sujet); // Le sujet de l'email est passé en paramètre
+            message.setText(contenu); // Le contenu de l'email est passé en paramètre
+            // Envoi de l'email
             javaMailSender.send(message);
+            // Retourne un message de succès
             return "Message envoyé avec succès !";
         } catch (Exception e) {
+            // En cas d'erreur lors de l'envoi, retourne un message d'erreur
             return "Erreur lors de l'envoie de l'email !";
         }
     }

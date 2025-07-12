@@ -43,6 +43,7 @@ public class ParametreCoinController {
             schema = @Schema(implementation = ParametreCoinResponseDto.class)
         )
     )*/
+    // Affiche tous les paramètres de coins
     @GetMapping
     public ResponseEntity<List<ParametreCoinResponseDto>> getAllParametresCoins() {
         List<ParametreCoinResponseDto> parametres = parametreCoinService.obtenirTousLesParametresCoins();
@@ -71,6 +72,7 @@ public class ParametreCoinController {
             )
         )
     })*/
+    // Récupère un paramètre de coin par son ID
     @GetMapping("/{id}")
     public ResponseEntity<ParametreCoinResponseDto> getParametreCoinById(
             @Parameter(description = "ID unique du paramètre", required = true, example = "1")
@@ -109,6 +111,7 @@ public class ParametreCoinController {
             )
         )
     })*/
+    // Crée un nouveau paramètre de coin
     @PostMapping("/admin/{idAdmin}")
     public ResponseEntity<ParametreCoinResponseDto> createParametreCoin(
             @Parameter(description = "ID de l'administrateur créateur", required = true, example = "1")
@@ -149,6 +152,7 @@ public class ParametreCoinController {
             )
         )
     })*/
+    // Met à jour un paramètre de coin existant
     @PutMapping("/{id}")
     public ResponseEntity<ParametreCoinResponseDto> updateParametreCoin(
             @Parameter(description = "ID du paramètre à modifier", required = true, example = "1")
@@ -177,6 +181,7 @@ public class ParametreCoinController {
             )
         )
     })*/
+    // Supprime un paramètre de coin par son ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteParametreCoin(
             @Parameter(description = "ID du paramètre à supprimer", required = true, example = "1")

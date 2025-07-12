@@ -30,7 +30,7 @@ public class ParticipantController {
         this.participantService = participantService;
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Envoyer une demande de participation",
         description = "Permet à un contributeur d'envoyer une demande pour participer à un projet"
     )
@@ -59,8 +59,9 @@ public class ParticipantController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @PostMapping("/projet/{idProjet}/contributeur/{idContributeur}")
+    // Envoie une demande de participation à un projet
     public ResponseEntity<ParticipantResponseDto> envoyerDemandeParticipation(
             @Parameter(description = "ID du projet", required = true, example = "1")
             @PathVariable int idProjet,
@@ -72,7 +73,7 @@ public class ParticipantController {
         return new ResponseEntity<>(participant, HttpStatus.CREATED);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Accepter une demande de participation",
         description = "Permet d'accepter la demande de participation d'un contributeur à un projet"
     )
@@ -101,8 +102,9 @@ public class ParticipantController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @PatchMapping("/{id}/accept")
+    // Accepte une demande de participation
     public ResponseEntity<ParticipantResponseDto> accepterDemande(
             @Parameter(description = "ID du participant", required = true, example = "1")
             @PathVariable int id) {
@@ -110,7 +112,7 @@ public class ParticipantController {
         return ResponseEntity.ok(participant);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Refuser une demande de participation",
         description = "Permet de refuser la demande de participation d'un contributeur à un projet"
     )
@@ -139,7 +141,8 @@ public class ParticipantController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
+    // Refuse une demande de participation
     @PatchMapping("/{id}/reject")
     public ResponseEntity<ParticipantResponseDto> refuserDemande(
             @Parameter(description = "ID du participant", required = true, example = "1")
@@ -148,7 +151,7 @@ public class ParticipantController {
         return ResponseEntity.ok(participant);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Débloquer l'accès à un projet",
         description = "Permet à un participant d'utiliser ses coins pour débloquer l'accès à un projet selon son niveau de complexité"
     )
@@ -177,8 +180,9 @@ public class ParticipantController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @PatchMapping("/{id}/unlock")
+    // Débloque l'accès d'un participant à un projet
     public ResponseEntity<ParticipantResponseDto> debloquerAcces(
             @Parameter(description = "ID du participant", required = true, example = "1")
             @PathVariable int id) {
@@ -186,7 +190,7 @@ public class ParticipantController {
         return ResponseEntity.ok(participant);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Réserver une fonctionnalité",
         description = "Permet à un participant de réserver une fonctionnalité disponible d'un projet"
     )
@@ -215,8 +219,9 @@ public class ParticipantController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @PatchMapping("/{idParticipant}/fonctionnalite/{idFonctionnalite}/reserve")
+    // Réserve une fonctionnalité pour un participant
     public ResponseEntity<FonctionnaliteDto> reserverFonctionnalite(
             @Parameter(description = "ID du participant", required = true, example = "1")
             @PathVariable int idParticipant,
@@ -226,7 +231,7 @@ public class ParticipantController {
         return ResponseEntity.ok(fonctionnalite);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Attribuer une tâche à un participant",
         description = "Permet d'attribuer une fonctionnalité spécifique à un participant (action de gestion)"
     )
@@ -237,8 +242,9 @@ public class ParticipantController {
             mediaType = "application/json",
             schema = @Schema(implementation = FonctionnaliteDto.class)
         )
-    )*/
+    )
     @PatchMapping("/{idParticipant}/fonctionnalite/{idFonctionnalite}/assign")
+    // Attribue une tâche à un participant
     public ResponseEntity<FonctionnaliteDto> attribuerTache(
             @Parameter(description = "ID du participant", required = true, example = "1")
             @PathVariable int idParticipant,
@@ -248,7 +254,7 @@ public class ParticipantController {
         return ResponseEntity.ok(fonctionnalite);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Récupérer l'historique d'acquisition d'un participant",
         description = "Retourne l'historique des contributions validées et des badges acquis par un participant"
     )
@@ -269,8 +275,9 @@ public class ParticipantController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @GetMapping("/{id}/historique")
+    // Affiche l'historique d'acquisition d'un participant
     public ResponseEntity<HistAcquisitionDto> getHistoriqueAcquisition(
             @Parameter(description = "ID du participant", required = true, example = "1")
             @PathVariable int id) {
@@ -278,7 +285,7 @@ public class ParticipantController {
         return ResponseEntity.ok(historique);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Récupérer les contributions d'un participant",
         description = "Retourne toutes les contributions soumises par un participant spécifique"
     )
@@ -289,7 +296,8 @@ public class ParticipantController {
             mediaType = "application/json",
             schema = @Schema(implementation = ContributionDto.class)
         )
-    )*/
+    )
+    // Affiche les contributions d'un participant
     @GetMapping("/{id}/contributions")
     public ResponseEntity<List<ContributionDto>> getContributionsParticipant(
             @Parameter(description = "ID du participant", required = true, example = "1")
@@ -298,7 +306,7 @@ public class ParticipantController {
         return ResponseEntity.ok(contributions);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Récupérer tous les participants d'un projet",
         description = "Retourne la liste de tous les participants d'un projet spécifique"
     )
@@ -309,7 +317,8 @@ public class ParticipantController {
             mediaType = "application/json",
             schema = @Schema(implementation = ParticipantResponseDto.class)
         )
-    )*/
+    )
+    // Affiche tous les participants d'un projet
     @GetMapping("/projet/{idProjet}")
     public ResponseEntity<List<ParticipantResponseDto>> getParticipantsByProjet(
             @Parameter(description = "ID du projet", required = true, example = "1")

@@ -8,7 +8,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Data @AllArgsConstructor @NoArgsConstructor
-public class CommentaireDto {
+public class CommentaireRequestDto {
     @NotBlank @Size(max = 100)
     private String contenu; // Contenu du commentaire
     @NotNull

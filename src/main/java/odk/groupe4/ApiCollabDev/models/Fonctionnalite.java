@@ -16,19 +16,23 @@ public class Fonctionnalite {
     @Column(name = "id_fonctionnalite")
     private int id;
 
-    private String titre; // Titre de la fonctionnalité
+    @Column(length = 100, nullable = false)
+    private String titre;
 
-    private String contenu; // Contenu de la fonctionnalité (description détaillée)
+    @Column(length = 500)
+    // Contenu de la fonctionnalité (description détaillée)
+    private String contenu;
 
     @Enumerated(EnumType.STRING)
-    private FeaturesStatus statusFeatures; // Statut de la fonctionnalité (ex: En attente, En cours, Terminé, etc.)
+    // Statut de la fonctionnalité (ex: En attente, En cours, Terminé, etc.)
+    private FeaturesStatus statusFeatures;
 
-    // Clé étrangère vers l'entité Projet (Projet auquel la fonctionnalité est associée)
+    // Une fonctionnalité est associée à un projet spécifique
     @ManyToOne
     @JoinColumn(name = "id_projet")
     private Projet projet;
 
-    // Clé étrangère vers l'entité Participant (Participant attribué à la fonctionnalité)
+    // Une fonctionnalité peut être assignée à un participant spécifique
     @ManyToOne
     @JoinColumn(name = "id_participant")
     private Participant participant;

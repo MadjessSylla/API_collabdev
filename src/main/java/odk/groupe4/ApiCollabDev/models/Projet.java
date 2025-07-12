@@ -39,38 +39,35 @@ public class Projet {
     private ProjectStatus status; // Statut du projet (ex: En attente, En cours, Terminé, etc.)
 
     @Enumerated(EnumType.STRING)
-    private ProjectLevel niveau;
+    private ProjectLevel niveau; // Niveau du projet (ex: Débutant, Intermédiaire, Avancé)
 
     private LocalDate dateCreation; // Date de création du projet
 
-    // Clé étrangère vers l'entité Contributeur (Créateur du projet)
-    @ManyToOne
-    @JoinColumn(name = "id_createur")
+    // Un projet est crée par un contributeur
+    @ManyToOne @JoinColumn(name = "id_createur")
     private Contributeur createur;
 
-    // Liste des fonctionnalités du projet lié à l'entité Fonctionnalité
+    // Un projet est validé par un administrateur
+    @ManyToOne @JoinColumn(name="id_validateur")
+    private Administrateur validateur;
+
+    // Un projet comprend plusieurs fonctionnalités
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Fonctionnalite> fonctionnalites = new ArrayList<>();
 
-    // Association avec l'entité Contributeur pour les contributeurs qui débloquent l'accès au projet
+    // Un projet peut être débloqué par plusieurs contributeurs
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "projet_debloque",
             joinColumns = @JoinColumn(name = "id_projet"),
             inverseJoinColumns = @JoinColumn(name = "id_contributeur"))
     private Set<Contributeur> contributeurs = new HashSet<>();
 
-    // Clé étrangère vers l'entité Questionnaire (Questionnaires associés au projet)
+    // Un projet peut avoir plusieurs QCM (Questionnaires de collecte de données)
     @OneToMany(mappedBy = "projet", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Questionnaire> questionnaires = new HashSet<>(); // Liste des questionnaires associés au projet
+    private Set<Questionnaire> questionnaires = new HashSet<>();
 
-    // Clé étrangère vers l'entité Participant (Contributeurs qui participent au projet)
+    // Un projet peut avoir plusieurs participants
     @OneToMany(mappedBy = "projet")
     private Set<Participant> participants = new HashSet<>();
 
-    //clé étrangère de la table administrateur
-    @ManyToOne @JoinColumn(name="id_validateur")
-    private Administrateur validateur;
-
-    @ManyToOne @JoinColumn(name="id_contributeur")
-    private Contributeur contributeur;
 }

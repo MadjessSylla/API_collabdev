@@ -45,6 +45,7 @@ public class AdministrateurController {
             )
         )
     })*/
+    // Affiche tous les administrateurs
     @GetMapping
     public ResponseEntity<List<AdministrateurResponseDto>> getAllAdministrateurs() {
         List<AdministrateurResponseDto> admins = administrateurService.getAll();
@@ -73,6 +74,7 @@ public class AdministrateurController {
             )
         )
     })*/
+    // Affiche un administrateur par son ID
     @GetMapping("/{id}")
     public ResponseEntity<AdministrateurResponseDto> getAdministrateurById(
             @Parameter(description = "ID unique de l'administrateur", required = true, example = "1")
@@ -111,6 +113,7 @@ public class AdministrateurController {
             )
         )
     })*/
+    // Crée un nouvel administrateur
     @PostMapping
     public ResponseEntity<AdministrateurResponseDto> createAdministrateur(
             @Parameter(description = "Données de l'administrateur à créer", required = true)
@@ -149,6 +152,7 @@ public class AdministrateurController {
             )
         )
     })*/
+    // Met à jour un administrateur existant
     @PutMapping("/{id}")
     public ResponseEntity<AdministrateurResponseDto> updateAdministrateur(
             @Parameter(description = "ID de l'administrateur à modifier", required = true, example = "1")
@@ -177,6 +181,7 @@ public class AdministrateurController {
             )
         )
     })*/
+    // Supprime un administrateur par son ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAdministrateur(
             @Parameter(description = "ID de l'administrateur à supprimer", required = true, example = "1")
@@ -207,6 +212,7 @@ public class AdministrateurController {
             )
         )
     })*/
+    // Bloque un administrateur par son ID
     @PatchMapping("/{id}/block")
     public ResponseEntity<AdministrateurResponseDto> blockAdministrateur(
             @Parameter(description = "ID de l'administrateur à bloquer", required = true, example = "1")
@@ -237,6 +243,7 @@ public class AdministrateurController {
             )
         )
     })*/
+    // Débloque un administrateur par son ID
     @PatchMapping("/{id}/unblock")
     public ResponseEntity<AdministrateurResponseDto> unblockAdministrateur(
             @Parameter(description = "ID de l'administrateur à débloquer", required = true, example = "1")

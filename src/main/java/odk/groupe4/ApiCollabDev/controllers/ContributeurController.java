@@ -8,13 +8,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import odk.groupe4.ApiCollabDev.dto.ContributeurDto;
+import odk.groupe4.ApiCollabDev.dto.ContributeurRequestDto;
 import odk.groupe4.ApiCollabDev.dto.ContributeurResponseDto;
 import odk.groupe4.ApiCollabDev.dto.ContributeurSoldeDto;
 import odk.groupe4.ApiCollabDev.exception.GlobalExceptionHandler;
 import odk.groupe4.ApiCollabDev.service.ContributeurService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +31,7 @@ public class ContributeurController {
         this.contributeurService = contributeurService;
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Récupérer tous les contributeurs",
         description = "Retourne la liste complète de tous les contributeurs inscrits sur la plateforme"
     )
@@ -43,14 +42,15 @@ public class ContributeurController {
             mediaType = "application/json",
             schema = @Schema(implementation = ContributeurResponseDto.class)
         )
-    )*/
+    )
     @GetMapping
+    // Récupérer tous les contributeurs
     public ResponseEntity<List<ContributeurResponseDto>> getAllContributeurs() {
         List<ContributeurResponseDto> contributeurs = contributeurService.getAllContributeurs();
         return ResponseEntity.ok(contributeurs);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Récupérer un contributeur par ID",
         description = "Retourne les détails d'un contributeur spécifique"
     )
@@ -71,8 +71,9 @@ public class ContributeurController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @GetMapping("/{id}")
+    // Récupérer un contributeur par son ID
     public ResponseEntity<ContributeurResponseDto> getContributeurById(
             @Parameter(description = "ID unique du contributeur", required = true, example = "1")
             @PathVariable int id) {
@@ -80,45 +81,7 @@ public class ContributeurController {
         return ResponseEntity.ok(contributeur);
     }
 
-    /*@Operation(
-        summary = "Créer un nouveau contributeur",
-        description = "Inscrit un nouveau contributeur sur la plateforme avec attribution automatique de coins de bienvenue"
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "201", 
-            description = "Contributeur créé avec succès",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ContributeurResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400", 
-            description = "Données d'inscription invalides",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "409", 
-            description = "Email ou téléphone déjà utilisé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        )
-    })*/
-    @PostMapping
-    public ResponseEntity<ContributeurResponseDto> createContributeur(
-            @Parameter(description = "Données du contributeur à inscrire", required = true)
-            @Valid @RequestBody ContributeurDto contributeurDto) {
-        ContributeurResponseDto createdContributeur = contributeurService.ajouterContributeur(contributeurDto);
-        return new ResponseEntity<>(createdContributeur, HttpStatus.CREATED);
-    }
-
-    /*@Operation(
+    @Operation(
         summary = "Mettre à jour un contributeur",
         description = "Met à jour les informations personnelles d'un contributeur"
     )
@@ -147,18 +110,19 @@ public class ContributeurController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @PutMapping("/{id}")
+    // Mettre à jour un contributeur
     public ResponseEntity<ContributeurResponseDto> updateContributeur(
             @Parameter(description = "ID du contributeur à modifier", required = true, example = "1")
             @PathVariable int id,
             @Parameter(description = "Nouvelles données du contributeur", required = true)
-            @Valid @RequestBody ContributeurDto contributeurDto) {
+            @Valid @RequestBody ContributeurRequestDto contributeurDto) {
         ContributeurResponseDto contributeur = contributeurService.updateContributeur(id, contributeurDto);
         return ResponseEntity.ok(contributeur);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Afficher le solde d'un contributeur",
         description = "Retourne le solde actuel en coins d'un contributeur spécifique"
     )
@@ -179,8 +143,9 @@ public class ContributeurController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @GetMapping("/{id}/solde")
+    // Afficher le solde d'un contributeur
     public ResponseEntity<ContributeurSoldeDto> getSoldeContributeur(
             @Parameter(description = "ID du contributeur", required = true, example = "1")
             @PathVariable int id) {
@@ -188,7 +153,7 @@ public class ContributeurController {
         return ResponseEntity.ok(solde);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Désactiver un contributeur",
         description = "Désactive le compte d'un contributeur (le rend inactif)"
     )
@@ -209,8 +174,9 @@ public class ContributeurController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @PatchMapping("/{id}/deactivate")
+    // Désactiver un contributeur
     public ResponseEntity<ContributeurResponseDto> deactivateContributeur(
             @Parameter(description = "ID du contributeur à désactiver", required = true, example = "1")
             @PathVariable int id) {
@@ -218,7 +184,7 @@ public class ContributeurController {
         return ResponseEntity.ok(contributeur);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Réactiver un contributeur",
         description = "Réactive le compte d'un contributeur (le rend actif)"
     )
@@ -239,8 +205,9 @@ public class ContributeurController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @PatchMapping("/{id}/activate")
+    // Réactiver un contributeur
     public ResponseEntity<ContributeurResponseDto> activateContributeur(
             @Parameter(description = "ID du contributeur à réactiver", required = true, example = "1")
             @PathVariable int id) {

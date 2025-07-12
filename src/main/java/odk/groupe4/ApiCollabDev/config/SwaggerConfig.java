@@ -1,4 +1,4 @@
-/*package odk.groupe4.ApiCollabDev.config;
+package odk.groupe4.ApiCollabDev.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -48,4 +48,3 @@ public class SwaggerConfig {
                         );
     }
 }
-*/

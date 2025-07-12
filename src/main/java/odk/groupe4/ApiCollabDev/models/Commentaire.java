@@ -16,12 +16,13 @@ public class Commentaire {
     @Column(name = "id_commentaire")
     private int id;
 
-    private String contenu; // Contenu du commentaire
+    @Column(length = 500)
+    private String contenu;
 
-    private LocalDate date; // Date de création du commentaire
+    @Column(name = "date_creation")
+    private LocalDate date;
 
-    // Auteur du commentaire
-    // Clé étrangère vers la table Contributeur
+    // Un commentaire est écrit par un auteur, qui est un participant
     @ManyToOne
     @JoinColumn(name = "id_auteur")
     private Participant auteur;

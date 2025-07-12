@@ -18,7 +18,8 @@ public class Notification {
 
     private String message;
 
+    // Une notification est envoyée à un utilisateur spécifique
     @ManyToOne
     @JoinColumn(name = "id_utilisateur")
-    private Utilisateur utilisateur; // L'utilisateur qui reçoit la notification
+    private Utilisateur utilisateur;
 }

@@ -15,14 +15,15 @@ public class BadgeParticipant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_badge_participant")
     private int id;
-    private LocalDate dateAcquisition; // Date d'acquisition du badge par le participant
 
-    // Clé étrangère de la table Badge
+    private LocalDate dateAcquisition;
+
+    // Un badge participant est associé à un badge spécifique
     @ManyToOne
     @JoinColumn(name = "id_bagde")
     private Badge badge;
 
-    // Clé étrangère de la table Participant
+    // Un badge participant est associé à un participant spécifique
     @ManyToOne
     @JoinColumn(name = "id_participant")
     private Participant participant;

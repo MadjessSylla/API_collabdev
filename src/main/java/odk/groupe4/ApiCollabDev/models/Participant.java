@@ -27,33 +27,35 @@ public class Participant {
     @Enumerated(EnumType.STRING)
     private ParticipantStatus statut; // EN_ATTENTE, ACCEPTE, REFUSE
 
-    //les reponse des Quiz seront stockées dans cette variable
+    // Le score du participant pour le quiz
     private String scoreQuiz;
 
-    //par defaut L'accès débloquer est false
+    // Indique si le participant a débloqué le projet
     private boolean estDebloque;
 
+    // Le projet auquel le participant est associé
     @ManyToOne
     @JoinColumn(name = "id_projet")
     private Projet projet;
 
-    // Clé étrangère de la table Contributeur
+    // Le contributeur associé à ce participant
     @ManyToOne
     @JoinColumn(name = "id_contributeur")
     private Contributeur contributeur;
 
-    // Liste des commentaires associés à ce participant
+    // Un participant peut être l'auteur de plusieurs commentaires
     @OneToMany(mappedBy = "auteur", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Commentaire> commentaires = new HashSet<>();
 
-    // Les badges reçus par le participant
+    // Un participant peut recevoir plusieurs badges
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<BadgeParticipant> badgeParticipants = new HashSet<>();
 
-    // Clé de référence vers la classe association Fonctionnalite_Participant
+    // Un participant peut être assigné à plusieurs fonctionnalités
     @OneToMany(mappedBy = "participant")
     private Set<Fonctionnalite> fonctionnalite;
 
+    // Un participant peut avoir plusieurs contributions
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contribution> contributions = new ArrayList<>();
 }

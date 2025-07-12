@@ -8,7 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import odk.groupe4.ApiCollabDev.dto.CommentaireDto;
+import odk.groupe4.ApiCollabDev.dto.CommentaireRequestDto;
+import odk.groupe4.ApiCollabDev.dto.CommentaireResponseDto;
 import odk.groupe4.ApiCollabDev.exception.GlobalExceptionHandler;
 import odk.groupe4.ApiCollabDev.models.Commentaire;
 import odk.groupe4.ApiCollabDev.service.CommentaireService;
@@ -31,7 +32,7 @@ public class CommentaireController {
         this.commentaireService = commentaireService;
     }
 
-   /* @Operation(
+   @Operation(
             summary = "Créer un commentaire",
             description = "Permet à un participant de créer un nouveau commentaire"
     )
@@ -52,18 +53,19 @@ public class CommentaireController {
                             schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
                     )
             )
-    })*/
+    })
     @PostMapping("/participant/{id}")
-    public ResponseEntity<Commentaire> creerCommentaire(
+   // Création d'un commentaire pour un participant spécifique
+    public ResponseEntity<CommentaireResponseDto> creerCommentaire(
             @Parameter(description = "ID du participant", required = true, example = "1")
             @PathVariable int id,
             @Parameter(description = "Données du commentaire", required = true)
-            @Valid @RequestBody CommentaireDto commentaire) {
-        Commentaire nouveauCommentaire = commentaireService.creerCommentaire(id, commentaire);
+            @Valid @RequestBody CommentaireRequestDto commentaire) {
+        CommentaireResponseDto nouveauCommentaire = commentaireService.creerCommentaire(id, commentaire);
         return new ResponseEntity<>(nouveauCommentaire, HttpStatus.CREATED);
     }
 
-    /*@Operation(
+    @Operation(
             summary = "Récupérer les commentaires d'un participant",
             description = "Retourne tous les commentaires créés par un participant spécifique"
     )
@@ -74,16 +76,17 @@ public class CommentaireController {
                     mediaType = "application/json",
                     schema = @Schema(implementation = Commentaire.class)
             )
-    )*/
+    )
     @GetMapping("/participant/{id}")
-    public ResponseEntity<Set<Commentaire>> getCommentairesByParticipant(
+    // Récupération des commentaires d'un participant spécifique
+    public ResponseEntity<Set<CommentaireResponseDto>> getCommentairesByParticipant(
             @Parameter(description = "ID du participant", required = true, example = "1")
             @PathVariable int id) {
-        Set<Commentaire> commentaires = commentaireService.afficherCommentaireParParticipant(id);
+        Set<CommentaireResponseDto> commentaires = commentaireService.afficherCommentaireParParticipant(id);
         return ResponseEntity.ok(commentaires);
     }
 
-    /*@Operation(
+    @Operation(
             summary = "Supprimer un commentaire",
             description = "Supprime définitivement un commentaire du système"
     )
@@ -100,8 +103,9 @@ public class CommentaireController {
                             schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
                     )
             )
-    })*/
+    })
     @DeleteMapping("/{id}")
+    // Suppression d'un commentaire par son ID
     public ResponseEntity<String> supprimerCommentaire(
             @Parameter(description = "ID du commentaire à supprimer", required = true, example = "1")
             @PathVariable int id) {

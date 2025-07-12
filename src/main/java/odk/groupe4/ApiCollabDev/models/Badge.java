@@ -28,13 +28,13 @@ public class Badge {
 
     private int coin_recompense;
 
-    // Administrateur qui a créé le badge
+    // Un badge est créé par un administrateur
     @ManyToOne
     @JoinColumn(name = "id_administrateur")
     @JsonIgnore
     private Administrateur createur;
 
-    // Clé de reference vers la classe association Badge_Participation
+    // Un badge peut être attribué à plusieurs participants
     @OneToMany(mappedBy = "badge", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Set<BadgeParticipant> badgeParticipants = new HashSet<>();

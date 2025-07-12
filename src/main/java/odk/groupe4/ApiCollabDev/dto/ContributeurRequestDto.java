@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Data @AllArgsConstructor @NoArgsConstructor
-public class ContributeurDto {
+public class ContributeurRequestDto {
     @NotBlank(message = "Nom obligatoire.")
     private String nom;
     @NotBlank(message = "Prenom obligatoire.")

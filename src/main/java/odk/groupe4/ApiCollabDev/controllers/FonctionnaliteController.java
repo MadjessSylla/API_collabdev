@@ -33,59 +33,7 @@ public class FonctionnaliteController {
         this.fonctionnaliteService = fonctionnaliteService;
     }
 
-   /* @Operation(
-        summary = "Récupérer toutes les fonctionnalités",
-        description = "Retourne la liste complète de toutes les fonctionnalités avec possibilité de filtrage par statut"
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Liste des fonctionnalités récupérée avec succès",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = FonctionnaliteResponseDto.class)
-            )
-        )
-    })*/
-    @GetMapping
-    public ResponseEntity<List<FonctionnaliteResponseDto>> getAllFonctionnalites(
-            @Parameter(description = "Filtrer par statut de fonctionnalité", required = false)
-            @RequestParam(required = false) FeaturesStatus status) {
-        List<FonctionnaliteResponseDto> fonctionnalites = fonctionnaliteService.getAllFonctionnalites(status);
-        return ResponseEntity.ok(fonctionnalites);
-    }
-
-    /*@Operation(
-        summary = "Récupérer une fonctionnalité par ID",
-        description = "Retourne les détails d'une fonctionnalité spécifique"
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Fonctionnalité trouvée",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = FonctionnaliteResponseDto.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Fonctionnalité non trouvée",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        )
-    })*/
-    @GetMapping("/{id}")
-    public ResponseEntity<FonctionnaliteResponseDto> getFonctionnaliteById(
-            @Parameter(description = "ID unique de la fonctionnalité", required = true, example = "1")
-            @PathVariable int id) {
-        FonctionnaliteResponseDto fonctionnalite = fonctionnaliteService.getFonctionnaliteById(id);
-        return ResponseEntity.ok(fonctionnalite);
-    }
-
-    /*@Operation(
+    @Operation(
         summary = "Créer une nouvelle fonctionnalité",
         description = "Ajoute une nouvelle fonctionnalité à un projet existant"
     )
@@ -114,7 +62,8 @@ public class FonctionnaliteController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
+    // Crée une nouvelle fonctionnalité pour un projet spécifique
     @PostMapping("/projet/{idProjet}")
     public ResponseEntity<FonctionnaliteResponseDto> createFonctionnalite(
             @Parameter(description = "ID du projet", required = true, example = "1")
@@ -125,7 +74,7 @@ public class FonctionnaliteController {
         return new ResponseEntity<>(fonctionnalite, HttpStatus.CREATED);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Mettre à jour une fonctionnalité",
         description = "Met à jour les informations d'une fonctionnalité existante"
     )
@@ -154,7 +103,8 @@ public class FonctionnaliteController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
+    // Met à jour une fonctionnalité existante
     @PutMapping("/{id}")
     public ResponseEntity<FonctionnaliteResponseDto> updateFonctionnalite(
             @Parameter(description = "ID de la fonctionnalité", required = true, example = "1")
@@ -165,29 +115,7 @@ public class FonctionnaliteController {
         return ResponseEntity.ok(fonctionnalite);
     }
 
-    /*@Operation(
-        summary = "Changer le statut d'une fonctionnalité",
-        description = "Met à jour le statut d'une fonctionnalité (A_FAIRE, EN_COURS, TERMINE)"
-    )
-    @ApiResponse(
-        responseCode = "200", 
-        description = "Statut mis à jour avec succès",
-        content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = FonctionnaliteResponseDto.class)
-        )
-    )*/
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<FonctionnaliteResponseDto> updateStatusFonctionnalite(
-            @Parameter(description = "ID de la fonctionnalité", required = true, example = "1")
-            @PathVariable int id,
-            @Parameter(description = "Nouveau statut", required = true)
-            @RequestParam FeaturesStatus status) {
-        FonctionnaliteResponseDto fonctionnalite = fonctionnaliteService.updateStatus(id, status);
-        return ResponseEntity.ok(fonctionnalite);
-    }
-
-    /*@Operation(
+    @Operation(
         summary = "Récupérer les fonctionnalités d'un projet",
         description = "Retourne toutes les fonctionnalités associées à un projet spécifique"
     )
@@ -198,7 +126,8 @@ public class FonctionnaliteController {
             mediaType = "application/json",
             schema = @Schema(implementation = FonctionnaliteResponseDto.class)
         )
-    )*/
+    )
+    // Récupère toutes les fonctionnalités d'un projet spécifique
     @GetMapping("/projet/{idProjet}")
     public ResponseEntity<List<FonctionnaliteResponseDto>> getFonctionnalitesByProjet(
             @Parameter(description = "ID du projet", required = true, example = "1")
@@ -207,7 +136,7 @@ public class FonctionnaliteController {
         return ResponseEntity.ok(fonctionnalites);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Supprimer une fonctionnalité",
         description = "Supprime définitivement une fonctionnalité du système"
     )
@@ -224,7 +153,8 @@ public class FonctionnaliteController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
+    // Supprime une fonctionnalité par son ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteFonctionnalite(
             @Parameter(description = "ID de la fonctionnalité à supprimer", required = true, example = "1")
@@ -232,4 +162,78 @@ public class FonctionnaliteController {
         fonctionnaliteService.deleteFonctionnalite(id);
         return ResponseEntity.noContent().build();
     }
+
+   /*@Operation(
+        summary = "Récupérer toutes les fonctionnalités",
+        description = "Retourne la liste complète de toutes les fonctionnalités avec possibilité de filtrage par statut"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Liste des fonctionnalités récupérée avec succès",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = FonctionnaliteResponseDto.class)
+            )
+        )
+    })
+    @GetMapping
+    public ResponseEntity<List<FonctionnaliteResponseDto>> getAllFonctionnalites(
+            @Parameter(description = "Filtrer par statut de fonctionnalité", required = false)
+            @RequestParam(required = false) FeaturesStatus status) {
+        List<FonctionnaliteResponseDto> fonctionnalites = fonctionnaliteService.getAllFonctionnalites(status);
+        return ResponseEntity.ok(fonctionnalites);
+    }
+
+    @Operation(
+        summary = "Récupérer une fonctionnalité par ID",
+        description = "Retourne les détails d'une fonctionnalité spécifique"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Fonctionnalité trouvée",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = FonctionnaliteResponseDto.class)
+            )
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Fonctionnalité non trouvée",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+            )
+        )
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<FonctionnaliteResponseDto> getFonctionnaliteById(
+            @Parameter(description = "ID unique de la fonctionnalité", required = true, example = "1")
+            @PathVariable int id) {
+        FonctionnaliteResponseDto fonctionnalite = fonctionnaliteService.getFonctionnaliteById(id);
+        return ResponseEntity.ok(fonctionnalite);
+    }
+    @Operation(
+        summary = "Changer le statut d'une fonctionnalité",
+        description = "Met à jour le statut d'une fonctionnalité (A_FAIRE, EN_COURS, TERMINE)"
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Statut mis à jour avec succès",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = FonctionnaliteResponseDto.class)
+        )
+    )
+    // Change le statut d'une fonctionnalité
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<FonctionnaliteResponseDto> updateStatusFonctionnalite(
+            @Parameter(description = "ID de la fonctionnalité", required = true, example = "1")
+            @PathVariable int id,
+            @Parameter(description = "Nouveau statut", required = true)
+            @RequestParam FeaturesStatus status) {
+        FonctionnaliteResponseDto fonctionnalite = fonctionnaliteService.updateStatus(id, status);
+        return ResponseEntity.ok(fonctionnalite);
+    }*/
 }

@@ -20,13 +20,13 @@ public class Administrateur extends Utilisateur{
     @JsonIgnore
     private Set<ParametreCoin> parametresCoins;
 
-    // Un administrateur peut valider plusieurs projets
-    @OneToMany(mappedBy = "validateur")
-    @JsonIgnore
-    private Set<Projet> projetsValides;
-
     // Un administrateur peut créer plusieurs badges de récompense
     @OneToMany(mappedBy = "createur")
     @JsonIgnore
     private Set<Badge> badgesRecompense;
+
+    // Un administrateur peut valider plusieurs projets
+    @OneToMany(mappedBy = "validateur")
+    @JsonIgnore
+    private Set<Projet> projetsValides;
 }

@@ -44,6 +44,7 @@ public class BadgeController {
             schema = @Schema(implementation = BadgeResponseDto.class)
         )
     )*/
+    // Affiche tous les badges
     @GetMapping
     public ResponseEntity<List<BadgeResponseDto>> getAllBadges() {
         List<BadgeResponseDto> badges = badgeService.obtenirTousLesBadges();
@@ -72,6 +73,7 @@ public class BadgeController {
             )
         )
     })*/
+    // Récupère un badge par son ID
     @GetMapping("/{id}")
     public ResponseEntity<BadgeResponseDto> getBadgeById(
             @Parameter(description = "ID unique du badge", required = true, example = "1")
@@ -110,6 +112,7 @@ public class BadgeController {
             )
         )
     })*/
+    // Crée un nouveau badge
     @PostMapping("/admin/{idAdmin}")
     public ResponseEntity<BadgeResponseDto> createBadge(
             @Parameter(description = "ID de l'administrateur créateur", required = true, example = "1")
@@ -150,6 +153,7 @@ public class BadgeController {
             )
         )
     })*/
+    // Met à jour un badge existant
     @PutMapping("/{id}")
     public ResponseEntity<BadgeResponseDto> updateBadge(
             @Parameter(description = "ID du badge à modifier", required = true, example = "1")
@@ -190,6 +194,7 @@ public class BadgeController {
             )
         )
     })*/
+    // Met à jour partiellement un badge (description et coins)
     @PatchMapping("/{id}")
     public ResponseEntity<BadgeResponseDto> updateBadgePartial(
             @Parameter(description = "ID du badge à modifier", required = true, example = "1")
@@ -218,6 +223,7 @@ public class BadgeController {
             )
         )
     })*/
+    // Supprime un badge par son ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBadge(
             @Parameter(description = "ID du badge à supprimer", required = true, example = "1")

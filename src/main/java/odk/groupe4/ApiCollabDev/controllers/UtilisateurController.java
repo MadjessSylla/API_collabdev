@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import odk.groupe4.ApiCollabDev.dto.ContributeurDto;
+import odk.groupe4.ApiCollabDev.dto.ContributeurRequestDto;
 import odk.groupe4.ApiCollabDev.dto.LoginResponseDto;
 import odk.groupe4.ApiCollabDev.dto.UtilisateurDto;
 import odk.groupe4.ApiCollabDev.dto.UtilisateurResponseDto;
@@ -31,7 +31,7 @@ public class UtilisateurController {
         this.utilisateurService = utilisateurService;
     }
 
-   /* @Operation(
+    @Operation(
         summary = "Inscription d'un nouveau contributeur",
         description = "Permet à un nouvel utilisateur de s'inscrire en tant que contributeur sur la plateforme"
     )
@@ -60,16 +60,17 @@ public class UtilisateurController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @PostMapping("/register")
+    // Inscription d'un utilisateur
     public ResponseEntity<UtilisateurResponseDto> inscrire(
             @Parameter(description = "Données d'inscription du contributeur", required = true)
-            @Valid @RequestBody ContributeurDto dto) {
+            @Valid @RequestBody ContributeurRequestDto dto) {
         UtilisateurResponseDto utilisateur = utilisateurService.inscrire(dto);
         return new ResponseEntity<>(utilisateur, HttpStatus.CREATED);
     }
 
-    /* @Operation(
+    @Operation(
         summary = "Connexion d'un utilisateur",
         description = "Permet à un utilisateur existant de se connecter à la plateforme"
     )
@@ -98,8 +99,9 @@ public class UtilisateurController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @PostMapping("/login")
+    // Connexion d'un utilisateur
     public ResponseEntity<LoginResponseDto> connecter(
             @Parameter(description = "Identifiants de connexion", required = true)
             @Valid @RequestBody UtilisateurDto utilisateurDto) {
@@ -107,21 +109,22 @@ public class UtilisateurController {
         return ResponseEntity.ok(response);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Déconnexion d'un utilisateur",
         description = "Permet à un utilisateur connecté de se déconnecter de la plateforme"
     )
     @ApiResponse(
         responseCode = "200", 
         description = "Déconnexion réussie"
-    )*/
+    )
     @PostMapping("/logout")
+    // Déconnexion d'un utilisateur
     public ResponseEntity<String> deconnecter() {
         // Logique de déconnexion (invalidation de token, etc.)
         return ResponseEntity.ok("Déconnexion réussie");
     }
 
-    /* @Operation(
+    @Operation(
         summary = "Récupérer le profil utilisateur",
         description = "Retourne les informations du profil de l'utilisateur connecté"
     )
@@ -142,8 +145,10 @@ public class UtilisateurController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
+    // Récupérer le profil de l'utilisateur connecté
     @GetMapping("/profile/{id}")
+    // Récupérer le profil d'un utilisateur par son ID
     public ResponseEntity<UtilisateurResponseDto> getProfile(
             @Parameter(description = "ID de l'utilisateur", required = true, example = "1")
             @PathVariable int id) {
@@ -151,7 +156,7 @@ public class UtilisateurController {
         return ResponseEntity.ok(utilisateur);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Changer le mot de passe",
         description = "Permet à un utilisateur de changer son mot de passe"
     )
@@ -176,8 +181,10 @@ public class UtilisateurController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
+    // Changer le mot de passe de l'utilisateur
     @PatchMapping("/{id}/change-password")
+    // Changer le mot de passe d'un utilisateur par son ID
     public ResponseEntity<String> changerMotDePasse(
             @Parameter(description = "ID de l'utilisateur", required = true, example = "1")
             @PathVariable int id,
