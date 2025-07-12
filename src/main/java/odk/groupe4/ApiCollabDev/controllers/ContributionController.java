@@ -33,7 +33,7 @@ public class ContributionController {
         this.contributionService = contributionService;
     }
 
-   /* @Operation(
+   @Operation(
         summary = "Récupérer toutes les contributions",
         description = "Retourne la liste complète de toutes les contributions avec possibilité de filtrage par statut"
     )
@@ -46,8 +46,9 @@ public class ContributionController {
                 schema = @Schema(implementation = ContributionDto.class)
             )
         )
-    })*/
+    })
     @GetMapping
+   // Afficher toutes les contributions
     public ResponseEntity<List<ContributionDto>> getAllContributions(
             @Parameter(description = "Filtrer par statut de contribution", required = false)
             @RequestParam(required = false) ContributionStatus status) {
@@ -55,7 +56,7 @@ public class ContributionController {
         return ResponseEntity.ok(contributions);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Récupérer une contribution par ID",
         description = "Retourne les détails d'une contribution spécifique"
     )
@@ -76,8 +77,9 @@ public class ContributionController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @GetMapping("/{id}")
+    // Afficher une contribution par ID
     public ResponseEntity<ContributionResponseDto> getContributionById(
             @Parameter(description = "ID unique de la contribution", required = true, example = "1")
             @PathVariable int id) {
@@ -85,7 +87,7 @@ public class ContributionController {
         return ResponseEntity.ok(contribution);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Soumettre une nouvelle contribution",
         description = "Permet à un participant de soumettre une contribution pour une fonctionnalité spécifique"
     )
@@ -114,8 +116,9 @@ public class ContributionController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @PostMapping("/fonctionnalite/{idFonctionnalite}/participant/{idParticipant}")
+    // Soumettre une contribution
     public ResponseEntity<ContributionResponseDto> soumettreContribution(
             @Parameter(description = "ID de la fonctionnalité", required = true, example = "1")
             @PathVariable int idFonctionnalite,
@@ -127,7 +130,7 @@ public class ContributionController {
         return new ResponseEntity<>(contribution, HttpStatus.CREATED);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Valider ou rejeter une contribution",
         description = "Permet à un gestionnaire de valider ou rejeter une contribution soumise"
     )
@@ -156,8 +159,9 @@ public class ContributionController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
     @PutMapping("/{id}/status")
+    // Mettre à jour le statut d'une contribution
     public ResponseEntity<ContributionResponseDto> updateContributionStatus(
             @Parameter(description = "ID de la contribution", required = true, example = "1")
             @PathVariable int id,
@@ -165,11 +169,11 @@ public class ContributionController {
             @RequestParam ContributionStatus status,
             @Parameter(description = "ID du gestionnaire", required = true, example = "1")
             @RequestParam int gestionnaireId) {
-        ContributionResponseDto contribution = contributionService.MiseAJourStatutContribution(id, status, gestionnaireId);
+        ContributionResponseDto contribution = contributionService.validateOrRejetContribution(id, status, gestionnaireId);
         return ResponseEntity.ok(contribution);
     }
 
-    /*@Operation(
+    @Operation(
         summary = "Récupérer les contributions d'un participant",
         description = "Retourne toutes les contributions soumises par un participant spécifique"
     )
@@ -190,7 +194,8 @@ public class ContributionController {
                 schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
             )
         )
-    })*/
+    })
+    // Afficher les contributions d'un participant
     @GetMapping("/participant/{participantId}")
     public ResponseEntity<List<ContributionDto>> getContributionsByParticipant(
             @Parameter(description = "ID du participant", required = true, example = "1")
@@ -199,7 +204,7 @@ public class ContributionController {
         return ResponseEntity.ok(contributions);
     }
 
-   /* @Operation(
+   @Operation(
         summary = "Récupérer les contributions d'une fonctionnalité",
         description = "Retourne toutes les contributions liées à une fonctionnalité spécifique"
     )
@@ -210,8 +215,9 @@ public class ContributionController {
             mediaType = "application/json",
             schema = @Schema(implementation = ContributionDto.class)
         )
-    )*/
+    )
     @GetMapping("/fonctionnalite/{fonctionnaliteId}")
+   // Afficher les contributions d'une fonctionnalité
     public ResponseEntity<List<ContributionDto>> getContributionsByFonctionnalite(
             @Parameter(description = "ID de la fonctionnalité", required = true, example = "1")
             @PathVariable int fonctionnaliteId) {
