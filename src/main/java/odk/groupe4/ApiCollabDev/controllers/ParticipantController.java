@@ -22,7 +22,7 @@ import java.util.List;
 @RequestMapping("/api/v1/participants")
 @Tag(name = "Participants", description = "API de gestion des participants aux projets")
 public class ParticipantController {
-    
+
     private final ParticipantService participantService;
 
     @Autowired
@@ -31,37 +31,36 @@ public class ParticipantController {
     }
 
     @Operation(
-        summary = "Envoyer une demande de participation",
-        description = "Permet à un contributeur d'envoyer une demande pour participer à un projet"
+            summary = "Envoyer une demande de participation",
+            description = "Permet à un contributeur d'envoyer une demande pour participer à un projet"
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "201", 
-            description = "Demande de participation envoyée avec succès",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ParticipantResponseDto.class)
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Demande de participation envoyée avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ParticipantResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Données de participation invalides ou demande déjà envoyée",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Projet ou contributeur non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
             )
-        ),
-        @ApiResponse(
-            responseCode = "400", 
-            description = "Données de participation invalides ou demande déjà envoyée",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Projet ou contributeur non trouvé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        )
     })
     @PostMapping("/projet/{idProjet}/contributeur/{idContributeur}")
-    // Envoie une demande de participation à un projet
     public ResponseEntity<ParticipantResponseDto> envoyerDemandeParticipation(
             @Parameter(description = "ID du projet", required = true, example = "1")
             @PathVariable int idProjet,
@@ -74,37 +73,36 @@ public class ParticipantController {
     }
 
     @Operation(
-        summary = "Accepter une demande de participation",
-        description = "Permet d'accepter la demande de participation d'un contributeur à un projet"
+            summary = "Accepter une demande de participation",
+            description = "Permet d'accepter la demande de participation d'un contributeur à un projet"
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Demande acceptée avec succès",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ParticipantResponseDto.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Demande acceptée avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ParticipantResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Participant non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "La demande a déjà été traitée",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
             )
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Participant non trouvé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400", 
-            description = "La demande a déjà été traitée",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        )
     })
     @PatchMapping("/{id}/accept")
-    // Accepte une demande de participation
     public ResponseEntity<ParticipantResponseDto> accepterDemande(
             @Parameter(description = "ID du participant", required = true, example = "1")
             @PathVariable int id) {
@@ -113,36 +111,35 @@ public class ParticipantController {
     }
 
     @Operation(
-        summary = "Refuser une demande de participation",
-        description = "Permet de refuser la demande de participation d'un contributeur à un projet"
+            summary = "Refuser une demande de participation",
+            description = "Permet de refuser la demande de participation d'un contributeur à un projet"
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Demande refusée avec succès",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ParticipantResponseDto.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Demande refusée avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ParticipantResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Participant non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "La demande a déjà été traitée",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
             )
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Participant non trouvé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400", 
-            description = "La demande a déjà été traitée",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        )
     })
-    // Refuse une demande de participation
     @PatchMapping("/{id}/reject")
     public ResponseEntity<ParticipantResponseDto> refuserDemande(
             @Parameter(description = "ID du participant", required = true, example = "1")
@@ -152,37 +149,36 @@ public class ParticipantController {
     }
 
     @Operation(
-        summary = "Débloquer l'accès à un projet",
-        description = "Permet à un participant d'utiliser ses coins pour débloquer l'accès à un projet selon son niveau de complexité"
+            summary = "Débloquer l'accès à un projet",
+            description = "Permet à un participant d'utiliser ses coins pour débloquer l'accès à un projet selon son niveau de complexité"
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Accès débloqué avec succès",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ParticipantResponseDto.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Accès débloqué avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ParticipantResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Participant non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Solde insuffisant, accès déjà débloqué ou demande non acceptée",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
             )
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Participant non trouvé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400", 
-            description = "Solde insuffisant, accès déjà débloqué ou demande non acceptée",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        )
     })
     @PatchMapping("/{id}/unlock")
-    // Débloque l'accès d'un participant à un projet
     public ResponseEntity<ParticipantResponseDto> debloquerAcces(
             @Parameter(description = "ID du participant", required = true, example = "1")
             @PathVariable int id) {
@@ -191,37 +187,36 @@ public class ParticipantController {
     }
 
     @Operation(
-        summary = "Réserver une fonctionnalité",
-        description = "Permet à un participant de réserver une fonctionnalité disponible d'un projet"
+            summary = "Réserver une fonctionnalité",
+            description = "Permet à un participant de réserver une fonctionnalité disponible d'un projet"
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Fonctionnalité réservée avec succès",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = FonctionnaliteDto.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Fonctionnalité réservée avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = FonctionnaliteDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Participant ou fonctionnalité non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Fonctionnalité déjà réservée ou participant a déjà une fonctionnalité",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
             )
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Participant ou fonctionnalité non trouvé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400", 
-            description = "Fonctionnalité déjà réservée ou participant a déjà une fonctionnalité",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        )
     })
     @PatchMapping("/{idParticipant}/fonctionnalite/{idFonctionnalite}/reserve")
-    // Réserve une fonctionnalité pour un participant
     public ResponseEntity<FonctionnaliteDto> reserverFonctionnalite(
             @Parameter(description = "ID du participant", required = true, example = "1")
             @PathVariable int idParticipant,
@@ -232,19 +227,18 @@ public class ParticipantController {
     }
 
     @Operation(
-        summary = "Attribuer une tâche à un participant",
-        description = "Permet d'attribuer une fonctionnalité spécifique à un participant (action de gestion)"
+            summary = "Attribuer une tâche à un participant",
+            description = "Permet d'attribuer une fonctionnalité spécifique à un participant (action de gestion)"
     )
     @ApiResponse(
-        responseCode = "200", 
-        description = "Tâche attribuée avec succès",
-        content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = FonctionnaliteDto.class)
-        )
+            responseCode = "200",
+            description = "Tâche attribuée avec succès",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = FonctionnaliteDto.class)
+            )
     )
     @PatchMapping("/{idParticipant}/fonctionnalite/{idFonctionnalite}/assign")
-    // Attribue une tâche à un participant
     public ResponseEntity<FonctionnaliteDto> attribuerTache(
             @Parameter(description = "ID du participant", required = true, example = "1")
             @PathVariable int idParticipant,
@@ -255,29 +249,28 @@ public class ParticipantController {
     }
 
     @Operation(
-        summary = "Récupérer l'historique d'acquisition d'un participant",
-        description = "Retourne l'historique des contributions validées et des badges acquis par un participant"
+            summary = "Récupérer l'historique d'acquisition d'un participant",
+            description = "Retourne l'historique des contributions validées et des badges acquis par un participant"
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Historique récupéré avec succès",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = HistAcquisitionDto.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Historique récupéré avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = HistAcquisitionDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Participant non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
             )
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Participant non trouvé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        )
     })
     @GetMapping("/{id}/historique")
-    // Affiche l'historique d'acquisition d'un participant
     public ResponseEntity<HistAcquisitionDto> getHistoriqueAcquisition(
             @Parameter(description = "ID du participant", required = true, example = "1")
             @PathVariable int id) {
@@ -286,18 +279,17 @@ public class ParticipantController {
     }
 
     @Operation(
-        summary = "Récupérer les contributions d'un participant",
-        description = "Retourne toutes les contributions soumises par un participant spécifique"
+            summary = "Récupérer les contributions d'un participant",
+            description = "Retourne toutes les contributions soumises par un participant spécifique"
     )
     @ApiResponse(
-        responseCode = "200", 
-        description = "Contributions récupérées avec succès",
-        content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ContributionDto.class)
-        )
+            responseCode = "200",
+            description = "Contributions récupérées avec succès",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ContributionDto.class)
+            )
     )
-    // Affiche les contributions d'un participant
     @GetMapping("/{id}/contributions")
     public ResponseEntity<List<ContributionDto>> getContributionsParticipant(
             @Parameter(description = "ID du participant", required = true, example = "1")
@@ -307,23 +299,34 @@ public class ParticipantController {
     }
 
     @Operation(
-        summary = "Récupérer tous les participants d'un projet",
-        description = "Retourne la liste de tous les participants d'un projet spécifique"
+            summary = "Récupérer tous les participants d'un projet",
+            description = "Retourne la liste de tous les participants d'un projet spécifique"
     )
     @ApiResponse(
-        responseCode = "200", 
-        description = "Participants récupérés avec succès",
-        content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ParticipantResponseDto.class)
-        )
+            responseCode = "200",
+            description = "Participants récupérés avec succès",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ParticipantResponseDto.class)
+            )
     )
-    // Affiche tous les participants d'un projet
     @GetMapping("/projet/{idProjet}")
     public ResponseEntity<List<ParticipantResponseDto>> getParticipantsByProjet(
             @Parameter(description = "ID du projet", required = true, example = "1")
             @PathVariable int idProjet) {
         List<ParticipantResponseDto> participants = participantService.getParticipantsByProjet(idProjet);
         return ResponseEntity.ok(participants);
+    }
+
+    @Operation(
+            summary = "Récupérer la progression des badges d'un participant",
+            description = "Retourne tous les badges disponibles et indique lesquels ont été atteints par le participant"
+    )
+    @GetMapping("/{id}/badges/progression")
+    public ResponseEntity<List<BadgeSeuilDto>> getProgressionBadges(
+            @Parameter(description = "ID du participant", required = true, example = "1")
+            @PathVariable int id) {
+        List<BadgeSeuilDto> progression = participantService.getProgressionBadges(id);
+        return ResponseEntity.ok(progression);
     }
 }

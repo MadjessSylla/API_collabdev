@@ -26,13 +26,15 @@ public class Questionnaire {
     @OneToMany(mappedBy = "questionnaire", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<QuestionsQuestionnaire> questions = new HashSet<>(); // Liste des questions du questionnaire
 
-    // Un quiz est crée par un contributeur (Gestionnaire de projet)
     @ManyToOne
     @JoinColumn(name = "id_contributeur")
-    private Contributeur contributeur;
+    private Contributeur contributeur; // Identifiant de l'utilisateur qui a créé le questionnaire
 
-    // Un quiz est associé à un projet
     @ManyToOne
     @JoinColumn(name = "id_projet")
-    private Projet projet;
+    private Projet projet; // Identifiant du projet auquel le questionnaire est associé
+
+    @ManyToOne
+    @JoinColumn(name = "id_template")
+    private TemplateProjet templateProjet; // Template auquel le questionnaire est associé
 }
