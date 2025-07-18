@@ -5,11 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import odk.groupe4.ApiCollabDev.models.enums.Profil;
-import odk.groupe4.ApiCollabDev.models.enums.StatusParticipant;
-import odk.groupe4.ApiCollabDev.models.interfaces.NotificationObserver;
+import odk.groupe4.ApiCollabDev.models.enums.ParticipantProfil;
+import odk.groupe4.ApiCollabDev.models.enums.ParticipantStatus;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity @Getter  @Setter @NoArgsConstructor @AllArgsConstructor
@@ -21,30 +22,40 @@ public class Participant {
     private int id;
 
     @Enumerated(EnumType.STRING)
-    private Profil profil; // Profil du participant (Porteur de projet, Développeur, Designer, Gestionnaire, Testeur, etc.)
+    private ParticipantProfil profil; // Profil du participant (Porteur de projet, Développeur, Designer, Gestionnaire, Testeur, etc.)
 
     @Enumerated(EnumType.STRING)
-    private StatusParticipant statut; // EN_ATTENTE, ACCEPTE, REFUSE
+    private ParticipantStatus statut; // EN_ATTENTE, ACCEPTE, REFUSE
 
-    // Clé étrangère de la table Projet
+    // Le score du participant pour le quiz
+    private String scoreQuiz;
+
+    // Indique si le participant a débloqué le projet
+    private boolean estDebloque;
+
+    // Le projet auquel le participant est associé
     @ManyToOne
     @JoinColumn(name = "id_projet")
     private Projet projet;
 
-    // Clé étrangère de la table Contributeur
+    // Le contributeur associé à ce participant
     @ManyToOne
     @JoinColumn(name = "id_contributeur")
     private Contributeur contributeur;
 
-    // Liste des commentaires associés à ce participant
+    // Un participant peut être l'auteur de plusieurs commentaires
     @OneToMany(mappedBy = "auteur", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Commentaire> commentaires = new HashSet<>();
 
-    // Les badges reçus par le participant
+    // Un participant peut recevoir plusieurs badges
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Badge_participant> badgeParticipants = new HashSet<>();
+    private Set<BadgeParticipant> badgeParticipants = new HashSet<>();
 
+    // Un participant peut être assigné à plusieurs fonctionnalités
     @OneToMany(mappedBy = "participant")
-    private Set<Fonctionnalite> fonctionnalitesTraite = new HashSet<>();
+    private Set<Fonctionnalite> fonctionnalite;
 
+    // Un participant peut avoir plusieurs contributions
+    @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contribution> contributions = new ArrayList<>();
 }

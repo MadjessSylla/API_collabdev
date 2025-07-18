@@ -1,15 +1,14 @@
 package odk.groupe4.ApiCollabDev.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import odk.groupe4.ApiCollabDev.models.enums.StatusContribution;
+import odk.groupe4.ApiCollabDev.models.enums.ContributionStatus;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Contribution {
@@ -17,25 +16,27 @@ public class Contribution {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_contribution")
     private int id;
-    private String lienUrl; // Lien vers la contribution (par exemple, un lien vers un dépôt GitHub, une maquette figma, un document, etc.)
-    private String fileUrl; // Lien vers un fichier de contribution (par exemple, un fichier de code, une image, un document, etc.) au format binaire
-    @Enumerated(EnumType.STRING)
-    private StatusContribution status; // Statut de la contribution (En attente, Acceptée, Rejetée)
-    private LocalDate dateSoumission; // Date de soumission de la contribution.
 
-    // La fonctionnalité à laquelle la contribution est associée.
-    // Une contribution est liée à une seule fonctionnalité et une fonctionnalité est traitée par une seule contribution.
+    private String lienUrl;
+    private String fileUrl;
+
+    @Enumerated(EnumType.STRING)
+    private ContributionStatus status;
+
+    private LocalDate dateSoumission;
+
     @OneToOne
     @JoinColumn(name = "id_fonctionnalite")
+    @JsonIgnore
     private Fonctionnalite fonctionnalite;
 
-    // Un participant peut soumettre plusieurs contributions, mais une contribution appartient à un seul participant.
     @ManyToOne
     @JoinColumn(name = "id_participant")
+    @JsonIgnore
     private Participant participant;
 
-    // Un participant Gestionnaire peut valider plusieurs contributions, mais une contribution est validée par un seul participant Gestionnaire.
     @ManyToOne
-    @JoinColumn(name = "id_participant_gestionnaire")
-    private Participant participantGestionnaire;
+    @JoinColumn(name = "id_gestionnaire")
+    @JsonIgnore
+    private Participant gestionnaire;
 }

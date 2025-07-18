@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation Technique - API CollabDev</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #1e40af;
+            font-size: 2.5em;
+            margin: 0;
+        }
+        
+        .header .subtitle {
+            color: #64748b;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        
+        .toc {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+        }
+        
+        .toc h2 {
+            color: #1e40af;
+            margin-top: 0;
+        }
+        
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .toc li {
+            padding: 5px 0;
+            border-bottom: 1px dotted #cbd5e1;
+        }
+        
+        .toc a {
+            text-decoration: none;
+            color: #475569;
+        }
+        
+        .toc a:hover {
+            color: #2563eb;
+        }
+        
+        h1, h2, h3, h4 {
+            color: #1e40af;
+            page-break-after: avoid;
+        }
+        
+        h1 {
+            font-size: 2em;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        
+        h2 {
+            font-size: 1.5em;
+            margin-top: 30px;
+            color: #1d4ed8;
+        }
+        
+        h3 {
+            font-size: 1.3em;
+            color: #2563eb;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            page-break-inside: avoid;
+        }
+        
+        .workflow-diagram {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+        }
+        
+        .architecture-diagram {
+            background: #fef7ff;
+            border: 1px solid #d8b4fe;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+        
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background: #1e40af;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        
+        .http-method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8em;
+            margin-right: 10px;
+        }
+        
+        .get { background: #10b981; color: white; }
+        .post { background: #3b82f6; color: white; }
+        .put { background: #f59e0b; color: white; }
+        .patch { background: #8b5cf6; color: white; }
+        .delete { background: #ef4444; color: white; }
+        
+        .highlight-box {
+            background: #dbeafe;
+            border-left: 4px solid #2563eb;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 0.9em;
+        }
+        
+        @media print {
+            body {
+                font-size: 12pt;
+            }
+            
+            .no-print {
+                display: none;
+            }
+            
+            h1, h2, h3 {
+                page-break-after: avoid;
+            }
+            
+            table {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Documentation Technique</h1>
+        <div class="subtitle">API CollabDev - Plateforme Collaborative de Gestion de Projets</div>
+        <div style="margin-top: 20px; color: #64748b;">
+            Version 1.0 | Spring Boot 3.x | API REST
+        </div>
+    </div>
+
+    <div class="toc">
+        <h2><span class="emoji">📋</span>Table des Matières</h2>
+        <ul>
+            <li><a href="#vue-densemble">1. Vue d'ensemble de l'application</a></li>
+            <li><a href="#architecture-technique">2. Architecture technique</a></li>
+            <li><a href="#workflow-complet">3. Workflow complet de l'application</a></li>
+            <li><a href="#fonctionnalites-principales">4. Fonctionnalités principales</a></li>
+            <li><a href="#guide-dutilisation-des-api">5. Guide d'utilisation des API REST</a></li>
+            <li><a href="#scenarios-dusage">6. Scénarios d'usage typiques</a></li>
+            <li><a href="#reference-des-endpoints">7. Référence complète des endpoints</a></li>
+            <li><a href="#configuration">8. Configuration et initialisation</a></li>
+        </ul>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="section" id="vue-densemble">
+        <h1><span class="emoji">🎯</span>Vue d'ensemble de l'application</h1>
+        
+        <p><strong>API CollabDev</strong> est une plateforme collaborative permettant la gestion de projets participatifs avec un système de gamification basé sur des coins virtuels et des badges de récompense.</p>
+
+        <h2>Acteurs principaux</h2>
+        <ul>
+            <li><strong>Contributeurs</strong> : Développeurs, designers qui participent aux projets</li>
+            <li><strong>Porteurs de projet</strong> : Initiateurs d'idées de projets</li>
+            <li><strong>Gestionnaires</strong> : Responsables de la gestion opérationnelle des projets</li>
+            <li><strong>Administrateurs</strong> : Gestionnaires de la plateforme</li>
+        </ul>
+
+        <h2>Concepts clés</h2>
+        <div class="highlight-box">
+            <ul>
+                <li><strong>Système de coins</strong> : Monnaie virtuelle pour débloquer l'accès aux projets</li>
+                <li><strong>Badges</strong> : Récompenses basées sur les contributions validées</li>
+                <li><strong>Quiz d'évaluation</strong> : Tests de compétences pour la sélection des participants</li>
+                <li><strong>Templates de projets</strong> : Modèles prédéfinis pour faciliter la création</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="section" id="architecture-technique">
+        <h1><span class="emoji">🏗️</span>Architecture technique</h1>
+
+        <h2>Stack technologique</h2>
+        <ul>
+            <li><strong>Framework</strong> : Spring Boot 3.x</li>
+            <li><strong>Base de données</strong> : JPA/Hibernate</li>
+            <li><strong>Documentation</strong> : OpenAPI 3 (Swagger)</li>
+            <li><strong>Validation</strong> : Bean Validation (JSR-303)</li>
+            <li><strong>Architecture</strong> : REST API avec pattern MVC</li>
+        </ul>
+
+        <h2>Structure des couches</h2>
+        <div class="architecture-diagram">
+            <pre>
+┌─────────────────────────────────────┐
+│           Controllers               │ ← Couche de présentation (REST)
+├─────────────────────────────────────┤
+│             Services                │ ← Logique métier
+├─────────────────────────────────────┤
+│         DAO/Repository              │ ← Accès aux données
+├─────────────────────────────────────┤
+│            Entities                 │ ← Modèle de données
+├─────────────────────────────────────┤
+│           Database                  │ ← Persistance
+└─────────────────────────────────────┘
+            </pre>
+        </div>
+
+        <h2>Packages principaux</h2>
+        <table>
+            <tr>
+                <th>Package</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><code>controllers/</code></td>
+                <td>Endpoints REST</td>
+            </tr>
+            <tr>
+                <td><code>services/</code></td>
+                <td>Logique métier</td>
+            </tr>
+            <tr>
+                <td><code>dao/</code></td>
+                <td>Interfaces d'accès aux données</td>
+            </tr>
+            <tr>
+                <td><code>models/</code></td>
+                <td>Entités JPA et énumérations</td>
+            </tr>
+            <tr>
+                <td><code>dto/</code></td>
+                <td>Objets de transfert de données</td>
+            </tr>
+            <tr>
+                <td><code>config/</code></td>
+                <td>Configuration (OpenAPI, initialisation)</td>
+            </tr>
+            <tr>
+                <td><code>exception/</code></td>
+                <td>Gestion globale des erreurs</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="section" id="workflow-complet">
+        <h1><span class="emoji">🔄</span>Workflow complet de l'application</h1>
+
+        <h2>1. Traitement d'une requête HTTP</h2>
+        <div class="workflow-diagram">
+            <pre>
+Requête HTTP → Controller → Service → DAO → Database
+                    ↓
+Response DTO ← Mapping ← Business Logic ← Entity
+            </pre>
+        </div>
+
+        <h3>Séquence détaillée :</h3>
+        <ol>
+            <li><strong>Réception</strong> : Le contrôleur reçoit la requête HTTP</li>
+            <li><strong>Validation</strong> : Validation des données d'entrée (Bean Validation)</li>
+            <li><strong>Transformation</strong> : Conversion DTO → Entité métier</li>
+            <li><strong>Traitement</strong> : Exécution de la logique métier dans le service</li>
+            <li><strong>Persistance</strong> : Interaction avec la base via les DAO</li>
+            <li><strong>Notification</strong> : Envoi de notifications si nécessaire</li>
+            <li><strong>Réponse</strong> : Transformation Entité → DTO de réponse</li>
+            <li><strong>Retour</strong> : Envoi de la réponse HTTP avec le bon code de statut</li>
+        </ol>
+
+        <h2>2. Gestion des erreurs</h2>
+        <div class="workflow-diagram">
+            <pre>
+Exception → GlobalExceptionHandler → ErrorResponse → HTTP Status
+            </pre>
+        </div>
+
+        <h2>3. Système de notifications</h2>
+        <div class="workflow-diagram">
+            <pre>
+Action métier → NotificationService → Création notification → Diffusion
+            </pre>
+        </div>
+    </div>
+
+    <div class="section" id="fonctionnalites-principales">
+        <h1><span class="emoji">⚙️</span>Fonctionnalités principales</h1>
+
+        <h2><span class="emoji">🔐</span>Authentification et gestion des utilisateurs</h2>
+        <ul>
+            <li><strong>Inscription</strong> avec attribution automatique de 100 coins et 10 points d'expérience</li>
+            <li><strong>Connexion</strong> avec validation des identifiants</li>
+            <li><strong>Gestion de profil</strong> et changement de mot de passe</li>
+            <li><strong>Types d'utilisateurs</strong> : Contributeur, Administrateur</li>
+        </ul>
+
+        <h2><span class="emoji">📋</span>Gestion des projets</h2>
+        <ul>
+            <li><strong>Proposition de projets</strong> par les contributeurs</li>
+            <li><strong>Validation administrative</strong> avec workflow d'approbation</li>
+            <li><strong>Filtrage</strong> par domaine (WEB, MOBILE, DESIGN) et secteur (SANTE, EDUCATION, etc.)</li>
+            <li><strong>Gestion du cycle de vie</strong> : EN_ATTENTE → OUVERT → EN_COURS → TERMINER</li>
+            <li><strong>Attribution de niveaux</strong> de complexité (DEBUTANT, INTERMEDIAIRE, AVANCE, EXPERT)</li>
+        </ul>
+
+        <h2><span class="emoji">👥</span>Système de participation</h2>
+        <ul>
+            <li><strong>Demandes de participation</strong> avec quiz d'évaluation</li>
+            <li><strong>Validation par gestionnaires</strong> avec scoring automatique</li>
+            <li><strong>Déverrouillage payant</strong> selon le niveau du projet</li>
+            <li><strong>Gestion des rôles</strong> : DEVELOPPEUR, DESIGNER, GESTIONNAIRE</li>
+        </ul>
+
+        <h2><span class="emoji">🎯</span>Gestion des tâches et contributions</h2>
+        <ul>
+            <li><strong>Définition de fonctionnalités</strong> par les gestionnaires</li>
+            <li><strong>Réservation de tâches</strong> par les contributeurs</li>
+            <li><strong>Soumission de contributions</strong> (liens ou fichiers)</li>
+            <li><strong>Validation/rejet</strong> par les gestionnaires</li>
+            <li><strong>Suivi des statuts</strong> : A_FAIRE → EN_COURS → TERMINE</li>
+        </ul>
+
+        <h2><span class="emoji">🏆</span>Système de gamification</h2>
+        <div class="success-box">
+            <ul>
+                <li><strong>Coins virtuels</strong> pour débloquer l'accès aux projets</li>
+                <li><strong>Badges de récompense</strong> : DEBUTANT, BRONZE, ARGENT, OR, PLATINE</li>
+                <li><strong>Attribution automatique</strong> basée sur les contributions validées</li>
+                <li><strong>Paramétrage flexible</strong> des récompenses par les administrateurs</li>
+            </ul>
+        </div>
+
+        <h2><span class="emoji">📝</span>Système de quiz et évaluation</h2>
+        <ul>
+            <li><strong>Création de questionnaires</strong> pour projets ou templates</li>
+            <li><strong>Évaluation automatique</strong> avec scoring</li>
+            <li><strong>Détermination du niveau</strong> de compétence</li>
+            <li><strong>Commentaires personnalisés</strong> selon les performances</li>
+        </ul>
+
+        <h2><span class="emoji">🔔</span>Notifications</h2>
+        <ul>
+            <li><strong>Notifications push</strong> pour les événements importants</li>
+            <li><strong>Système d'observateur</strong> pour la diffusion</li>
+            <li><strong>Historique des notifications</strong> par utilisateur</li>
+        </ul>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="section" id="guide-dutilisation-des-api">
+        <h1><span class="emoji">📖</span>Guide d'utilisation des API REST</h1>
+
+        <h2>Scénario 1 : Inscription et première connexion</h2>
+
+        <h3>Étape 1 : Inscription d'un nouveau contributeur</h3>
+        <div class="code-block">
+POST /api/v1/auth/register
+Content-Type: application/json
+
+{
+  "nom": "Dupont",
+  "prenom": "Jean",
+  "telephone": "0123456789",
+  "email": "jean.dupont@email.com",
+  "password": "motdepasse123"
+}
+        </div>
+
+        <h3>Étape 2 : Connexion</h3>
+        <div class="code-block">
+POST /api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "jean.dupont@email.com",
+  "password": "motdepasse123"
+}
+        </div>
+
+        <h2>Scénario 2 : Création et validation d'un projet</h2>
+
+        <h3>Étape 1 : Proposer un nouveau projet</h3>
+        <div class="code-block">
+POST /api/v1/projets/contributeur/1
+Content-Type: application/json
+
+{
+  "titre": "Application de gestion de tâches",
+  "description": "Une application web pour gérer les tâches quotidiennes",
+  "domaine": "WEB",
+  "secteur": "PRODUCTIVITE",
+  "urlCahierDeCharge": "https://example.com/cahier-charges.pdf"
+}
+        </div>
+
+        <h3>Étape 2 : Validation par un administrateur</h3>
+        <div class="code-block">
+PATCH /api/v1/projets/1/validate/admin/1
+        </div>
+
+        <h3>Étape 3 : Attribution d'un niveau de complexité</h3>
+        <div class="code-block">
+PATCH /api/v1/projets/1/niveau/admin/1?niveau=INTERMEDIAIRE
+        </div>
+
+        <h2>Scénario 3 : Participation à un projet</h2>
+
+        <h3>Étape 1 : Consulter les projets ouverts</h3>
+        <div class="code-block">
+GET /api/v1/projets/ouverts?domaine=WEB&secteur=PRODUCTIVITE
+        </div>
+
+        <h3>Étape 2 : Envoyer une demande de participation</h3>
+        <div class="code-block">
+POST /api/v1/participants/projet/1/contributeur/2
+Content-Type: application/json
+
+{
+  "profil": "DEVELOPPEUR",
+  "scoreQuiz": 85
+}
+        </div>
+
+        <h3>Étape 3 : Acceptation par le gestionnaire</h3>
+        <div class="code-block">
+PATCH /api/v1/participants/1/accept
+        </div>
+
+        <h3>Étape 4 : Déverrouillage de l'accès</h3>
+        <div class="code-block">
+PATCH /api/v1/participants/1/unlock
+        </div>
+
+        <h2>Scénario 4 : Contribution et validation</h2>
+
+        <h3>Étape 1 : Réserver une fonctionnalité</h3>
+        <div class="code-block">
+PATCH /api/v1/participants/1/fonctionnalite/1/reserve
+        </div>
+
+        <h3>Étape 2 : Soumettre une contribution</h3>
+        <div class="code-block">
+POST /api/v1/contributions/fonctionnalite/1/participant/1
+Content-Type: application/json
+
+{
+  "lienUrl": "https://github.com/user/repo",
+  "fileUrl": "https://example.com/contribution.zip"
+}
+        </div>
+
+        <h3>Étape 3 : Validation par le gestionnaire</h3>
+        <div class="code-block">
+PUT /api/v1/contributions/1/status?status=VALIDE&gestionnaireId=1
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="section" id="scenarios-dusage">
+        <h1><span class="emoji">🎭</span>Scénarios d'usage typiques</h1>
+
+        <h2>Scénario A : Porteur de projet (Idéateur uniquement)</h2>
+        <ol>
+            <li><strong>Inscription</strong> et connexion</li>
+            <li><strong>Proposition</strong> d'un projet avec cahier des charges</li>
+            <li><strong>Attente</strong> de validation administrative (48h max)</li>
+            <li><strong>Création</strong> d'un quiz pour sélectionner un gestionnaire</li>
+            <li><strong>Sélection</strong> d'un gestionnaire après évaluation</li>
+            <li><strong>Suivi</strong> de l'avancement du projet</li>
+        </ol>
+
+        <h2>Scénario B : Porteur de projet et Gestionnaire</h2>
+        <ol>
+            <li><strong>Inscription</strong> et connexion</li>
+            <li><strong>Proposition</strong> d'un projet en tant que gestionnaire</li>
+            <li><strong>Attente</strong> de validation administrative</li>
+            <li><strong>Définition</strong> des fonctionnalités du projet</li>
+            <li><strong>Création</strong> de quiz pour les contributeurs</li>
+            <li><strong>Gestion</strong> des demandes de participation</li>
+            <li><strong>Attribution</strong> ou réservation de tâches</li>
+            <li><strong>Validation</strong> des contributions</li>
+        </ol>
+
+        <h2>Scénario C : Contributeur participant</h2>
+        <ol>
+            <li><strong>Inscription</strong> et connexion (100 coins offerts)</li>
+            <li><strong>Consultation</strong> des projets ouverts</li>
+            <li><strong>Passage</strong> du quiz d'évaluation</li>
+            <li><strong>Attente</strong> de validation (48h max)</li>
+            <li><strong>Déverrouillage</strong> de l'accès (coût en coins)</li>
+            <li><strong>Réservation</strong> d'une tâche</li>
+            <li><strong>Développement</strong> et soumission</li>
+            <li><strong>Réception</strong> de récompenses (coins + badges)</li>
+        </ol>
+
+        <h2>Scénario D : Administration de la plateforme</h2>
+        <ol>
+            <li><strong>Connexion</strong> administrateur</li>
+            <li><strong>Validation</strong> des projets proposés</li>
+            <li><strong>Attribution</strong> des niveaux de complexité</li>
+            <li><strong>Gestion</strong> des paramètres de coins</li>
+            <li><strong>Création</strong> de badges personnalisés</li>
+            <li><strong>Monitoring</strong> de l'activité</li>
+        </ol>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="section" id="reference-des-endpoints">
+        <h1><span class="emoji">📚</span>Référence complète des endpoints</h1>
+
+        <h2><span class="emoji">🔐</span>Authentification (<code>/api/v1/auth</code>)</h2>
+        <table>
+            <tr>
+                <th>Méthode</th>
+                <th>Endpoint</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><span class="http-method post">POST</span></td>
+                <td><code>/register</code></td>
+                <td>Inscription d'un nouveau contributeur</td>
+            </tr>
+            <tr>
+                <td><span class="http-method post">POST</span></td>
+                <td><code>/login</code></td>
+                <td>Connexion utilisateur</td>
+            </tr>
+            <tr>
+                <td><span class="http-method post">POST</span></td>
+                <td><code>/logout</code></td>
+                <td>Déconnexion</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/profile/{id}</code></td>
+                <td>Récupération du profil</td>
+            </tr>
+            <tr>
+                <td><span class="http-method patch">PATCH</span></td>
+                <td><code>/{id}/change-password</code></td>
+                <td>Changement de mot de passe</td>
+            </tr>
+        </table>
+
+        <h2><span class="emoji">📋</span>Projets (<code>/api/v1/projets</code>)</h2>
+        <table>
+            <tr>
+                <th>Méthode</th>
+                <th>Endpoint</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/</code></td>
+                <td>Liste tous les projets (filtrage par statut)</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/ouverts</code></td>
+                <td>Projets ouverts (filtrage domaine/secteur)</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/domaine/{domaine}</code></td>
+                <td>Projets par domaine</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/secteur/{secteur}</code></td>
+                <td>Projets par secteur</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/{id}</code></td>
+                <td>Détails d'un projet</td>
+            </tr>
+            <tr>
+                <td><span class="http-method post">POST</span></td>
+                <td><code>/contributeur/{idPorteur}</code></td>
+                <td>Proposer un nouveau projet</td>
+            </tr>
+            <tr>
+                <td><span class="http-method patch">PATCH</span></td>
+                <td><code>/{id}/validate/admin/{idAdmin}</code></td>
+                <td>Valider un projet</td>
+            </tr>
+            <tr>
+                <td><span class="http-method delete">DELETE</span></td>
+                <td><code>/{id}/reject/admin/{idAdmin}</code></td>
+                <td>Rejeter un projet</td>
+            </tr>
+            <tr>
+                <td><span class="http-method patch">PATCH</span></td>
+                <td><code>/{id}/cahier-charges</code></td>
+                <td>Modifier le cahier des charges</td>
+            </tr>
+            <tr>
+                <td><span class="http-method patch">PATCH</span></td>
+                <td><code>/{id}/niveau/admin/{idAdmin}</code></td>
+                <td>Attribuer un niveau</td>
+            </tr>
+            <tr>
+                <td><span class="http-method patch">PATCH</span></td>
+                <td><code>/{id}/start</code></td>
+                <td>Démarrer un projet</td>
+            </tr>
+            <tr>
+                <td><span class="http-method patch">PATCH</span></td>
+                <td><code>/{id}/complete</code></td>
+                <td>Terminer un projet</td>
+            </tr>
+        </table>
+
+        <h2><span class="emoji">👥</span>Participants (<code>/api/v1/participants</code>)</h2>
+        <table>
+            <tr>
+                <th>Méthode</th>
+                <th>Endpoint</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><span class="http-method post">POST</span></td>
+                <td><code>/projet/{idProjet}/contributeur/{idContributeur}</code></td>
+                <td>Demande de participation</td>
+            </tr>
+            <tr>
+                <td><span class="http-method patch">PATCH</span></td>
+                <td><code>/{id}/accept</code></td>
+                <td>Accepter une demande</td>
+            </tr>
+            <tr>
+                <td><span class="http-method patch">PATCH</span></td>
+                <td><code>/{id}/reject</code></td>
+                <td>Refuser une demande</td>
+            </tr>
+            <tr>
+                <td><span class="http-method patch">PATCH</span></td>
+                <td><code>/{id}/unlock</code></td>
+                <td>Débloquer l'accès</td>
+            </tr>
+            <tr>
+                <td><span class="http-method patch">PATCH</span></td>
+                <td><code>/{idParticipant}/fonctionnalite/{idFonctionnalite}/reserve</code></td>
+                <td>Réserver une tâche</td>
+            </tr>
+            <tr>
+                <td><span class="http-method patch">PATCH</span></td>
+                <td><code>/{idParticipant}/fonctionnalite/{idFonctionnalite}/assign</code></td>
+                <td>Attribuer une tâche</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/{id}/historique</code></td>
+                <td>Historique d'acquisition</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/{id}/contributions</code></td>
+                <td>Contributions du participant</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/projet/{idProjet}</code></td>
+                <td>Participants d'un projet</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/{id}/badges/progression</code></td>
+                <td>Progression des badges</td>
+            </tr>
+        </table>
+
+        <h2><span class="emoji">🎯</span>Contributions (<code>/api/v1/contributions</code>)</h2>
+        <table>
+            <tr>
+                <th>Méthode</th>
+                <th>Endpoint</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/</code></td>
+                <td>Liste des contributions (filtrage par statut)</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/{id}</code></td>
+                <td>Détails d'une contribution</td>
+            </tr>
+            <tr>
+                <td><span class="http-method post">POST</span></td>
+                <td><code>/fonctionnalite/{idFonctionnalite}/participant/{idParticipant}</code></td>
+                <td>Soumettre une contribution</td>
+            </tr>
+            <tr>
+                <td><span class="http-method put">PUT</span></td>
+                <td><code>/{id}/status</code></td>
+                <td>Valider/rejeter une contribution</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/participant/{participantId}</code></td>
+                <td>Contributions d'un participant</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/fonctionnalite/{fonctionnaliteId}</code></td>
+                <td>Contributions d'une fonctionnalité</td>
+            </tr>
+        </table>
+
+        <h2><span class="emoji">🏆</span>Badges (<code>/api/v1/badges</code>)</h2>
+        <table>
+            <tr>
+                <th>Méthode</th>
+                <th>Endpoint</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/</code></td>
+                <td>Liste tous les badges</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/{id}</code></td>
+                <td>Détails d'un badge</td>
+            </tr>
+            <tr>
+                <td><span class="http-method post">POST</span></td>
+                <td><code>/admin/{idAdmin}</code></td>
+                <td>Créer un badge</td>
+            </tr>
+            <tr>
+                <td><span class="http-method put">PUT</span></td>
+                <td><code>/{id}</code></td>
+                <td>Modifier un badge</td>
+            </tr>
+            <tr>
+                <td><span class="http-method patch">PATCH</span></td>
+                <td><code>/{id}</code></td>
+                <td>Modification partielle</td>
+            </tr>
+            <tr>
+                <td><span class="http-method delete">DELETE</span></td>
+                <td><code>/{id}</code></td>
+                <td>Supprimer un badge</td>
+            </tr>
+        </table>
+
+        <h2><span class="emoji">💰</span>Paramètres Coins (<code>/api/v1/parametres-coins</code>)</h2>
+        <table>
+            <tr>
+                <th>Méthode</th>
+                <th>Endpoint</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/</code></td>
+                <td>Liste des paramètres</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/{id}</code></td>
+                <td>Détails d'un paramètre</td>
+            </tr>
+            <tr>
+                <td><span class="http-method post">POST</span></td>
+                <td><code>/admin/{idAdmin}</code></td>
+                <td>Créer un paramètre</td>
+            </tr>
+            <tr>
+                <td><span class="http-method put">PUT</span></td>
+                <td><code>/{id}</code></td>
+                <td>Modifier un paramètre</td>
+            </tr>
+            <tr>
+                <td><span class="http-method delete">DELETE</span></td>
+                <td><code>/{id}</code></td>
+                <td>Supprimer un paramètre</td>
+            </tr>
+        </table>
+
+        <h2><span class="emoji">📝</span>Questionnaires (<code>/api/v1/questionnaires</code>)</h2>
+        <table>
+            <tr>
+                <th>Méthode</th>
+                <th>Endpoint</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><span class="http-method post">POST</span></td>
+                <td><code>/projet/{idProjet}/createur/{idCreateur}</code></td>
+                <td>Créer pour un projet</td>
+            </tr>
+            <tr>
+                <td><span class="http-method post">POST</span></td>
+                <td><code>/template/{idTemplate}/admin/{idAdmin}</code></td>
+                <td>Créer pour un template</td>
+            </tr>
+            <tr>
+                <td><span class="http-method post">POST</span></td>
+                <td><code>/{idQuestionnaire}/questions</code></td>
+                <td>Ajouter une question</td>
+            </tr>
+            <tr>
+                <td><span class="http-method post">POST</span></td>
+                <td><code>/{idQuestionnaire}/evaluer</code></td>
+                <td>Évaluer un quiz</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/{id}</code></td>
+                <td>Détails d'un questionnaire</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/projet/{idProjet}</code></td>
+                <td>Questionnaires d'un projet</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/template/{idTemplate}</code></td>
+                <td>Questionnaires d'un template</td>
+            </tr>
+        </table>
+
+        <h2><span class="emoji">📋</span>Templates (<code>/api/v1/templates</code>)</h2>
+        <table>
+            <tr>
+                <th>Méthode</th>
+                <th>Endpoint</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/</code></td>
+                <td>Liste des templates</td>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/{id}</code></td>
+                <td>Détails d'un template</td>
+            </tr>
+            <tr>
+                <td><span class="http-method post">POST</span></td>
+                <td><code>/admin/{idAdmin}</code></td>
+                <td>Créer un template</td>
+            </tr>
+            <tr>
+                <td><span class="http-method put">PUT</span></td>
+                <td><code>/{id}</code></td>
+                <td>Modifier un template</td>
+            </tr>
+            <tr>
+                <td><span class="http-method delete">DELETE</span></td>
+                <td><code>/{id}</code></td>
+                <td>Supprimer un template</td>
+            </tr>
+        </table>
+
+        <h2><span class="emoji">🔔</span>Notifications (<code>/api/v1/notifications</code>)</h2>
+        <table>
+            <tr>
+                <th>Méthode</th>
+                <th>Endpoint</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td><span class="http-method get">GET</span></td>
+                <td><code>/utilisateur/{idUtilisateur}</code></td>
+                <td>Notifications d'un utilisateur</td>
+            </tr>
+            <tr>
+                <td><span class="http-method patch">PATCH</span></td>
+                <td><code>/{id}/read</code></td>
+                <td>Marquer comme lue</td>
+            </tr>
+            <tr>
+                <td><span class="http-method delete">DELETE</span></td>
+                <td><code>/{id}</code></td>
+                <td>Supprimer une notification</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="page-break"></div>
+
+    <div class="section" id="configuration">
+        <h1><span class="emoji">🔧</span>Configuration et initialisation</h1>
+
+        <h2>Initialisation automatique</h2>
+        <div class="success-box">
+            <p>L'application initialise automatiquement :</p>
+            <ul>
+                <li><strong>Paramètres de coins</strong> par défaut (inscription, contributions, déverrouillages)</li>
+                <li><strong>Badges système</strong> (DEBUTANT à PLATINE)</li>
+                <li><strong>Administrateur système</strong> si nécessaire</li>
+            </ul>
+        </div>
+
+        <h2>Variables d'environnement</h2>
+        <p>Les configurations peuvent être personnalisées via les propriétés Spring Boot dans <code>application.properties</code>.</p>
+
+        <h2>Codes de statut HTTP</h2>
+        <table>
+            <tr>
+                <th>Code</th>
+                <th>Signification</th>
+                <th>Usage</th>
+            </tr>
+            <tr>
+                <td>200</td>
+                <td>OK</td>
+                <td>Opération réussie</td>
+            </tr>
+            <tr>
+                <td>201</td>
+                <td>Created</td>
+                <td>Ressource créée</td>
+            </tr>
+            <tr>
+                <td>204</td>
+                <td>No Content</td>
+                <td>Suppression réussie</td>
+            </tr>
+            <tr>
+                <td>400</td>
+                <td>Bad Request</td>
+                <td>Données invalides</td>
+            </tr>
+            <tr>
+                <td>401</td>
+                <td>Unauthorized</td>
+                <td>Authentification requise</td>
+            </tr>
+            <tr>
+                <td>404</td>
+                <td>Not Found</td>
+                <td>Ressource introuvable</td>
+            </tr>
+            <tr>
+                <td>409</td>
+                <td>Conflict</td>
+                <td>Conflit (ex: email déjà utilisé)</td>
+            </tr>
+            <tr>
+                <td>500</td>
+                <td>Internal Error</td>
+                <td>Erreur serveur</td>
+            </tr>
+        </table>
+
+        <div class="warning-box">
+            <h3><span class="emoji">⚠️</span>Points d'attention</h3>
+            <ul>
+                <li>Vérifier la configuration de la base de données avant le premier démarrage</li>
+                <li>S'assurer que les ports nécessaires sont disponibles</li>
+                <li>Configurer les paramètres SMTP pour l'envoi d'emails</li>
+                <li>Définir les variables d'environnement de production</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Cette documentation fournit une vue complète du fonctionnement de l'API CollabDev, permettant aux développeurs de comprendre l'architecture, d'utiliser les endpoints correctement et d'implémenter les scénarios d'usage typiques de la plateforme collaborative.</p>
+        <p><strong>API CollabDev</strong> - Documentation Technique v1.0 | Spring Boot 3.x</p>
+    </div>
+
+    <script>
+        // Script pour générer le PDF
+        window.onload = function() {
+            // Ajouter un bouton de téléchargement PDF (optionnel)
+            const downloadBtn = document.createElement('button');
+            downloadBtn.textContent = 'Télécharger en PDF';
+            downloadBtn.className = 'no-print';
+            downloadBtn.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #2563eb;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+                z-index: 1000;
+            `;
+            downloadBtn.onclick = function() {
+                window.print();
+            };
+            document.body.appendChild(downloadBtn);
+        };
+    </script>
+</body>
+</html>

@@ -15,11 +15,14 @@ public class Commentaire {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_commentaire")
     private int id;
-    private String contenu; // Contenu du commentaire
-    private LocalDate date; // Date de création du commentaire
 
-    // Auteur du commentaire
-    // Clé étrangère vers la table Contributeur
+    @Column(length = 500)
+    private String contenu;
+
+    @Column(name = "date_creation")
+    private LocalDate date;
+
+    // Un commentaire est écrit par un auteur, qui est un participant
     @ManyToOne
     @JoinColumn(name = "id_auteur")
     private Participant auteur;

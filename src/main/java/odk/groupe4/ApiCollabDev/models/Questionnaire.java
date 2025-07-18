@@ -16,8 +16,11 @@ public class Questionnaire {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_questionnaire")
     private int id; // Identifiant du questionnaire
+
     private String titre; // Titre du questionnaire
+
     private String description; // Description du questionnaire
+
     private LocalDate dateCreation; // Date de création du questionnaire
 
     @OneToMany(mappedBy = "questionnaire", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -30,4 +33,8 @@ public class Questionnaire {
     @ManyToOne
     @JoinColumn(name = "id_projet")
     private Projet projet; // Identifiant du projet auquel le questionnaire est associé
+
+    @ManyToOne
+    @JoinColumn(name = "id_template")
+    private TemplateProjet templateProjet; // Template auquel le questionnaire est associé
 }

@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import odk.groupe4.ApiCollabDev.models.enums.StatusFeatures;
+import odk.groupe4.ApiCollabDev.models.enums.FeaturesStatus;
 
 @Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 @Table(name = "fonctionnalites")
@@ -16,16 +16,23 @@ public class Fonctionnalite {
     @Column(name = "id_fonctionnalite")
     private int id;
 
-    private String titre; // Titre de la fonctionnalité
-    private String contenu; // Contenu de la fonctionnalité (description détaillée)
-    @Enumerated(EnumType.STRING)
-    private StatusFeatures statusFeatures; // Statut de la fonctionnalité (ex: En attente, En cours, Terminé, etc.)
+    @Column(length = 100, nullable = false)
+    private String titre;
 
-    // Clé étrangère vers l'entité Projet (Projet auquel la fonctionnalité est associée)
+    @Column(length = 500)
+    // Contenu de la fonctionnalité (description détaillée)
+    private String contenu;
+
+    @Enumerated(EnumType.STRING)
+    // Statut de la fonctionnalité (ex: En attente, En cours, Terminé, etc.)
+    private FeaturesStatus statusFeatures;
+
+    // Une fonctionnalité est associée à un projet spécifique
     @ManyToOne
     @JoinColumn(name = "id_projet")
     private Projet projet;
 
+    // Une fonctionnalité peut être assignée à un participant spécifique
     @ManyToOne
     @JoinColumn(name = "id_participant")
     private Participant participant;
