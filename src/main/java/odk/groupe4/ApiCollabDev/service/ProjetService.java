@@ -9,11 +9,9 @@ import odk.groupe4.ApiCollabDev.dto.ProjetDto;
 import odk.groupe4.ApiCollabDev.dto.ProjetResponseDto;
 import odk.groupe4.ApiCollabDev.models.Administrateur;
 import odk.groupe4.ApiCollabDev.models.Contributeur;
+import odk.groupe4.ApiCollabDev.models.Participant;
 import odk.groupe4.ApiCollabDev.models.Projet;
-import odk.groupe4.ApiCollabDev.models.enums.ProjectDomain;
-import odk.groupe4.ApiCollabDev.models.enums.ProjectLevel;
-import odk.groupe4.ApiCollabDev.models.enums.ProjectSector;
-import odk.groupe4.ApiCollabDev.models.enums.ProjectStatus;
+import odk.groupe4.ApiCollabDev.models.enums.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -153,8 +151,25 @@ public class ProjetService {
         projet.setCreateur(contributeur);
         projet.setDateCreation(LocalDate.now());
 
+
+
         // On sauvegarde le projet dans la base de données.
         Projet savedProjet = projetDao.save(projet);
+
+        Participant participant = new Participant();
+        participant.setStatut(ParticipantStatus.ACCEPTE);
+        participant.setEstDebloque(false);
+        participant.setContributeur(contributeur);
+        participant.setProjet(savedProjet);
+
+        // Vérifie le rôle que va jouer le porteur de projet
+        if(projetDto.getRole() == RolePorteurProjet.PORTEUR_DE_PROJET){
+            participant.setProfil(ParticipantProfil.PORTEUR_DE_PROJET);
+            participantDao.save(participant);
+        } else if (projetDto.getRole() == RolePorteurProjet.GESTIONNAIRE) {
+            participant.setProfil(ParticipantProfil.GESTIONNAIRE);
+            participantDao.save(participant);
+        }
 
         // Notifier tous les administrateurs
         administrateurDao.findAll().forEach(administrateur -> {

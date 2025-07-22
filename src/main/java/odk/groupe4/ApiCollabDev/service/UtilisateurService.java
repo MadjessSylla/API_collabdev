@@ -42,12 +42,12 @@ public class UtilisateurService {
         // Vérifier si l'email ou le téléphone existe déjà
         Optional<Utilisateur> existingUser = utilisateurDao.findByEmail(dto.getEmail());
         if (existingUser.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cet email est déjà utilisé.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cet email est déjà utilisé.");
         }
         // Vérifier si le téléphone existe déjà
         Optional<Contributeur> existTelephone = contributeurDao.findByTelephone(dto.getTelephone());
         if (existTelephone.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ce numéro est déjà utilisé.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ce numéro est déjà utilisé.");
         }
 
         // Récupérer le solde de coin pour l'inscription

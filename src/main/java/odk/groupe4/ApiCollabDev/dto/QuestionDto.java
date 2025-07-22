@@ -17,6 +17,6 @@ public class QuestionDto {
     @NotNull
     private List<String> options;
 
-    @NotNull @Positive
+    @NotNull
     private int indexReponse;
 }
