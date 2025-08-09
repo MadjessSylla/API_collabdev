@@ -21,6 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/contributeurs")
+
 @Tag(name = "Contributeurs", description = "API de gestion des contributeurs de la plateforme")
 public class ContributeurController {
     

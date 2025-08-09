@@ -1,5 +1,10 @@
 package odk.groupe4.ApiCollabDev.controllers;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.io.IOException;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -7,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.validation.Valid;
 import odk.groupe4.ApiCollabDev.dto.ProjetCahierDto;
 import odk.groupe4.ApiCollabDev.dto.ProjetDto;
@@ -21,8 +27,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/projets")
@@ -240,6 +252,31 @@ public class ProjetController {
             )
         )
     })
+
+    @PostMapping("/contributeur/upload")
+    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
+        try {
+            // Définit un dossier d'upload local
+            Path uploadDir = Paths.get("uploads");
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+
+            String fileName = file.getOriginalFilename();
+            Path filePath = uploadDir.resolve(fileName);
+
+            Files.write(filePath, file.getBytes());
+
+            Map<String, String> response = new HashMap<>();
+            response.put("fileUrl", "/uploads/" + fileName);
+
+            return ResponseEntity.ok(response);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
     // Valider un projet proposé par un contributeur
     @PatchMapping("/{id}/validate/admin/{idAdmin}")
     public ResponseEntity<ProjetResponseDto> validerProjet(

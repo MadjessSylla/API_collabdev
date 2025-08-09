@@ -13,9 +13,9 @@ public class ProjetDto {
     private String titre;
     @NotBlank @Size(max = 100)
     private String description;
-    @NotNull @Size(max = 50)
+    @NotNull
     private ProjectDomain domaine;
-    @NotNull @Size(max = 50)
+    @NotNull
     private ProjectSector secteur;
     @NotBlank
     private String urlCahierDeCharge;
