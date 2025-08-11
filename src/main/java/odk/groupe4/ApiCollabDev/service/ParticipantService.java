@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ParticipantService {
@@ -202,6 +203,22 @@ public class ParticipantService {
         return new HistAcquisitionDto(idParticipant, contributionDTOs, badgeDTOs);
     }
 
+    public List<BadgeRewardDto> getBadgesGagnes(int idParticipant, Integer idProjet) {
+        Participant participant = participantDao.findById(idParticipant)
+                .orElseThrow(() -> new RuntimeException("Participant non trouvé à l'ID " + idParticipant));
+
+        Stream<BadgeParticipant> stream = participant.getBadgeParticipants().stream();
+
+        // Filtrer par projet si idProjet est fourni
+        if (idProjet != null) {
+            stream = stream.filter(bp -> bp.getParticipant().getProjet().getId() == idProjet);
+        }
+
+        return stream
+                .map(this::mapToBadgeDTO)
+                .collect(Collectors.toList());
+    }
+
     public List<ContributionDto> afficherContributionsParticipant(int idParticipant) {
         Participant participant = participantDao.findById(idParticipant)
                 .orElseThrow(() -> new RuntimeException("Participant non trouvé"));
@@ -270,7 +287,7 @@ public class ParticipantService {
 
     private ContributionDto mapToContributionDTO(Contribution contribution) {
         ContributionDto contributionDto = new ContributionDto();
-        contributionDto.setIdContribution(contribution.getId());
+        contributionDto.setId(contribution.getId());
         contributionDto.setLienUrl(contribution.getLienUrl());
         contributionDto.setFileUrl(contribution.getFileUrl());
         contributionDto.setStatus(contribution.getStatus());
@@ -294,7 +311,7 @@ public class ParticipantService {
 
     private ContributionDto ContributionDaoToContributionDto(Contribution contribution) {
         ContributionDto contributionDto = new ContributionDto();
-        contributionDto.setIdContribution(contribution.getId());
+        contributionDto.setId(contribution.getId());
         contributionDto.setLienUrl(contribution.getLienUrl());
         contributionDto.setFileUrl(contribution.getFileUrl());
         contributionDto.setStatus(contribution.getStatus());

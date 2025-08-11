@@ -12,6 +12,7 @@ import odk.groupe4.ApiCollabDev.dto.ProjetCahierDto;
 import odk.groupe4.ApiCollabDev.dto.ProjetDto;
 import odk.groupe4.ApiCollabDev.dto.ProjetResponseDto;
 import odk.groupe4.ApiCollabDev.exception.GlobalExceptionHandler;
+import odk.groupe4.ApiCollabDev.models.Projet;
 import odk.groupe4.ApiCollabDev.models.enums.ProjectDomain;
 import odk.groupe4.ApiCollabDev.models.enums.ProjectLevel;
 import odk.groupe4.ApiCollabDev.models.enums.ProjectSector;
@@ -21,8 +22,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/projets")
@@ -170,6 +178,37 @@ public class ProjetController {
     }
 
     @Operation(
+            summary = "Lister les projets débloqués par un contributeur",
+            description = "Retourne la liste de tous les projets qu'un contributeur a débloqués"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Liste des projets débloqués récupérée avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Projet.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Contributeur non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            )
+    })
+    @GetMapping("/{id}/projets-debloques")
+    public ResponseEntity<List<ProjetResponseDto>> getProjetsDebloquesByContributeur(
+            @Parameter(description = "ID du contributeur", required = true, example = "1")
+            @PathVariable int id) {
+        List<ProjetResponseDto> projets = projetService.getProjetsDebloquesByContributeur(id);
+        return ResponseEntity.ok(projets);
+    }
+
+
+    @Operation(
         summary = "Proposer un nouveau projet",
         description = "Permet à un contributeur de proposer un nouveau projet collaboratif"
     )
@@ -240,6 +279,32 @@ public class ProjetController {
             )
         )
     })
+
+    @PostMapping("/contributeur/upload")
+    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
+        try {
+            // Définit un dossier d'upload local
+            Path uploadDir = Paths.get("uploads");
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+
+            String fileName = file.getOriginalFilename();
+            Path filePath = uploadDir.resolve(fileName);
+
+            Files.write(filePath, file.getBytes());
+
+            Map<String, String> response = new HashMap<>();
+            response.put("fileUrl", "/uploads/" + fileName);
+
+            return ResponseEntity.ok(response);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     // Valider un projet proposé par un contributeur
     @PatchMapping("/{id}/validate/admin/{idAdmin}")
     public ResponseEntity<ProjetResponseDto> validerProjet(

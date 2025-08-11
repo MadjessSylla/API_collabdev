@@ -6,7 +6,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,24 +16,15 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * Gère les exceptions de validation des arguments de méthode.
-     *
-     * @param ex l'exception de validation
-     * @return une réponse d'erreur avec les détails de validation
-     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
-       // Créer une map pour stocker les erreurs de validation
         Map<String, String> errors = new HashMap<>();
-        // Parcourir les erreurs de validation et les ajouter à la map
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
 
-        // Créer une réponse d'erreur avec les détails de validation
         ErrorResponse errorResponse = new ErrorResponse(
                 "Erreur de validation",
                 "Les données fournies ne sont pas valides",
@@ -39,70 +32,64 @@ public class GlobalExceptionHandler {
                 errors
         );
 
-        // Retourner la réponse d'erreur avec le statut HTTP 400 (Bad Request)
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Gère les exceptions d'argument invalide.
-     *
-     * @param ex l'exception d'argument invalide
-     * @return une réponse d'erreur avec le message d'erreur
-     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-       // Créer une réponse d'erreur avec le message d'erreur
         ErrorResponse errorResponse = new ErrorResponse(
                 "Argument invalide",
                 ex.getMessage(),
                 LocalDateTime.now(),
                 null
         );
-        // Retourner la réponse d'erreur avec le statut HTTP 400 (Bad Request)
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    /**
-     * Gère les exceptions d'exécution.
-     *
-     * @param ex l'exception d'exécution
-     * @return une réponse d'erreur avec le message d'erreur
-     */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
-        // Créer une réponse d'erreur avec le message d'erreur
         ErrorResponse errorResponse = new ErrorResponse(
                 "Erreur interne",
                 ex.getMessage(),
                 LocalDateTime.now(),
                 null
         );
-        // Retourner la réponse d'erreur avec le statut HTTP 500 (Internal Server Error)
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    /**
-     * Gère les exceptions génériques.
-     *
-     * @param ex l'exception générique
-     * @return une réponse d'erreur avec un message d'erreur générique
-     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception ex) {
-        // Créer une réponse d'erreur générique
         ErrorResponse errorResponse = new ErrorResponse(
                 "Erreur inattendue",
                 "Une erreur inattendue s'est produite",
                 LocalDateTime.now(),
                 null
         );
-        // Retourner la réponse d'erreur avec le statut HTTP 500 (Internal Server Error)
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    /**
-     * Classe représentant la réponse d'erreur.
-     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxSizeException(MaxUploadSizeExceededException exc) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Taille maximale dépassée",
+                "Taille du fichier dépasse la limite maximale autorisée",
+                LocalDateTime.now(),
+                null
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<ErrorResponse> handleIOException(IOException exc) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Erreur de traitement du fichier",
+                exc.getMessage(),
+                LocalDateTime.now(),
+                null
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     public static class ErrorResponse {
         private String titre;
         private String message;

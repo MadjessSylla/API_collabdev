@@ -204,7 +204,7 @@ public class ContributionService {
 
     private ContributionDto ContributionDaoToContributionDto(Contribution contribution) {
         ContributionDto contributionDto = new ContributionDto();
-        contributionDto.setIdContribution(contribution.getId());
+        contributionDto.setId(contribution.getId());
         contributionDto.setLienUrl(contribution.getLienUrl());
         contributionDto.setFileUrl(contribution.getFileUrl());
         contributionDto.setStatus(contribution.getStatus());

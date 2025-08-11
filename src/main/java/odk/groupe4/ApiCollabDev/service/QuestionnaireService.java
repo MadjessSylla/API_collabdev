@@ -15,35 +15,32 @@ import java.util.stream.Collectors;
 public class QuestionnaireService {
     private final QuestionnaireDao questionnaireDao;
     private final QuestionsQuestionnaireDao questionDao;
-    private final ContributeurDao contributeurDao;
+    private final UtilisateurDao utilisateurDao;  // <-- UtilisateurDao au lieu de ContributeurDao
     private final ProjetDao projetDao;
-    private final TemplateProjetDao templateDao;
 
     @Autowired
     public QuestionnaireService(QuestionnaireDao questionnaireDao,
                                 QuestionsQuestionnaireDao questionDao,
-                                ContributeurDao contributeurDao,
-                                ProjetDao projetDao,
-                                TemplateProjetDao templateDao) {
+                                UtilisateurDao utilisateurDao,  // <-- ici
+                                ProjetDao projetDao) {
         this.questionnaireDao = questionnaireDao;
         this.questionDao = questionDao;
-        this.contributeurDao = contributeurDao;
+        this.utilisateurDao = utilisateurDao;  // <-- ici
         this.projetDao = projetDao;
-        this.templateDao = templateDao;
     }
 
     public QuestionnaireResponseDto creerQuestionnaireProjet(int idProjet, int idCreateur, QuestionnaireDto dto) {
         Projet projet = projetDao.findById(idProjet)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID: " + idProjet));
 
-        Contributeur createur = contributeurDao.findById(idCreateur)
-                .orElseThrow(() -> new RuntimeException("Contributeur non trouvé avec l'ID: " + idCreateur));
+        Utilisateur createur = utilisateurDao.findById(idCreateur)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé avec l'ID: " + idCreateur));
 
         Questionnaire questionnaire = new Questionnaire();
         questionnaire.setTitre(dto.getTitre());
         questionnaire.setDescription(dto.getDescription());
         questionnaire.setDateCreation(LocalDate.now());
-        questionnaire.setContributeur(createur);
+        questionnaire.setUtilisateur(createur);
         questionnaire.setProjet(projet);
 
         Questionnaire savedQuestionnaire = questionnaireDao.save(questionnaire);
@@ -51,18 +48,14 @@ public class QuestionnaireService {
     }
 
     public QuestionnaireResponseDto creerQuestionnaireTemplate(int idTemplate, int idAdmin, QuestionnaireDto dto) {
-        TemplateProjet template = templateDao.findById(idTemplate)
-                .orElseThrow(() -> new RuntimeException("Template non trouvé avec l'ID: " + idTemplate));
-
-        Contributeur createur = contributeurDao.findById(idAdmin)
+        Utilisateur createur = utilisateurDao.findById(idAdmin)
                 .orElseThrow(() -> new RuntimeException("Créateur non trouvé avec l'ID: " + idAdmin));
 
         Questionnaire questionnaire = new Questionnaire();
         questionnaire.setTitre(dto.getTitre());
         questionnaire.setDescription(dto.getDescription());
         questionnaire.setDateCreation(LocalDate.now());
-        questionnaire.setContributeur(createur);
-        questionnaire.setTemplateProjet(template);
+        questionnaire.setUtilisateur(createur);
 
         Questionnaire savedQuestionnaire = questionnaireDao.save(questionnaire);
         return mapToResponseDto(savedQuestionnaire);
@@ -75,7 +68,6 @@ public class QuestionnaireService {
         QuestionsQuestionnaire question = new QuestionsQuestionnaire();
         question.setQuestion(dto.getQuestion());
         question.setOptions(dto.getOptions());
-        question.setIndexReponse(dto.getIndexReponse());
         question.setQuestionnaire(questionnaire);
 
         questionDao.save(question);
@@ -113,15 +105,6 @@ public class QuestionnaireService {
                 .collect(Collectors.toList());
     }
 
-    public List<QuestionnaireResponseDto> getQuestionnairesByTemplate(int idTemplate) {
-        if (!templateDao.existsById(idTemplate)) {
-            throw new RuntimeException("Template non trouvé avec l'ID: " + idTemplate);
-        }
-
-        return questionnaireDao.findByTemplateProjetId(idTemplate).stream()
-                .map(this::mapToResponseDto)
-                .collect(Collectors.toList());
-    }
 
     public QuestionnaireResponseDto getQuestionnaireById(int id) {
         Questionnaire questionnaire = questionnaireDao.findById(id)
@@ -145,16 +128,28 @@ public class QuestionnaireService {
     }
 
     private QuestionnaireResponseDto mapToResponseDto(Questionnaire questionnaire) {
+        String createurNom = null;
+        if (questionnaire.getUtilisateur() != null) {
+            // Si ta classe Utilisateur a une méthode getNom(), sinon adapte ici
+            if (questionnaire.getUtilisateur() instanceof Contributeur) {
+                createurNom = ((Contributeur) questionnaire.getUtilisateur()).getNom();
+            } else if (questionnaire.getUtilisateur() instanceof Administrateur) {
+                createurNom = "Administrateur"; // ou autre logique pour obtenir un nom
+            } else {
+                createurNom = "Utilisateur"; // fallback
+            }
+        }
+
         return new QuestionnaireResponseDto(
                 questionnaire.getId(),
                 questionnaire.getTitre(),
                 questionnaire.getDescription(),
                 questionnaire.getDateCreation(),
-                questionnaire.getContributeur().getNom() + " " + questionnaire.getContributeur().getPrenom(),
-                questionnaire.getContributeur().getEmail(),
+                createurNom,                                    // createurNom
+                questionnaire.getUtilisateur() != null ? questionnaire.getUtilisateur().getEmail() : null,  // createurEmail
                 questionnaire.getProjet() != null ? questionnaire.getProjet().getTitre() : null,
-                questionnaire.getTemplateProjet() != null ? questionnaire.getTemplateProjet().getNom() : null,
-                questionnaire.getQuestions().size()
+                questionnaire.getQuestions() != null ? questionnaire.getQuestions().size() : 0
         );
     }
+
 }

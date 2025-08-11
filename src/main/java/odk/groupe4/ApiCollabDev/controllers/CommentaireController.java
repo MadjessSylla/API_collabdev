@@ -11,18 +11,17 @@ import jakarta.validation.Valid;
 import odk.groupe4.ApiCollabDev.dto.CommentaireRequestDto;
 import odk.groupe4.ApiCollabDev.dto.CommentaireResponseDto;
 import odk.groupe4.ApiCollabDev.exception.GlobalExceptionHandler;
-import odk.groupe4.ApiCollabDev.models.Commentaire;
 import odk.groupe4.ApiCollabDev.service.CommentaireService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/commentaires")
-@Tag(name = "Commentaires", description = "API de gestion des commentaires")
+@Tag(name = "Commentaires", description = "API de gestion des commentaires et réponses (threads)")
 public class CommentaireController {
 
     private final CommentaireService commentaireService;
@@ -32,84 +31,78 @@ public class CommentaireController {
         this.commentaireService = commentaireService;
     }
 
-   @Operation(
-            summary = "Créer un commentaire",
-            description = "Permet à un participant de créer un nouveau commentaire"
+    @Operation(
+            summary = "Créer un commentaire ou une réponse dans un projet",
+            description = "Permet à un participant de créer un commentaire racine ou une réponse à un commentaire existant dans un projet donné."
     )
     @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "Commentaire créé avec succès",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = Commentaire.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Participant non trouvé",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-                    )
-            )
+            @ApiResponse(responseCode = "201", description = "Commentaire créé avec succès",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CommentaireResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "Participant ou projet non trouvé",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Données invalides",
+                    content = @Content(mediaType = "application/json"))
     })
-    @PostMapping("/participant/{id}")
-   // Création d'un commentaire pour un participant spécifique
+    @PostMapping("/participant/{participantId}/projet/{projetId}")
     public ResponseEntity<CommentaireResponseDto> creerCommentaire(
-            @Parameter(description = "ID du participant", required = true, example = "1")
-            @PathVariable int id,
-            @Parameter(description = "Données du commentaire", required = true)
-            @Valid @RequestBody CommentaireRequestDto commentaire) {
-        CommentaireResponseDto nouveauCommentaire = commentaireService.creerCommentaire(id, commentaire);
-        return new ResponseEntity<>(nouveauCommentaire, HttpStatus.CREATED);
+            @Parameter(description = "ID du participant auteur du commentaire", required = true, example = "1")
+            @PathVariable int participantId,
+            @Parameter(description = "ID du projet associé au commentaire", required = true, example = "5")
+            @PathVariable int projetId,
+            @Parameter(description = "Données du commentaire à créer", required = true)
+            @Valid @RequestBody CommentaireRequestDto body
+    ) {
+        CommentaireResponseDto created = commentaireService.creerCommentaire(participantId, projetId, body);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @Operation(
-            summary = "Récupérer les commentaires d'un participant",
-            description = "Retourne tous les commentaires créés par un participant spécifique"
+            summary = "Lister les commentaires racines d'un participant",
+            description = "Retourne tous les commentaires racines écrits par un participant, avec leurs réponses imbriquées."
     )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Commentaires récupérés avec succès",
-            content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = Commentaire.class)
-            )
-    )
+    @ApiResponse(responseCode = "200", description = "Commentaires récupérés avec succès",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = CommentaireResponseDto.class)))
     @GetMapping("/participant/{id}")
-    // Récupération des commentaires d'un participant spécifique
-    public ResponseEntity<Set<CommentaireResponseDto>> getCommentairesByParticipant(
+    public ResponseEntity<List<CommentaireResponseDto>> getCommentairesByParticipant(
             @Parameter(description = "ID du participant", required = true, example = "1")
-            @PathVariable int id) {
-        Set<CommentaireResponseDto> commentaires = commentaireService.afficherCommentaireParParticipant(id);
-        return ResponseEntity.ok(commentaires);
+            @PathVariable int id
+    ) {
+        return ResponseEntity.ok(commentaireService.afficherCommentairesRacinesParParticipant(id));
     }
 
     @Operation(
-            summary = "Supprimer un commentaire",
-            description = "Supprime définitivement un commentaire du système"
+            summary = "Lister les commentaires racines d'un projet",
+            description = "Retourne tous les commentaires racines associés à un projet, avec leurs réponses imbriquées."
+    )
+    @ApiResponse(responseCode = "200", description = "Commentaires récupérés avec succès",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = CommentaireResponseDto.class)))
+    @GetMapping("/projet/{id}")
+    public ResponseEntity<List<CommentaireResponseDto>> getCommentairesByProjet(
+            @Parameter(description = "ID du projet", required = true, example = "5")
+            @PathVariable int id
+    ) {
+        return ResponseEntity.ok(commentaireService.afficherCommentairesRacinesParProjet(id));
+    }
+
+    @Operation(
+            summary = "Supprimer un commentaire (et ses réponses)",
+            description = "Supprime un commentaire et toutes ses réponses associées."
     )
     @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Commentaire supprimé avec succès"
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Commentaire non trouvé",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-                    )
-            )
+            @ApiResponse(responseCode = "200", description = "Commentaire supprimé avec succès"),
+            @ApiResponse(responseCode = "404", description = "Commentaire non trouvé",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)))
     })
     @DeleteMapping("/{id}")
-    // Suppression d'un commentaire par son ID
     public ResponseEntity<String> supprimerCommentaire(
-            @Parameter(description = "ID du commentaire à supprimer", required = true, example = "1")
-            @PathVariable int id) {
-        String message = commentaireService.supprimerCommentaire(id);
-        return ResponseEntity.ok(message);
+            @Parameter(description = "ID du commentaire à supprimer", required = true, example = "10")
+            @PathVariable int id
+    ) {
+        return ResponseEntity.ok(commentaireService.supprimerCommentaire(id));
     }
 }

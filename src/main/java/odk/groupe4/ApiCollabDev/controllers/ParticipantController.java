@@ -2,6 +2,7 @@ package odk.groupe4.ApiCollabDev.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -277,6 +278,30 @@ public class ParticipantController {
         HistAcquisitionDto historique = participantService.getHistAcquisition(id);
         return ResponseEntity.ok(historique);
     }
+
+    @Operation(
+            summary = "Récupérer les badges gagnés par un participant",
+            description = "Retourne la liste des badges qu’un participant a obtenus, éventuellement filtrés par projet."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Liste des badges récupérée avec succès",
+                    content = @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = BadgeRewardDto.class)))),
+            @ApiResponse(responseCode = "404", description = "Participant ou projet introuvable"),
+            @ApiResponse(responseCode = "500", description = "Erreur interne du serveur")
+    })
+    @GetMapping("/{idParticipant}/badges")
+    public ResponseEntity<List<BadgeRewardDto>> getBadgesParticipant(
+            @Parameter(description = "ID du participant", required = true, example = "12")
+            @PathVariable int idParticipant,
+
+            @Parameter(description = "ID du projet (facultatif pour filtrer)", example = "5")
+            @RequestParam(required = false) Integer idProjet
+    ) {
+        List<BadgeRewardDto> badges = participantService.getBadgesGagnes(idParticipant, idProjet);
+        return ResponseEntity.ok(badges);
+    }
+
 
     @Operation(
             summary = "Récupérer les contributions d'un participant",

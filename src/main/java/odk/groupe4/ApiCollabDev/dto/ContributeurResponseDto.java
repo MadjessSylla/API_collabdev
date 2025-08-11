@@ -4,9 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Data @NoArgsConstructor @AllArgsConstructor
 public class ContributeurResponseDto {
     private int id;
     private String nom;
@@ -15,5 +13,8 @@ public class ContributeurResponseDto {
     private String email;
     private int pointExp;
     private int totalCoin;
+    private String bibliographie;
+    private String photoProfil;
     private boolean actif;
+
 }

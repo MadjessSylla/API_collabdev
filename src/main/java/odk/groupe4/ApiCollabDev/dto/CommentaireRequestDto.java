@@ -1,16 +1,22 @@
 package odk.groupe4.ApiCollabDev.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.time.LocalDate;
-
-@Data @AllArgsConstructor @NoArgsConstructor
+/**
+ * DTO de création d'un commentaire (ou d'une réponse si parentId est fourni).
+ */
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class CommentaireRequestDto {
-    @NotBlank @Size(max = 100)
-    private String contenu; // Contenu du commentaire
-    @NotNull
-    private LocalDate date; // Date de création du commentaire
+
+    @NotBlank(message = "Le contenu du commentaire est requis.")
+    private String contenu;
+
+    /**
+     * Identifiant du commentaire parent si c'est une réponse (nullable).
+     */
+    private Integer parentId;
 }

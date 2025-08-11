@@ -7,10 +7,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Commentaire {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_commentaire")
@@ -20,11 +21,19 @@ public class Commentaire {
     private String contenu;
 
     @Column(name = "date_creation")
-    private LocalDate date;
+    private LocalDate creationDate;
 
-    // Un commentaire est écrit par un auteur, qui est un participant
     @ManyToOne
     @JoinColumn(name = "id_auteur")
     private Participant auteur;
 
+    @ManyToOne
+    private Commentaire commentaireParent;
+
+    @OneToMany(mappedBy = "commentaireParent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Commentaire> reponses = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "id_projet")
+    private Projet projet;
 }

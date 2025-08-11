@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Notification {
     @Id
@@ -17,6 +19,8 @@ public class Notification {
     private String sujet;
 
     private String message;
+
+    private LocalDate date;
 
     // Une notification est envoyée à un utilisateur spécifique
     @ManyToOne

@@ -108,17 +108,6 @@ public class QuestionnaireController {
         return ResponseEntity.ok(resultat);
     }
 
-    @Operation(
-            summary = "Récupérer un questionnaire par ID",
-            description = "Retourne les détails d'un questionnaire spécifique"
-    )
-    @GetMapping("/{id}")
-    public ResponseEntity<QuestionnaireResponseDto> getQuestionnaireById(
-            @Parameter(description = "ID du questionnaire", required = true, example = "1")
-            @PathVariable int id) {
-        QuestionnaireResponseDto questionnaire = questionnaireService.getQuestionnaireById(id);
-        return ResponseEntity.ok(questionnaire);
-    }
 
     @Operation(
             summary = "Récupérer les questionnaires d'un projet",
@@ -132,15 +121,4 @@ public class QuestionnaireController {
         return ResponseEntity.ok(questionnaires);
     }
 
-    @Operation(
-            summary = "Récupérer les questionnaires d'un template",
-            description = "Retourne tous les questionnaires associés à un template de projet"
-    )
-    @GetMapping("/template/{idTemplate}")
-    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnairesByTemplate(
-            @Parameter(description = "ID du template", required = true, example = "1")
-            @PathVariable int idTemplate) {
-        List<QuestionnaireResponseDto> questionnaires = questionnaireService.getQuestionnairesByTemplate(idTemplate);
-        return ResponseEntity.ok(questionnaires);
-    }
 }

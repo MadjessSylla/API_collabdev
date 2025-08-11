@@ -17,7 +17,13 @@ public class Contribution {
     @Column(name = "id_contribution")
     private int id;
 
+    private String titre; // ajout
+
+    @Column(columnDefinition = "TEXT")
+    private String description; // ajout
+
     private String lienUrl;
+
     private String fileUrl;
 
     @Enumerated(EnumType.STRING)
