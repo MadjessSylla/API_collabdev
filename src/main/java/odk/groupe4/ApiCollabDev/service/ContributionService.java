@@ -26,7 +26,7 @@ public class ContributionService {
     private final ContributeurDao contributeurDao;
     private final ParametreCoinDao parametreCoinDao;
     private final BadgeDao badgeDao;
-    private final BadgeParticipantDao badgeParticipantDao;
+    private final BadgeContributeurDao badgeContributeurDao;
     private final NotificationService notificationService;
 
     // Injection des dépendances via constructeur
@@ -37,7 +37,7 @@ public class ContributionService {
                                ContributeurDao contributeurDao,
                                ParametreCoinDao parametreCoinDao,
                                BadgeDao badgeDao,
-                               BadgeParticipantDao badgeParticipantDao,
+                               BadgeContributeurDao badgeContributeurDao,
                                NotificationService notificationService) {
         this.contributionDao = contributionDao;
         this.participantDao = participantDao;
@@ -45,7 +45,7 @@ public class ContributionService {
         this.contributeurDao = contributeurDao;
         this.parametreCoinDao = parametreCoinDao;
         this.badgeDao = badgeDao;
-        this.badgeParticipantDao = badgeParticipantDao;
+        this.badgeContributeurDao = badgeContributeurDao;
         this.notificationService = notificationService;
     }
 
@@ -120,6 +120,8 @@ public class ContributionService {
                 .orElseThrow(() -> new IllegalArgumentException("Fonctionnalité non trouvée"));
 
         Contribution newContribution = new Contribution();
+        newContribution.setTitre(contribution.getTitre());
+        newContribution.setDescription(contribution.getDescription());
         newContribution.setLienUrl(contribution.getLienUrl());
         newContribution.setFileUrl(contribution.getFileUrl());
         newContribution.setStatus(ContributionStatus.ENVOYE);
@@ -251,39 +253,44 @@ public class ContributionService {
     }
 
     /**
-     * Attribue des badges à un participant en fonction du nombre de contributions validées.
-     * Si le participant atteint le seuil pour un badge non encore attribué,
+     * Attribue des badges à un contributeur en fonction du nombre total de contributions validées.
+     * Compte toutes les contributions validées du contributeur à travers tous ses participations.
+     * Si le contributeur atteint le seuil pour un badge non encore attribué,
      * le badge est attribué, les coins de récompense associés sont ajoutés,
      * et une notification est envoyée.
      *
-     * @param participant Participant à qui attribuer des badges
+     * @param participant Participant dont le contributeur recevra les badges
      */
     private void assignerBadges(Participant participant) {
-        // Nombre total de contributions validées par le participant
-        int nombreValidation = contributionDao.findByParticipantIdAndStatus(participant.getId(), ContributionStatus.VALIDE).size();
+        Contributeur contributeur = participant.getContributeur();
+
+        // Compter toutes les contributions validées du contributeur à travers toutes ses participations
+        int nombreValidationTotal = 0;
+        for (Participant p : contributeur.getParticipations()) {
+            nombreValidationTotal += contributionDao.findByParticipantIdAndStatus(p.getId(), ContributionStatus.VALIDE).size();
+        }
 
         // Liste des badges disponibles triée par nombre de contributions requises
         List<Badge> badgesDisponibles = badgeDao.findAllOrderByNombreContributionAsc();
 
         for (Badge badge : badgesDisponibles) {
-            if (nombreValidation >= badge.getNombreContribution()) {
-                // Vérifie si le participant possède déjà ce badge
-                boolean hasBadge = badgeParticipantDao.findByParticipantIdAndBadgeId(participant.getId(), badge.getId()).isPresent();
+            if (nombreValidationTotal >= badge.getNombreContribution()) {
+                // Vérifie si le contributeur possède déjà ce badge
+                boolean hasBadge = badgeContributeurDao.findByContributeurIdAndBadgeId(contributeur.getId(), badge.getId()).isPresent();
 
                 if (!hasBadge) {
-                    // Attribution du badge
-                    BadgeParticipant badgeParticipant = new BadgeParticipant();
-                    badgeParticipant.setBadge(badge);
-                    badgeParticipant.setParticipant(participant);
-                    badgeParticipant.setDateAcquisition(LocalDate.now());
-                    badgeParticipantDao.save(badgeParticipant);
+                    // Attribution du badge au contributeur
+                    BadgeContributeur badgeContributeur = new BadgeContributeur();
+                    badgeContributeur.setBadge(badge);
+                    badgeContributeur.setContributeur(contributeur);
+                    badgeContributeur.setDateAcquisition(LocalDate.now());
+                    badgeContributeurDao.save(badgeContributeur);
 
                     // Attribution des coins de récompense au contributeur
-                    Contributeur contributeur = participant.getContributeur();
                     contributeur.setTotalCoin(contributeur.getTotalCoin() + badge.getCoin_recompense());
                     contributeurDao.save(contributeur);
 
-                    // Notification au participant
+                    // Notification au contributeur
                     notificationService.createNotification(
                             contributeur,
                             "Nouveau badge obtenu !",
@@ -292,7 +299,7 @@ public class ContributionService {
                                     "Vous recevez " + badge.getCoin_recompense() + " coins en récompense !"
                     );
 
-                    System.out.println("Badge " + badge.getType() + " attribué au participant " + participant.getId());
+                    System.out.println("Badge " + badge.getType() + " attribué au contributeur " + contributeur.getId());
                 }
             }
         }
@@ -307,6 +314,8 @@ public class ContributionService {
     private ContributionDto ContributionDaoToContributionDto(Contribution contribution) {
         ContributionDto contributionDto = new ContributionDto();
         contributionDto.setId(contribution.getId());
+        contributionDto.setTitre(contribution.getTitre());
+        contributionDto.setDescription(contribution.getDescription());
         contributionDto.setLienUrl(contribution.getLienUrl());
         contributionDto.setFileUrl(contribution.getFileUrl());
         contributionDto.setStatus(contribution.getStatus());
@@ -328,6 +337,8 @@ public class ContributionService {
     private ContributionResponseDto mapToResponseDto(Contribution contribution) {
         return new ContributionResponseDto(
                 contribution.getId(),
+                contribution.getTitre(),
+                contribution.getDescription(),
                 contribution.getLienUrl(),
                 contribution.getFileUrl(),
                 contribution.getStatus(),

@@ -12,11 +12,13 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ContributionResponseDto {
     private int id;
+    private String titre;
+    private String description;
     private String lienUrl;
     private String fileUrl;
     private ContributionStatus status;
     private LocalDate dateSoumission;
     private String fonctionnaliteTitre;
-    private String participantNom;
-    private String gestionnaireNom;
+    private String participantNomComplet;
+    private String gestionnaireNomComplet;
 }

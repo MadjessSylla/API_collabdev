@@ -50,9 +50,9 @@ public class Participant {
     @OneToMany(mappedBy = "auteur", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Commentaire> commentaires = new HashSet<>();
 
-    // Un participant peur recevoir des badges de récompenses
+    /*// Un participant peur recevoir des badges de récompenses
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<BadgeParticipant> badgeParticipants = new HashSet<>();
+    private Set<BadgeParticipant> badgeParticipants = new HashSet<>();*/
 
     // Un participant peut travailler sur plusieurs fonctionnalités d'un projet.
     @OneToMany(mappedBy = "participant")

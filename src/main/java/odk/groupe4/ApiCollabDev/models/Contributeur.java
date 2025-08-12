@@ -47,4 +47,8 @@ public class Contributeur extends Utilisateur {
     @OneToMany(mappedBy = "createur")
     @JsonIgnore
     private Set<Projet> projetsCrees = new HashSet<>();
+
+    @OneToMany(mappedBy = "contributeur", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<BadgeContributeur> badgeContributeurs = new HashSet<>();
+
 }

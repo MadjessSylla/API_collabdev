@@ -9,22 +9,23 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 @Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
-public class BadgeParticipant {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"id_badge", "id_contributeur"}))
+public class BadgeContributeur {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_badge_participant")
+    @Column(name = "id_badge_contributeur")
     private int id;
 
     private LocalDate dateAcquisition;
 
-    // Un badge participant est associé à un badge spécifique
+    // Badge associé
     @ManyToOne
-    @JoinColumn(name = "id_bagde")
+    @JoinColumn(name = "id_badge")
     private Badge badge;
 
-    // Un badge participant est associé à un participant spécifique
+    // Contributeur associé
     @ManyToOne
-    @JoinColumn(name = "id_participant")
-    private Participant participant;
+    @JoinColumn(name = "id_contributeur")
+    private Contributeur contributeur;
 }
