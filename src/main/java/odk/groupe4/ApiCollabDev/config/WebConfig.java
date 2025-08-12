@@ -22,14 +22,14 @@ public class WebConfig {
         return new WebMvcConfigurer() {
 
             /**
-             * Configure les mappings CORS pour l'API.
+             * Configure-les mappings CORS pour l'API.
              * @param registry objet qui gère les règles CORS
              */
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Autorise toutes les routes de l'API
                         .allowedOrigins("http://localhost:4200") // Autorise uniquement le frontend Angular local
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Méthodes autorisées
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH") // Méthodes autorisées
                         .allowedHeaders("*"); // Tous les headers autorisés
             }
         };
