@@ -4,6 +4,7 @@ import odk.groupe4.ApiCollabDev.dao.NotificationDao;
 import odk.groupe4.ApiCollabDev.dto.NotificationDto;
 import odk.groupe4.ApiCollabDev.models.Notification;
 import odk.groupe4.ApiCollabDev.models.Utilisateur;
+import odk.groupe4.ApiCollabDev.service.utility.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

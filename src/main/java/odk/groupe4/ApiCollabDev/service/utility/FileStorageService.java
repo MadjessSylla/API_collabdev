@@ -1,4 +1,4 @@
-package odk.groupe4.ApiCollabDev.service;
+package odk.groupe4.ApiCollabDev.service.utility;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

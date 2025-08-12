@@ -10,9 +10,6 @@ import java.util.List;
 
 @Repository
 public interface FonctionnaliteDao extends JpaRepository<Fonctionnalite, Integer> {
-    List<Fonctionnalite> findByStatusFeatures(FeaturesStatus status);
-    
     List<Fonctionnalite> findByProjetId(int projetId);
 
-    boolean existsByParticipantAndStatusFeatures(Participant participant, FeaturesStatus featuresStatus);
 }

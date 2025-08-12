@@ -15,6 +15,4 @@ public interface ContributeurDao extends JpaRepository<Contributeur, Integer> {
     ContributeurSoldeDto totalCoinContributeur(int id);
 
     Optional<Contributeur> findByTelephone(String telephone);
-    
-    Optional<Contributeur> findByEmail(String email);
 }

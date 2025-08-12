@@ -13,9 +13,6 @@ import java.util.List;
 @Repository
 public interface ContributionDao extends JpaRepository<Contribution, Integer> {
     List<Contribution> findByParticipantIdAndStatus(int participantId, ContributionStatus status);
-    
-    @Query("SELECT c FROM Contribution c WHERE c.participant.contributeur.id = :idUtilisateur")
-    List<Contribution> findByUserId(@Param("idUtilisateur") Integer idUtilisateur);
 
     List<Contribution> findByParticipant(Participant participant);
     

@@ -160,47 +160,6 @@ public class ContributeurController {
     }
 
     @Operation(
-            summary = "Mettre à jour la photo du contributeur",
-            description = "Met à jour le photo de profil d'un contributeur"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Contributeur mis à jour avec succès",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ContributeurResponseDto.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Contributeur non trouvé",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Données de mise à jour invalides",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-                    )
-            )
-    })
-    @PutMapping("/{id}/photo")
-    public ResponseEntity<ContributeurResponseDto> updateContributeurPhotoProfil(
-            @Parameter(description = "ID du contributeur à modifier", required = true, example = "1")
-            @PathVariable int id,
-            @Parameter(description = "Nouvelles url de la photo du contributeur", required = true)
-            @Valid @RequestBody ContributeurPhotoDto contributeurDto) {
-        ContributeurResponseDto contributeur = contributeurService.updatePhotoProfil(id, contributeurDto);
-        return ResponseEntity.ok(contributeur);
-    }
-
-
-    @Operation(
             summary = "Afficher le solde d'un contributeur",
             description = "Retourne le solde actuel en coins d'un contributeur spécifique"
     )
@@ -231,13 +190,13 @@ public class ContributeurController {
     }
 
     @Operation(
-            summary = "Désactiver un contributeur",
-            description = "Désactive le compte d'un contributeur (le rend inactif)"
+            summary = "Mettre à jour le statut d'un contributeur",
+            description = "Active ou désactive le compte d'un contributeur selon le paramètre `actif`"
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Contributeur désactivé avec succès",
+                    description = "Statut du contributeur mis à jour avec succès",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ContributeurResponseDto.class)
@@ -252,41 +211,16 @@ public class ContributeurController {
                     )
             )
     })
-    @PatchMapping("/{id}/deactivate")
-    public ResponseEntity<ContributeurResponseDto> deactivateContributeur(
-            @Parameter(description = "ID du contributeur à désactiver", required = true, example = "1")
-            @PathVariable int id) {
-        ContributeurResponseDto contributeur = contributeurService.desactivateContributeur(id);
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ContributeurResponseDto> updateContributeurStatus(
+            @Parameter(description = "ID du contributeur", required = true, example = "1")
+            @PathVariable int id,
+
+            @Parameter(description = "Nouveau statut : true pour activer, false pour désactiver", required = true, example = "true")
+            @RequestParam boolean actif
+    ) {
+        ContributeurResponseDto contributeur = contributeurService.updateContributeurStatus(id, actif);
         return ResponseEntity.ok(contributeur);
     }
 
-    @Operation(
-            summary = "Réactiver un contributeur",
-            description = "Réactive le compte d'un contributeur (le rend actif)"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Contributeur réactivé avec succès",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ContributeurResponseDto.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Contributeur non trouvé",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-                    )
-            )
-    })
-    @PatchMapping("/{id}/activate")
-    public ResponseEntity<ContributeurResponseDto> activateContributeur(
-            @Parameter(description = "ID du contributeur à réactiver", required = true, example = "1")
-            @PathVariable int id) {
-        ContributeurResponseDto contributeur = contributeurService.activateContributeur(id);
-        return ResponseEntity.ok(contributeur);
-    }
 }

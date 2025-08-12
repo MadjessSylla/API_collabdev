@@ -1,4 +1,4 @@
-package odk.groupe4.ApiCollabDev;
+package odk.groupe4.ApiCollabDev.config;
 
 import jakarta.annotation.PostConstruct;
 import odk.groupe4.ApiCollabDev.dao.AdministrateurDao;

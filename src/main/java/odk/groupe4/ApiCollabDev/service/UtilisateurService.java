@@ -159,23 +159,27 @@ public class UtilisateurService {
         if (utilisateur instanceof Contributeur contributeur) {
             return new UtilisateurResponseDto(
                     utilisateur.getId(),
-                    utilisateur.getEmail(),
-                    type,
-                    utilisateur.isActif(),
                     contributeur.getNom(),
                     contributeur.getPrenom(),
                     contributeur.getTelephone(),
+                    utilisateur.getEmail(),
+                    utilisateur.isActif(),
+                    type,
                     contributeur.getPointExp(),
-                    contributeur.getTotalCoin()
+                    contributeur.getTotalCoin(),
+                    contributeur.getBiographie(),
+                    contributeur.getPhotoProfil()
             );
             // Si l'utilisateur est un administrateur, retourner les détails de l'administrateur
         } else {
             return new UtilisateurResponseDto(
                     utilisateur.getId(),
-                    utilisateur.getEmail(),
-                    type,
-                    utilisateur.isActif(),
                     null,
+                    null,
+                    null,
+                    utilisateur.getEmail(),
+                    utilisateur.isActif(),
+                    type,
                     null,
                     null,
                     null,
@@ -205,11 +209,11 @@ public class UtilisateurService {
         return new LoginResponseDto(
                 utilisateur.getId(),
                 utilisateur.getEmail(),
+                utilisateur.isActif(),
+                "Connexion réussie",
                 type,
                 nom,
-                prenom,
-                utilisateur.isActif(),
-                "Connexion réussie"
+                prenom
         );
     }
 }

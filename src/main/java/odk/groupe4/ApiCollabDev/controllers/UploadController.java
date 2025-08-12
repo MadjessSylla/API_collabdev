@@ -13,7 +13,7 @@ import odk.groupe4.ApiCollabDev.dto.FileUploadResponseDto;
 import odk.groupe4.ApiCollabDev.models.Contributeur;
 import odk.groupe4.ApiCollabDev.models.Contribution;
 import odk.groupe4.ApiCollabDev.models.Projet;
-import odk.groupe4.ApiCollabDev.service.FileStorageService;
+import odk.groupe4.ApiCollabDev.service.utility.FileStorageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -101,30 +101,11 @@ public class ContributeurService {
         return mapToResponseDto(updatedContributeur);
     }
 
-    public ContributeurResponseDto updatePhotoProfil (int id, ContributeurPhotoDto dto){
+    public ContributeurResponseDto updateContributeurStatus(int id, boolean actif) {
         Contributeur contributeur = contributeurDao.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contributeur non trouvé avec l'ID: " + id));
 
-        contributeur.setPhotoProfil(dto.getPhotoProfil());
-
-        Contributeur updatedContributeur = contributeurDao.save(contributeur);
-        return mapToResponseDto(updatedContributeur);
-    }
-
-    public ContributeurResponseDto desactivateContributeur(int id) {
-        Contributeur contributeur = contributeurDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("Contributeur non trouvé avec l'ID: " + id));
-
-        contributeur.setActif(false);
-        Contributeur savedContributeur = contributeurDao.save(contributeur);
-        return mapToResponseDto(savedContributeur);
-    }
-
-    public ContributeurResponseDto activateContributeur(int id) {
-        Contributeur contributeur = contributeurDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("Contributeur non trouvé avec l'ID: " + id));
-
-        contributeur.setActif(true);
+        contributeur.setActif(actif);
         Contributeur savedContributeur = contributeurDao.save(contributeur);
         return mapToResponseDto(savedContributeur);
     }
