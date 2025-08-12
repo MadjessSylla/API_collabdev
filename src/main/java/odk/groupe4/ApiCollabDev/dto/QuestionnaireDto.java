@@ -10,20 +10,14 @@ import java.util.List;
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class QuestionnaireDto {
     private Integer id;
-
     @NotBlank
     private String titre;
-
     private String description;
-
     @NotNull
     private TypeQuiz type; // enum sans @Size
-
     @NotNull
     private Integer dureeEstimee;
-
     private Integer contributeurId;
     private Integer projetId;
-
     private List<QuestionDto> questions;
 }

@@ -40,7 +40,7 @@ public class QuestionnaireController {
                     description = "Questionnaire créé avec succès",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = QuestionnaireResponseDto.class)
+                            schema = @Schema(implementation = QuestionnaireDetailResponseDto.class)
                     )
             ),
             @ApiResponse(
@@ -53,30 +53,14 @@ public class QuestionnaireController {
             )
     })
     @PostMapping("/projet/{idProjet}/createur/{idCreateur}")
-    public ResponseEntity<QuestionnaireResponseDto> creerQuestionnaireProjet(
+    public ResponseEntity<QuestionnaireDetailResponseDto> creerQuestionnaireProjet(
             @Parameter(description = "ID du projet", required = true, example = "1")
             @PathVariable int idProjet,
             @Parameter(description = "ID du créateur", required = true, example = "1")
             @PathVariable int idCreateur,
             @Parameter(description = "Données du questionnaire", required = true)
             @Valid @RequestBody QuestionnaireDto dto) {
-        QuestionnaireResponseDto questionnaire = questionnaireService.creerQuestionnaireProjet(idProjet, idCreateur, dto);
-        return new ResponseEntity<>(questionnaire, HttpStatus.CREATED);
-    }
-
-    @Operation(
-            summary = "Créer un questionnaire pour un template",
-            description = "Permet à un administrateur de créer un questionnaire pour un template de projet"
-    )
-    @PostMapping("/template/{idTemplate}/admin/{idAdmin}")
-    public ResponseEntity<QuestionnaireResponseDto> creerQuestionnaireTemplate(
-            @Parameter(description = "ID du template", required = true, example = "1")
-            @PathVariable int idTemplate,
-            @Parameter(description = "ID de l'administrateur", required = true, example = "1")
-            @PathVariable int idAdmin,
-            @Parameter(description = "Données du questionnaire", required = true)
-            @Valid @RequestBody QuestionnaireDto dto) {
-        QuestionnaireResponseDto questionnaire = questionnaireService.creerQuestionnaireTemplate(idTemplate, idAdmin, dto);
+        QuestionnaireDetailResponseDto questionnaire = questionnaireService.creerQuestionnaireProjet(idProjet, idCreateur, dto);
         return new ResponseEntity<>(questionnaire, HttpStatus.CREATED);
     }
 
@@ -108,17 +92,81 @@ public class QuestionnaireController {
         return ResponseEntity.ok(resultat);
     }
 
+    @Operation(
+            summary = "Récupérer un questionnaire par ID avec tous les détails",
+            description = "Retourne les détails complets d'un questionnaire spécifique incluant toutes les questions, informations du créateur et du projet"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Questionnaire récupéré avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = QuestionnaireDetailResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Questionnaire non trouvé"
+            )
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<QuestionnaireDetailResponseDto> getQuestionnaireById(
+            @Parameter(description = "ID du questionnaire", required = true, example = "1")
+            @PathVariable int id) {
+        QuestionnaireDetailResponseDto questionnaire = questionnaireService.getQuestionnaireById(id);
+        return ResponseEntity.ok(questionnaire);
+    }
 
     @Operation(
-            summary = "Récupérer les questionnaires d'un projet",
-            description = "Retourne tous les questionnaires associés à un projet spécifique"
+            summary = "Récupérer les questionnaires d'un projet avec tous les détails",
+            description = "Retourne tous les questionnaires associés à un projet spécifique avec leurs détails complets (questions, créateur, etc.)"
     )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Liste des questionnaires récupérée avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = QuestionnaireDetailResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Projet non trouvé"
+            )
+    })
     @GetMapping("/projet/{idProjet}")
-    public ResponseEntity<List<QuestionnaireResponseDto>> getQuestionnairesByProjet(
+    public ResponseEntity<List<QuestionnaireDetailResponseDto>> getQuestionnairesByProjet(
             @Parameter(description = "ID du projet", required = true, example = "1")
             @PathVariable int idProjet) {
-        List<QuestionnaireResponseDto> questionnaires = questionnaireService.getQuestionnairesByProjet(idProjet);
+        List<QuestionnaireDetailResponseDto> questionnaires = questionnaireService.getQuestionnairesByProjet(idProjet);
         return ResponseEntity.ok(questionnaires);
     }
 
+    @Operation(
+            summary = "Modifier un questionnaire",
+            description = "Met à jour les informations d'un questionnaire existant"
+    )
+    @PutMapping("/{id}")
+    public ResponseEntity<QuestionnaireDetailResponseDto> modifierQuestionnaire(
+            @Parameter(description = "ID du questionnaire", required = true, example = "1")
+            @PathVariable int id,
+            @Parameter(description = "Nouvelles données du questionnaire", required = true)
+            @Valid @RequestBody QuestionnaireDto dto) {
+        QuestionnaireDetailResponseDto questionnaire = questionnaireService.modifierQuestionnaire(id, dto);
+        return ResponseEntity.ok(questionnaire);
+    }
+
+    @Operation(
+            summary = "Supprimer un questionnaire",
+            description = "Supprime définitivement un questionnaire et toutes ses questions"
+    )
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> supprimerQuestionnaire(
+            @Parameter(description = "ID du questionnaire", required = true, example = "1")
+            @PathVariable int id) {
+        questionnaireService.supprimerQuestionnaire(id);
+        return ResponseEntity.noContent().build();
+    }
 }
