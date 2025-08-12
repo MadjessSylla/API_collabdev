@@ -2,6 +2,7 @@ package odk.groupe4.ApiCollabDev.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -55,6 +56,59 @@ public class ContributionController {
         List<ContributionDto> contributions = contributionService.afficherLaListeDesContribution(status);
         return ResponseEntity.ok(contributions);
     }
+
+    @Operation(
+            summary = "Récupérer les contributions d'un projet avec filtre de statut optionnel",
+            description = "Retourne la liste des contributions liées à un projet donné, " +
+                    "filtrées par statut si précisé. Si aucun statut n'est fourni, toutes les contributions du projet sont retournées."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Liste des contributions récupérée avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = ContributionDto.class))
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Requête invalide (ex: ID projet invalide ou paramètre statut incorrect)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Projet non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            )
+    })
+    @GetMapping("/projet/{projetId}")
+    // Affiche toutes les contributions d'un projet par statut
+    public ResponseEntity<List<ContributionDto>> getContributionsByProjet(
+            @Parameter(
+                    description = "ID unique du projet dont on veut récupérer les contributions",
+                    required = true,
+                    example = "42"
+            )
+            @PathVariable int projetId,
+            @Parameter(
+                    description = "Filtrer les contributions selon leur statut. " +
+                            "Valeurs possibles : ENVOYE, VALIDE, REJETE. Paramètre optionnel.",
+                    required = false,
+                    example = "VALIDE"
+            )
+            @RequestParam(required = false) ContributionStatus status) {
+        List<ContributionDto> contributions = contributionService.afficherContributionsParProjetEtStatus(projetId, status);
+        return ResponseEntity.ok(contributions);
+    }
+
+
 
     @Operation(
         summary = "Récupérer une contribution par ID",

@@ -13,10 +13,10 @@ import java.util.List;
 @Repository
 public interface ContributionDao extends JpaRepository<Contribution, Integer> {
     List<Contribution> findByParticipantIdAndStatus(int participantId, ContributionStatus status);
-
     List<Contribution> findByParticipant(Participant participant);
-    
     List<Contribution> findByStatus(ContributionStatus status);
-    
     List<Contribution> findByFonctionnaliteId(int fonctionnaliteId);
+    List<Contribution> findByParticipantIn(List<Participant> participants);
+    List<Contribution> findByParticipantInAndStatus(List<Participant> participants, ContributionStatus status);
+
 }
