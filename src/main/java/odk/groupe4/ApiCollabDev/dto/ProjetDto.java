@@ -20,31 +20,17 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class ProjetDto {
-    private Integer id;
-
     @NotBlank(message = "Le titre est obligatoire")
     private String titre;
-
     @NotBlank(message = "La description est obligatoire")
     private String description;
-
     @NotNull(message = "Le domaine est obligatoire")
     private ProjectDomain domaine;
-
     @NotNull(message = "Le secteur est obligatoire")
     private ProjectSector secteur;
-
-    private String urlCahierDeCharge;
-
-    private ProjectStatus status;
     private ProjectLevel niveau;
-
-    private LocalDate dateCreation;
     private LocalDate dateEcheance;
-
     private Integer createurId;
-    private Integer validateurId;
-
     // Ajout pour aligner avec le service (détermine le profil du participant créateur)
     private RolePorteurProjet role;
 }

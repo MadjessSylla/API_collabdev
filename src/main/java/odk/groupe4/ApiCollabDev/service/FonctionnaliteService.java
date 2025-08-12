@@ -108,6 +108,23 @@ public class FonctionnaliteService {
     }
 
     /**
+     * Met à jour uniquement le statut d'une fonctionnalité.
+     *
+     * @param id     l'ID de la fonctionnalité à mettre à jour
+     * @param status le nouveau statut
+     * @return le DTO de la fonctionnalité mise à jour
+     */
+    public FonctionnaliteResponseDto updateStatus(int id, FeaturesStatus status) {
+        Fonctionnalite fonctionnalite = fonctionnaliteDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("Fonctionnalité non trouvée avec l'ID: " + id));
+
+        fonctionnalite.setStatusFeatures(status);
+        Fonctionnalite updated = fonctionnaliteDao.save(fonctionnalite);
+
+        return mapToResponseDto(updated);
+    }
+
+    /**
      * Mappe une entité Fonctionnalite à un DTO FonctionnaliteResponseDto.
      *
      * @param fonctionnalite l'entité à mapper

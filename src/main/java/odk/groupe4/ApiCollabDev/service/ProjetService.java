@@ -1,16 +1,8 @@
 package odk.groupe4.ApiCollabDev.service;
 
-import odk.groupe4.ApiCollabDev.dao.AdministrateurDao;
-import odk.groupe4.ApiCollabDev.dao.ContributeurDao;
-import odk.groupe4.ApiCollabDev.dao.ParticipantDao;
-import odk.groupe4.ApiCollabDev.dao.ProjetDao;
-import odk.groupe4.ApiCollabDev.dto.ProjetCahierDto;
-import odk.groupe4.ApiCollabDev.dto.ProjetDto;
-import odk.groupe4.ApiCollabDev.dto.ProjetResponseDto;
-import odk.groupe4.ApiCollabDev.models.Administrateur;
-import odk.groupe4.ApiCollabDev.models.Contributeur;
-import odk.groupe4.ApiCollabDev.models.Participant;
-import odk.groupe4.ApiCollabDev.models.Projet;
+import odk.groupe4.ApiCollabDev.dao.*;
+import odk.groupe4.ApiCollabDev.dto.*;
+import odk.groupe4.ApiCollabDev.models.*;
 import odk.groupe4.ApiCollabDev.models.enums.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,14 +11,24 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service qui gère la logique métier pour les projets :
+ * - Création, validation, rejet
+ * - Filtrage par domaine, secteur, contributeur, statut
+ * - Notifications associées
+ */
 @Service
 public class ProjetService {
+
     private final ProjetDao projetDao;
     private final AdministrateurDao administrateurDao;
     private final ContributeurDao contributeurDao;
     private final ParticipantDao participantDao;
     private final NotificationService notificationService;
 
+    /**
+     * Injection des dépendances via constructeur
+     */
     @Autowired
     public ProjetService(ProjetDao projetDao,
                          AdministrateurDao administrateurDao,
@@ -40,39 +42,50 @@ public class ProjetService {
         this.notificationService = notificationService;
     }
 
+    /**
+     * Récupère tous les projets ou uniquement ceux d'un statut donné.
+     */
     public List<ProjetResponseDto> getAllProjets(ProjectStatus status) {
-        List<Projet> projets;
-        if (status != null) {
-            projets = projetDao.findByStatus(status);
-        } else {
-            projets = projetDao.findAll();
-        }
+        List<Projet> projets = (status != null)
+                ? projetDao.findByStatus(status)
+                : projetDao.findAll();
+
         return projets.stream()
                 .map(this::mapToResponseDto)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retourne les projets créés par un contributeur spécifique.
+     */
     public List<ProjetResponseDto> getProjetsByContributeur(int idContributeur) {
         Contributeur contributeur = contributeurDao.findById(idContributeur)
                 .orElseThrow(() -> new RuntimeException("Contributeur introuvable avec l'ID: " + idContributeur));
-        List<Projet> projets = projetDao.findByCreateur(contributeur);
-        return projets.stream()
+
+        return projetDao.findByCreateur(contributeur).stream()
                 .map(this::mapToResponseDto)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Récupère les projets débloqués pour un contributeur donné.
+     */
     public List<ProjetResponseDto> getProjetsDebloquesByContributeur(int id) {
         Contributeur contributeur = contributeurDao.findById(id)
                 .orElseThrow(() -> new RuntimeException("Contributeur non trouvé avec l'ID: " + id));
 
-        // Conversion en liste (optionnel, car c'est un Set)
+        // Ici, on transforme le Set de projets en liste de DTO
         return contributeur.getProjetsDebloques().stream()
                 .map(this::mapToResponseDto)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Récupère les projets ouverts selon le domaine et/ou secteur.
+     */
     public List<ProjetResponseDto> getProjetsOuverts(ProjectDomain domaine, ProjectSector secteur) {
         List<Projet> projets;
+
         if (domaine != null && secteur != null) {
             projets = projetDao.findByStatusAndDomaineAndSecteur(ProjectStatus.OUVERT, domaine, secteur);
         } else if (domaine != null) {
@@ -82,41 +95,55 @@ public class ProjetService {
         } else {
             projets = projetDao.findByStatus(ProjectStatus.OUVERT);
         }
+
         return projets.stream()
                 .map(this::mapToResponseDto)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Filtre les projets par domaine.
+     */
     public List<ProjetResponseDto> getProjetsByDomaine(ProjectDomain domaine) {
-        List<Projet> projets = projetDao.findByDomaine(domaine);
-        return projets.stream()
+        return projetDao.findByDomaine(domaine).stream()
                 .map(this::mapToResponseDto)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Filtre les projets par secteur.
+     */
     public List<ProjetResponseDto> getProjetsBySecteur(ProjectSector secteur) {
-        List<Projet> projets = projetDao.findBySecteur(secteur);
-        return projets.stream()
+        return projetDao.findBySecteur(secteur).stream()
                 .map(this::mapToResponseDto)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Récupère un projet par son identifiant.
+     */
     public ProjetResponseDto getProjetById(int id) {
         Projet projet = projetDao.findById(id)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID: " + id));
         return mapToResponseDto(projet);
     }
 
+    /**
+     * Permet à un contributeur de proposer un projet.
+     * Crée également un participant lié au projet.
+     * Notifie tous les administrateurs de la soumission.
+     */
     public ProjetResponseDto proposerProjet(ProjetDto projetDto, int idCreateurProjet) {
         Contributeur contributeur = contributeurDao.findById(idCreateurProjet)
                 .orElseThrow(() -> new RuntimeException("Contributeur introuvable"));
 
+        // Création du projet
         Projet projet = new Projet();
         projet.setTitre(projetDto.getTitre());
         projet.setDescription(projetDto.getDescription());
         projet.setDomaine(projetDto.getDomaine());
         projet.setSecteur(projetDto.getSecteur());
-        projet.setUrlCahierDeCharge(projetDto.getUrlCahierDeCharge());
+        // L'URL du cahier de charge sera géré par uploadProjetCahier() de UploadController
         projet.setStatus(ProjectStatus.EN_ATTENTE);
         projet.setCreateur(contributeur);
         projet.setDateCreation(LocalDate.now());
@@ -126,7 +153,7 @@ public class ProjetService {
 
         Projet savedProjet = projetDao.save(projet);
 
-        // Crée automatiquement un Participant pour le créateur (profil selon role)
+        // Création du participant associé au créateur
         Participant participant = new Participant();
         participant.setStatut(ParticipantStatus.ACCEPTE);
         participant.setEstDebloque(false);
@@ -134,17 +161,17 @@ public class ProjetService {
         participant.setProjet(savedProjet);
         participant.setDatePostulation(LocalDate.now());
 
+        // Détermination du profil en fonction du rôle choisi
         if (projetDto.getRole() == RolePorteurProjet.PORTEUR_DE_PROJET) {
             participant.setProfil(ParticipantProfil.PORTEUR_DE_PROJET);
         } else if (projetDto.getRole() == RolePorteurProjet.GESTIONNAIRE) {
             participant.setProfil(ParticipantProfil.GESTIONNAIRE);
         } else {
-            // Par défaut, si non renseigné, on considère PORTEUR_DE_PROJET
-            participant.setProfil(ParticipantProfil.PORTEUR_DE_PROJET);
+            participant.setProfil(ParticipantProfil.PORTEUR_DE_PROJET); // Par défaut
         }
         participantDao.save(participant);
 
-        // Notifier tous les administrateurs
+        // Notification des administrateurs
         administrateurDao.findAll().forEach(administrateur ->
                 notificationService.createNotification(
                         administrateur,
@@ -157,6 +184,9 @@ public class ProjetService {
         return mapToResponseDto(savedProjet);
     }
 
+    /**
+     * Valide un projet en attente.
+     */
     public ProjetResponseDto validerProjet(int idProjet, int idUserValide) {
         Projet projet = projetDao.findById(idProjet)
                 .orElseThrow(() -> new RuntimeException("Projet introuvable"));
@@ -171,16 +201,19 @@ public class ProjetService {
         projet.setValidateur(admin);
         projet.setStatus(ProjectStatus.OUVERT);
 
+        // Notifier le créateur
         notificationService.createNotification(
                 projet.getCreateur(),
                 "Projet validé",
                 "Votre projet '" + projet.getTitre() + "' a été validé par le service de validation."
         );
 
-        Projet savedProjet = projetDao.save(projet);
-        return mapToResponseDto(savedProjet);
+        return mapToResponseDto(projetDao.save(projet));
     }
 
+    /**
+     * Rejette un projet en attente et le supprime de la base.
+     */
     public void rejeterProjet(int idProjet, int idUserValide) {
         Projet projet = projetDao.findById(idProjet)
                 .orElseThrow(() -> new RuntimeException("Projet introuvable"));
@@ -192,27 +225,34 @@ public class ProjetService {
         Administrateur admin = administrateurDao.findById(idUserValide)
                 .orElseThrow(() -> new RuntimeException("Administrateur introuvable"));
 
-        // On passe le statut à REJETE et on supprime le projet (logique actuelle)
         projet.setValidateur(admin);
         projet.setStatus(ProjectStatus.REJETE);
 
+        // Notifier le créateur
         notificationService.createNotification(
                 projet.getCreateur(),
                 "Projet rejeté",
                 "Votre projet '" + projet.getTitre() + "' a été rejeté par le service de validation."
         );
 
+        // Suppression du projet
         projetDao.delete(projet);
     }
 
+    /**
+     * Édite l'URL du cahier des charges d'un projet.
+     */
     public ProjetResponseDto editerCahierDeCharge(ProjetCahierDto projetCahierDto, int idProjet) {
         Projet projet = projetDao.findById(idProjet)
                 .orElseThrow(() -> new RuntimeException("Projet introuvable"));
+
         projet.setUrlCahierDeCharge(projetCahierDto.getUrlCahierDeCharge());
-        Projet savedProjet = projetDao.save(projet);
-        return mapToResponseDto(savedProjet);
+        return mapToResponseDto(projetDao.save(projet));
     }
 
+    /**
+     * Attribue un niveau de complexité à un projet.
+     */
     public ProjetResponseDto attribuerNiveau(int idProjet, int idAdministrateur, ProjectLevel niveau) {
         Projet projet = projetDao.findById(idProjet)
                 .orElseThrow(() -> new RuntimeException("Projet introuvable"));
@@ -237,10 +277,12 @@ public class ProjetService {
                 "Le niveau de complexité '" + niveau + "' a été attribué à votre projet '" + projet.getTitre() + "'."
         );
 
-        Projet savedProjet = projetDao.save(projet);
-        return mapToResponseDto(savedProjet);
+        return mapToResponseDto(projetDao.save(projet));
     }
 
+    /**
+     * Passe le projet au statut "EN_COURS".
+     */
     public ProjetResponseDto demarrerProjet(int idProjet) {
         Projet projet = projetDao.findById(idProjet)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID: " + idProjet));
@@ -251,6 +293,7 @@ public class ProjetService {
 
         projet.setStatus(ProjectStatus.EN_COURS);
 
+        // Notifier tous les participants
         projet.getParticipants().forEach(participant ->
                 notificationService.createNotification(
                         participant.getContributeur(),
@@ -259,10 +302,12 @@ public class ProjetService {
                 )
         );
 
-        Projet savedProjet = projetDao.save(projet);
-        return mapToResponseDto(savedProjet);
+        return mapToResponseDto(projetDao.save(projet));
     }
 
+    /**
+     * Passe le projet au statut "TERMINER".
+     */
     public ProjetResponseDto terminerProjet(int idProjet) {
         Projet projet = projetDao.findById(idProjet)
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID: " + idProjet));
@@ -272,10 +317,12 @@ public class ProjetService {
         }
 
         projet.setStatus(ProjectStatus.TERMINER);
-        Projet savedProjet = projetDao.save(projet);
-        return mapToResponseDto(savedProjet);
+        return mapToResponseDto(projetDao.save(projet));
     }
 
+    /**
+     * Convertit un objet Projet en ProjetResponseDto pour l'API.
+     */
     private ProjetResponseDto mapToResponseDto(Projet projet) {
         return new ProjetResponseDto(
                 projet.getId(),
@@ -291,7 +338,8 @@ public class ProjetService {
                 projet.getCreateur() != null ? projet.getCreateur().getPrenom() : null,
                 projet.getValidateur() != null ? projet.getValidateur().getEmail() : null,
                 projet.getParticipants() != null ? projet.getParticipants().size() : 0,
-                projet.getFonctionnalites() != null ? projet.getFonctionnalites().size() : 0
+                projet.getFonctionnalites() != null ? projet.getFonctionnalites().size() : 0,
+                projet.getDateEcheance()
         );
     }
 }

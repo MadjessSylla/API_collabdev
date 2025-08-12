@@ -116,6 +116,34 @@ public class FonctionnaliteController {
     }
 
     @Operation(
+            summary = "Changer le statut d'une fonctionnalité",
+            description = "Met à jour uniquement le statut (A_FAIRE, EN_COURS, TERMINE) d'une fonctionnalité"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Statut mis à jour avec succès",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = FonctionnaliteResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Fonctionnalité non trouvée",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class))
+            )
+    })
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<FonctionnaliteResponseDto> updateFonctionnaliteStatus(
+            @Parameter(description = "ID de la fonctionnalité", required = true, example = "1")
+            @PathVariable int id,
+            @Parameter(description = "Nouveau statut", required = true, example = "EN_COURS")
+            @RequestParam FeaturesStatus status) {
+
+        FonctionnaliteResponseDto updated = fonctionnaliteService.updateStatus(id, status);
+        return ResponseEntity.ok(updated);
+    }
+
+
+    @Operation(
         summary = "Récupérer les fonctionnalités d'un projet",
         description = "Retourne toutes les fonctionnalités associées à un projet spécifique"
     )
