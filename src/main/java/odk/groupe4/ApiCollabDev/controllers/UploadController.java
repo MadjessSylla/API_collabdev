@@ -107,6 +107,78 @@ public class UploadController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responses);
     }
 
+    /* ---------------------- Modification ---------------------- */
+
+    @Operation(summary = "Modifier la photo de profil d'un contributeur")
+    @ApiResponse(responseCode = "200", description = "Photo modifiée avec succès",
+            content = @Content(schema = @Schema(implementation = FileUploadResponseDto.class)))
+    @PutMapping("/contributeurs/{id}/photo")
+    public ResponseEntity<FileUploadResponseDto> updateContributeurPhoto(
+            @PathVariable int id,
+            @RequestParam("file") MultipartFile file
+    ) throws Exception {
+        Contributeur c = contributeurDao.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Contributeur non trouvé: " + id));
+
+        // Supprimer l'ancienne photo si elle existe
+        if (c.getPhotoProfil() != null && !c.getPhotoProfil().isEmpty()) {
+            storage.delete(c.getPhotoProfil());
+        }
+
+        // Uploader la nouvelle photo
+        var stored = storage.store(file, "photos");
+        c.setPhotoProfil(stored.url());
+        contributeurDao.save(c);
+
+        return ResponseEntity.ok()
+                .body(new FileUploadResponseDto(stored.fileName(), stored.url(), stored.size(), stored.contentType()));
+    }
+
+    @Operation(summary = "Modifier le cahier des charges d'un projet")
+    @ApiResponse(responseCode = "200", description = "Cahier des charges modifié avec succès")
+    @PutMapping("/projets/{id}/cahier")
+    public ResponseEntity<FileUploadResponseDto> updateProjetCahier(
+            @PathVariable int id,
+            @RequestParam("file") MultipartFile file
+    ) throws Exception {
+        Projet p = projetDao.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Projet non trouvé: " + id));
+
+        // Supprimer l'ancien fichier s'il existe
+        if (p.getUrlCahierDeCharge() != null && !p.getUrlCahierDeCharge().isEmpty()) {
+            storage.delete(p.getUrlCahierDeCharge());
+        }
+
+        var stored = storage.store(file, "cahiers");
+        p.setUrlCahierDeCharge(stored.url());
+        projetDao.save(p);
+
+        return ResponseEntity.ok()
+                .body(new FileUploadResponseDto(stored.fileName(), stored.url(), stored.size(), stored.contentType()));
+    }
+
+    @Operation(summary = "Modifier le fichier d'une contribution")
+    @PutMapping("/contributions/{id}/fichier")
+    public ResponseEntity<FileUploadResponseDto> updateContributionFile(
+            @PathVariable int id,
+            @RequestParam("file") MultipartFile file
+    ) throws Exception {
+        Contribution c = contributionDao.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Contribution non trouvée: " + id));
+
+        // Supprimer l'ancien fichier s'il existe
+        if (c.getFileUrl() != null && !c.getFileUrl().isEmpty()) {
+            storage.delete(c.getFileUrl());
+        }
+
+        var stored = storage.store(file, "contributions");
+        c.setFileUrl(stored.url());
+        contributionDao.save(c);
+
+        return ResponseEntity.ok()
+                .body(new FileUploadResponseDto(stored.fileName(), stored.url(), stored.size(), stored.contentType()));
+    }
+
     /* ---------------------- SUPPRESSION ---------------------- */
 
     @Operation(summary = "Supprimer un fichier par son chemin")
