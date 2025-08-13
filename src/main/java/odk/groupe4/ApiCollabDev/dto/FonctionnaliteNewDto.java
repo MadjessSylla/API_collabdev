@@ -26,7 +26,5 @@ public class FonctionnaliteNewDto {
     private List<String> criteresAcceptation;
     private ProjectPriority importance;
     private List<String> motsCles;
-    @NotNull(message = "L'identifiant du projet est obligatoire")
-    private Integer projetId;
     private Integer participantId;
 }
