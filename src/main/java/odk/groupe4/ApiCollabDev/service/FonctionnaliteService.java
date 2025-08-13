@@ -1,27 +1,34 @@
 package odk.groupe4.ApiCollabDev.service;
 
 import odk.groupe4.ApiCollabDev.dao.FonctionnaliteDao;
+import odk.groupe4.ApiCollabDev.dao.ParticipantDao;
 import odk.groupe4.ApiCollabDev.dao.ProjetDao;
 import odk.groupe4.ApiCollabDev.dto.FonctionnaliteNewDto;
 import odk.groupe4.ApiCollabDev.dto.FonctionnaliteResponseDto;
 import odk.groupe4.ApiCollabDev.models.Fonctionnalite;
+import odk.groupe4.ApiCollabDev.models.Participant;
 import odk.groupe4.ApiCollabDev.models.Projet;
 import odk.groupe4.ApiCollabDev.models.enums.FeaturesStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class FonctionnaliteService {
     private final FonctionnaliteDao fonctionnaliteDao;
     private final ProjetDao projetDao;
+    private final ParticipantDao participantDao;
 
     @Autowired
-    public FonctionnaliteService(FonctionnaliteDao fonctionnaliteDao, ProjetDao projetDao) {
+    public FonctionnaliteService(FonctionnaliteDao fonctionnaliteDao,
+                                 ProjetDao projetDao,
+                                 ParticipantDao participantDao) {
         this.fonctionnaliteDao = fonctionnaliteDao;
         this.projetDao = projetDao;
+        this.participantDao = participantDao;
     }
 
     /**
@@ -36,6 +43,7 @@ public class FonctionnaliteService {
                 .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID: " + idProjet));
 
         Fonctionnalite fonctionnalite = new Fonctionnalite();
+
         fonctionnalite.setTitre(dto.getTitre());
         fonctionnalite.setContenu(dto.getContenu());
         fonctionnalite.setStatusFeatures(FeaturesStatus.A_FAIRE);
@@ -45,6 +53,14 @@ public class FonctionnaliteService {
         fonctionnalite.setImportance(dto.getImportance());
         fonctionnalite.setMotsCles(dto.getMotsCles());
         fonctionnalite.setProjet(projet);
+
+        Optional<Participant> p = participantDao.findById(dto.getParticipantId());
+        if(!p.isPresent()){
+            fonctionnalite.setParticipant(p.get());
+        } else {
+            // A la creation de la tâche, le gestionnaire n'a pas assigné de Participant
+            fonctionnalite.setParticipant(null);
+        }
 
         Fonctionnalite savedFonctionnalite = fonctionnaliteDao.save(fonctionnalite);
         return mapToResponseDto(savedFonctionnalite);

@@ -16,13 +16,11 @@ import java.util.List;
 @Builder
 public class FonctionnaliteNewDto {
 
-    private Integer id;
     @NotBlank(message = "Le titre est obligatoire")
     @Size(max = 100, message = "Le titre ne doit pas dépasser 100 caractères")
     private String titre;
     @Size(max = 500, message = "Le contenu ne doit pas dépasser 500 caractères")
     private String contenu;
-    private FeaturesStatus statusFeatures; // Par défaut A_FAIRE dans le service
     private LocalDate dateEcheance;
     private List<String> exigences;
     private List<String> criteresAcceptation;
