@@ -28,9 +28,8 @@ public class ProjetDto {
     private ProjectDomain domaine;
     @NotNull(message = "Le secteur est obligatoire")
     private ProjectSector secteur;
-    private ProjectLevel niveau;
+    private String urlCahierDeCharge;
     private LocalDate dateEcheance;
-    private Integer createurId;
     // Ajout pour aligner avec le service (détermine le profil du participant créateur)
     private RolePorteurProjet role;
 }

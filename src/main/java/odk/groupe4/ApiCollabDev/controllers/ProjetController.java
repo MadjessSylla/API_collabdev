@@ -20,6 +20,7 @@ import odk.groupe4.ApiCollabDev.models.enums.ProjectStatus;
 import odk.groupe4.ApiCollabDev.service.ProjetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,9 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/projets")
@@ -207,10 +206,9 @@ public class ProjetController {
         return ResponseEntity.ok(projets);
     }
 
-
     @Operation(
             summary = "Proposer un nouveau projet",
-            description = "Permet à un contributeur de proposer un nouveau projet collaboratif"
+            description = "Permet à un contributeur de proposer un nouveau projet collaboratif avec un cahier des charges optionnel"
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -223,7 +221,7 @@ public class ProjetController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Données du projet invalides",
+                    description = "Données du projet invalides ou erreur de téléversement",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
@@ -238,21 +236,33 @@ public class ProjetController {
                     )
             )
     })
-    // Proposer un nouveau projet par un contributeur
-    @PostMapping("/contributeur/{idPorteurProjet}")
+    @PostMapping(value = "/contributeur/{idPorteurProjet}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProjetResponseDto> proposerProjet(
             @Parameter(description = "ID du contributeur porteur du projet", required = true, example = "1")
             @PathVariable int idPorteurProjet,
             @Parameter(description = "Données du projet à proposer", required = true)
-            @Valid @RequestBody ProjetDto projetDto) {
-        ProjetResponseDto projet = projetService.proposerProjet(projetDto, idPorteurProjet);
-        return new ResponseEntity<>(projet, HttpStatus.CREATED);
+            @RequestPart("projet") @Valid ProjetDto projetDto,
+            @Parameter(description = "Fichier du cahier des charges (optionnel)", required = false)
+            @RequestPart(value = "cahierDesCharges", required = false) MultipartFile cahierDesCharges) {
+
+        try {
+            // Gérer l'upload du fichier si présent
+            if (cahierDesCharges != null && !cahierDesCharges.isEmpty()) {
+                String fileUrl = uploadFile(cahierDesCharges);
+                projetDto.setUrlCahierDeCharge(fileUrl);
+            }
+
+            ProjetResponseDto projet = projetService.proposerProjet(projetDto, idPorteurProjet);
+            return new ResponseEntity<>(projet, HttpStatus.CREATED);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Erreur lors du téléversement du fichier: " + e.getMessage());
+        }
     }
 
     @Operation(
             summary = "Mettre à jour un projet",
-            description = "Permet au créateur d'un projet de mettre à jour les détails de son projet. " +
-                    "Seul le créateur peut modifier son projet et uniquement si le projet est en attente ou ouvert."
+            description = "Permet au créateur d'un projet de modifier ses détails. Si le projet était validé, il repasse en attente de validation."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -265,7 +275,7 @@ public class ProjetController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Données invalides ou projet ne peut pas être modifié",
+                    description = "Données invalides ou projet non modifiable",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
@@ -281,7 +291,7 @@ public class ProjetController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Projet ou contributeur non trouvé",
+                    description = "Projet ou créateur non trouvé",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
@@ -290,7 +300,7 @@ public class ProjetController {
     })
     @PutMapping("/{idProjet}/createur/{idCreateur}")
     public ResponseEntity<ProjetResponseDto> mettreAJourProjet(
-            @Parameter(description = "ID du projet à mettre à jour", required = true, example = "1")
+            @Parameter(description = "ID du projet à modifier", required = true, example = "1")
             @PathVariable int idProjet,
             @Parameter(description = "ID du créateur du projet", required = true, example = "1")
             @PathVariable int idCreateur,
@@ -302,9 +312,7 @@ public class ProjetController {
 
     @Operation(
             summary = "Annuler un projet",
-            description = "Permet au créateur d'un projet d'annuler (supprimer) son projet. " +
-                    "Seul le créateur peut supprimer son projet et uniquement si le projet n'est pas en cours ou terminé. " +
-                    "Tous les participants seront notifiés de l'annulation."
+            description = "Permet au créateur d'un projet de l'annuler (supprimer). Impossible si le projet est en cours ou terminé."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -313,7 +321,7 @@ public class ProjetController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Le projet ne peut pas être annulé (en cours ou terminé)",
+                    description = "Projet non annulable dans son état actuel",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
@@ -329,7 +337,7 @@ public class ProjetController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Projet ou contributeur non trouvé",
+                    description = "Projet ou créateur non trouvé",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
@@ -376,7 +384,6 @@ public class ProjetController {
                     )
             )
     })
-    // Valider un projet proposé par un contributeur
     @PatchMapping("/{id}/validate/admin/{idAdmin}")
     public ResponseEntity<ProjetResponseDto> validerProjet(
             @Parameter(description = "ID du projet à valider", required = true, example = "1")
@@ -385,31 +392,6 @@ public class ProjetController {
             @PathVariable int idAdmin) {
         ProjetResponseDto projet = projetService.validerProjet(id, idAdmin);
         return ResponseEntity.ok(projet);
-    }
-
-    @PostMapping("/contributeur/upload")
-    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
-        try {
-            // Définit un dossier d'upload local
-            Path uploadDir = Paths.get("uploads");
-            if (!Files.exists(uploadDir)) {
-                Files.createDirectories(uploadDir);
-            }
-
-            String fileName = file.getOriginalFilename();
-            Path filePath = uploadDir.resolve(fileName);
-
-            Files.write(filePath, file.getBytes());
-
-            Map<String, String> response = new HashMap<>();
-            response.put("fileUrl", "/uploads/" + fileName);
-
-            return ResponseEntity.ok(response);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
     }
 
     @Operation(
@@ -430,7 +412,6 @@ public class ProjetController {
                     )
             )
     })
-    // Rejeter un projet proposé par un contributeur
     @DeleteMapping("/{id}/reject/admin/{idAdmin}")
     public ResponseEntity<Void> rejeterProjet(
             @Parameter(description = "ID du projet à rejeter", required = true, example = "1")
@@ -443,7 +424,7 @@ public class ProjetController {
 
     @Operation(
             summary = "Éditer le cahier des charges",
-            description = "Met à jour l'URL du cahier des charges d'un projet"
+            description = "Met à jour le cahier des charges d'un projet en téléversant un nouveau fichier ou en fournissant une URL"
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -464,22 +445,44 @@ public class ProjetController {
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "URL du cahier des charges invalide",
+                    description = "Erreur de téléversement ou données invalides",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
                     )
             )
     })
-    // Éditer le cahier des charges d'un projet
-    @PatchMapping("/{id}/cahier-charges")
+    @PatchMapping(value = "/{id}/cahier-charges", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProjetResponseDto> editerCahierDeCharge(
             @Parameter(description = "ID du projet", required = true, example = "1")
             @PathVariable int id,
-            @Parameter(description = "Nouvelle URL du cahier des charges", required = true)
-            @Valid @RequestBody ProjetCahierDto projetCahierDto) {
-        ProjetResponseDto projet = projetService.editerCahierDeCharge(projetCahierDto, id);
-        return ResponseEntity.ok(projet);
+            @Parameter(description = "URL du cahier des charges (optionnel si fichier fourni)", required = false)
+            @RequestPart(value = "cahierDto", required = false) ProjetCahierDto projetCahierDto,
+            @Parameter(description = "Fichier du cahier des charges (optionnel si URL fournie)", required = false)
+            @RequestPart(value = "cahierDesCharges", required = false) MultipartFile cahierDesCharges) {
+
+        try {
+            String urlCahier = null;
+
+            // Priorité au fichier téléversé
+            if (cahierDesCharges != null && !cahierDesCharges.isEmpty()) {
+                urlCahier = uploadFile(cahierDesCharges);
+            } else if (projetCahierDto != null && projetCahierDto.getUrlCahierDeCharge() != null) {
+                urlCahier = projetCahierDto.getUrlCahierDeCharge();
+            } else {
+                throw new RuntimeException("Aucun fichier ou URL fourni pour le cahier des charges");
+            }
+
+            // Créer le DTO avec l'URL finale
+            ProjetCahierDto cahierDto = new ProjetCahierDto();
+            cahierDto.setUrlCahierDeCharge(urlCahier);
+
+            ProjetResponseDto projet = projetService.editerCahierDeCharge(cahierDto, id);
+            return ResponseEntity.ok(projet);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Erreur lors du téléversement du fichier: " + e.getMessage());
+        }
     }
 
     @Operation(
@@ -512,7 +515,6 @@ public class ProjetController {
                     )
             )
     })
-    // Attribuer un niveau de complexité à un projet
     @PatchMapping("/{id}/niveau/admin/{idAdmin}")
     public ResponseEntity<ProjetResponseDto> attribuerNiveau(
             @Parameter(description = "ID du projet", required = true, example = "1")
@@ -555,7 +557,6 @@ public class ProjetController {
                     )
             )
     })
-    // Démarrer un projet en changeant son statut à EN_COURS
     @PatchMapping("/{id}/start")
     public ResponseEntity<ProjetResponseDto> demarrerProjet(
             @Parameter(description = "ID du projet à démarrer", required = true, example = "1")
@@ -576,12 +577,61 @@ public class ProjetController {
                     schema = @Schema(implementation = ProjetResponseDto.class)
             )
     )
-    // Terminer un projet en changeant son statut à TERMINÉ
     @PatchMapping("/{id}/complete")
     public ResponseEntity<ProjetResponseDto> terminerProjet(
             @Parameter(description = "ID du projet à terminer", required = true, example = "1")
             @PathVariable int id) {
         ProjetResponseDto projet = projetService.terminerProjet(id);
         return ResponseEntity.ok(projet);
+    }
+
+    /**
+     * Méthode privée pour gérer l'upload des fichiers
+     */
+    private String uploadFile(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new RuntimeException("Le fichier est vide");
+        }
+
+        // Validation du type de fichier (optionnel)
+        String contentType = file.getContentType();
+        if (contentType != null && !isValidFileType(contentType)) {
+            throw new RuntimeException("Type de fichier non autorisé: " + contentType);
+        }
+
+        // Créer le dossier d'upload s'il n'existe pas
+        Path uploadDir = Paths.get("uploads/cahiers-charges");
+        if (!Files.exists(uploadDir)) {
+            Files.createDirectories(uploadDir);
+        }
+
+        // Générer un nom de fichier unique
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        String uniqueFilename = System.currentTimeMillis() + "_" +
+                (originalFilename != null ? originalFilename.replaceAll("[^a-zA-Z0-9.-]", "_") : "file" + fileExtension);
+
+        Path filePath = uploadDir.resolve(uniqueFilename);
+
+        // Sauvegarder le fichier
+        Files.write(filePath, file.getBytes());
+
+        // Retourner l'URL relative du fichier
+        return "/uploads/cahiers-charges/" + uniqueFilename;
+    }
+
+    /**
+     * Valide le type de fichier autorisé
+     */
+    private boolean isValidFileType(String contentType) {
+        return contentType.equals("application/pdf") ||
+                contentType.equals("application/msword") ||
+                contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document") ||
+                contentType.equals("text/plain") ||
+                contentType.startsWith("image/");
     }
 }
