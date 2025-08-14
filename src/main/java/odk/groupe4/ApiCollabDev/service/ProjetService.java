@@ -29,7 +29,7 @@ public class ProjetService {
     private final ParticipantDao participantDao;
     private final NotificationService notificationService;
 
-    @Autowired
+    //@Autowired
     public ProjetService(ProjetDao projetDao,
                          AdministrateurDao administrateurDao,
                          ContributeurDao contributeurDao,

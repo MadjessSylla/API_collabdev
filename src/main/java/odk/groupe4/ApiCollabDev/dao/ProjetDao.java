@@ -19,4 +19,5 @@ public interface ProjetDao extends JpaRepository<Projet, Integer> {
     List<Projet> findByStatusAndSecteur(ProjectStatus status, ProjectSector secteur);
     List<Projet> findByStatusAndDomaineAndSecteur(ProjectStatus status, ProjectDomain domaine, ProjectSector secteur);
     List<Projet> findByCreateur(Contributeur contributeur);
+
 }
