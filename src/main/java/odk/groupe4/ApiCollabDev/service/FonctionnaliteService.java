@@ -55,7 +55,7 @@ public class FonctionnaliteService {
         fonctionnalite.setProjet(projet);
 
         Optional<Participant> p = participantDao.findById(dto.getParticipantId());
-        if(!p.isPresent()){
+        if(p.isPresent()){
             fonctionnalite.setParticipant(p.get());
         } else {
             // A la creation de la tâche, le gestionnaire n'a pas assigné de Participant
