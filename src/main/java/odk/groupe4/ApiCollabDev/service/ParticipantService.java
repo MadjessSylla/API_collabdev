@@ -20,6 +20,7 @@ public class ParticipantService {
     private final ParametreCoinDao parametreCoinDao;
     private final FonctionnaliteDao fonctionnaliteDao;
     private final BadgeDao badgeDao;
+    private final BadgeContributeurDao badgeContributeurDao;
 
     @Autowired
     public ParticipantService(ParticipantDao participantDao,
@@ -29,7 +30,8 @@ public class ParticipantService {
                               ContributeurDao contributeurDao,
                               ParametreCoinDao parametreCoinDao,
                               FonctionnaliteDao fonctionnaliteDao,
-                              BadgeDao badgeDao) {
+                              BadgeDao badgeDao,
+                              BadgeContributeurDao badgeContributeurDao) {
         this.participantDao = participantDao;
         this.projetDao = projetDao;
         this.contributionDao = contributionDao;
@@ -38,6 +40,7 @@ public class ParticipantService {
         this.parametreCoinDao = parametreCoinDao;
         this.fonctionnaliteDao = fonctionnaliteDao;
         this.badgeDao = badgeDao;
+        this.badgeContributeurDao = badgeContributeurDao;
     }
 
     public ParticipantResponseDto envoyerDemande(int idProjet, int idContributeur, ParticipantDto demandeDTO) {
@@ -58,6 +61,9 @@ public class ParticipantService {
         participant.setStatut(ParticipantStatus.EN_ATTENTE);
         participant.setScoreQuiz(demandeDTO.getScoreQuiz());
         participant.setEstDebloque(false);
+        participant.setDatePostulation(demandeDTO.getDatePostulation());
+        participant.setCommentaireMotivation(demandeDTO.getCommentaireMotivation());
+        participant.setCommentaireExperience(demandeDTO.getCommentaireExperience());
 
         Participant savedParticipant = participantDao.save(participant);
         return mapToResponseDto(savedParticipant);
@@ -182,24 +188,37 @@ public class ParticipantService {
     }
 
     public HistAcquisitionDto getHistAcquisition(int idParticipant) {
-        if (!participantDao.existsById(idParticipant)) {
-            throw new IllegalArgumentException("Participant avec l'ID " + idParticipant + " n'existe pas.");
-        }
+        Participant participant = participantDao.findById(idParticipant)
+                .orElseThrow(() -> new IllegalArgumentException("Participant avec l'ID " + idParticipant + " n'existe pas."));
 
+        // Récupérer les contributions validées du participant
         List<Contribution> contributions = contributionDao.findByParticipantIdAndStatus(idParticipant, ContributionStatus.VALIDE);
         List<ContributionDto> contributionDTOs = contributions.stream()
                 .map(this::mapToContributionDTO)
                 .collect(Collectors.toList());
 
-        List<BadgeParticipant> badgeParticipants = participantDao.findById(idParticipant)
-                .orElseThrow(() -> new IllegalArgumentException("Participant avec l'ID " + idParticipant + " n'existe pas."))
-                .getBadgeParticipants().stream().toList();
+        // Récupérer les badges du contributeur (pas du participant)
+        Contributeur contributeur = participant.getContributeur();
+        List<BadgeContributeur> badgeContributeurs = badgeContributeurDao.findByContributeur(contributeur);
 
-        List<BadgeRewardDto> badgeDTOs = badgeParticipants.stream()
+        List<BadgeRewardDto> badgeDTOs = badgeContributeurs.stream()
                 .map(this::mapToBadgeDTO)
                 .collect(Collectors.toList());
 
         return new HistAcquisitionDto(idParticipant, contributionDTOs, badgeDTOs);
+    }
+
+    public List<BadgeRewardDto> getBadgesGagnes(int idParticipant, Integer idProjet) {
+        Participant participant = participantDao.findById(idParticipant)
+                .orElseThrow(() -> new RuntimeException("Participant non trouvé à l'ID " + idParticipant));
+
+        // Récupérer tous les badges du contributeur
+        Contributeur contributeur = participant.getContributeur();
+        List<BadgeContributeur> badgeContributeurs = badgeContributeurDao.findByContributeur(contributeur);
+
+        return badgeContributeurs.stream()
+                .map(this::mapToBadgeDTO)
+                .collect(Collectors.toList());
     }
 
     public List<ContributionDto> afficherContributionsParticipant(int idParticipant) {
@@ -227,18 +246,25 @@ public class ParticipantService {
         Participant participant = participantDao.findById(idParticipant)
                 .orElseThrow(() -> new RuntimeException("Participant non trouvé"));
 
-        int nombreContributions = contributionDao.findByParticipantIdAndStatus(idParticipant, ContributionStatus.VALIDE).size();
+        // Compter toutes les contributions validées du contributeur (pas seulement du participant)
+        Contributeur contributeur = participant.getContributeur();
+        int nombreContributions = contributionDao.countValidatedContributionsByContributeur(contributeur.getId());
 
         List<Badge> tousLesBadges = badgeDao.findAllOrderByNombreContributionAsc();
 
         return tousLesBadges.stream()
-                .map(badge -> new BadgeSeuilDto(
-                        badge.getType(),
-                        badge.getNombreContribution(),
-                        badge.getCoin_recompense(),
-                        badge.getDescription(),
-                        nombreContributions >= badge.getNombreContribution()
-                ))
+                .map(badge -> {
+                    // Vérifier si le contributeur possède déjà ce badge
+                    boolean possedeBadge = badgeContributeurDao.findByContributeurAndBadge(contributeur, badge).isPresent();
+
+                    return new BadgeSeuilDto(
+                            badge.getType(),
+                            badge.getNombreContribution(),
+                            badge.getCoin_recompense(),
+                            badge.getDescription(),
+                            possedeBadge || nombreContributions >= badge.getNombreContribution()
+                    );
+                })
                 .collect(Collectors.toList());
     }
 
@@ -270,7 +296,7 @@ public class ParticipantService {
 
     private ContributionDto mapToContributionDTO(Contribution contribution) {
         ContributionDto contributionDto = new ContributionDto();
-        contributionDto.setIdContribution(contribution.getId());
+        contributionDto.setId(contribution.getId());
         contributionDto.setLienUrl(contribution.getLienUrl());
         contributionDto.setFileUrl(contribution.getFileUrl());
         contributionDto.setStatus(contribution.getStatus());
@@ -281,20 +307,20 @@ public class ParticipantService {
         return contributionDto;
     }
 
-    private BadgeRewardDto mapToBadgeDTO(BadgeParticipant badgeParticipant) {
+    private BadgeRewardDto mapToBadgeDTO(BadgeContributeur badgeContributeur) {
         BadgeRewardDto dto = new BadgeRewardDto();
-        dto.setIdBadge(badgeParticipant.getBadge().getId());
-        dto.setTypeBadge(badgeParticipant.getBadge().getType());
-        dto.setDescription(badgeParticipant.getBadge().getDescription());
-        dto.setNombreContribution(badgeParticipant.getBadge().getNombreContribution());
-        dto.setCoinRecompense(badgeParticipant.getBadge().getCoin_recompense());
-        dto.setDateAcquisition(badgeParticipant.getDateAcquisition());
+        dto.setIdBadge(badgeContributeur.getBadge().getId());
+        dto.setTypeBadge(badgeContributeur.getBadge().getType());
+        dto.setDescription(badgeContributeur.getBadge().getDescription());
+        dto.setNombreContribution(badgeContributeur.getBadge().getNombreContribution());
+        dto.setCoinRecompense(badgeContributeur.getBadge().getCoin_recompense());
+        dto.setDateAcquisition(badgeContributeur.getDateAcquisition());
         return dto;
     }
 
     private ContributionDto ContributionDaoToContributionDto(Contribution contribution) {
         ContributionDto contributionDto = new ContributionDto();
-        contributionDto.setIdContribution(contribution.getId());
+        contributionDto.setId(contribution.getId());
         contributionDto.setLienUrl(contribution.getLienUrl());
         contributionDto.setFileUrl(contribution.getFileUrl());
         contributionDto.setStatus(contribution.getStatus());

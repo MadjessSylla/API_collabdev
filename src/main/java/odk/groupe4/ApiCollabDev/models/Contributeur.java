@@ -27,6 +27,12 @@ public class Contributeur extends Utilisateur {
 
     private int totalCoin;
 
+    @Column(columnDefinition = "TEXT")
+    private String biographie; // Biographie du contributeur
+
+    @Column(length = 255)
+    private String photoProfil; // URL de la photo de profil du contributeur
+
     // Un contributeur peut participer à plusieurs projets.
     @OneToMany(mappedBy = "contributeur")
     @JsonIgnore
@@ -36,4 +42,13 @@ public class Contributeur extends Utilisateur {
     @ManyToMany(mappedBy = "contributeurs")
     @JsonIgnore
     private Set<Projet> projetsDebloques = new HashSet<>();
+
+    // Un contributeur peut créer plusieurs projets.
+    @OneToMany(mappedBy = "createur")
+    @JsonIgnore
+    private Set<Projet> projetsCrees = new HashSet<>();
+
+    @OneToMany(mappedBy = "contributeur", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<BadgeContributeur> badgeContributeurs = new HashSet<>();
+
 }

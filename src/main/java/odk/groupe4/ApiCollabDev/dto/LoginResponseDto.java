@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 public class LoginResponseDto {
     private int id;
     private String email;
+    private boolean actif;
+    private String message;
     private String type; // "CONTRIBUTEUR" ou "ADMINISTRATEUR"
     private String nom;
     private String prenom;
-    private boolean actif;
-    private String message;
 }

@@ -12,6 +12,7 @@ import odk.groupe4.ApiCollabDev.dto.ProjetCahierDto;
 import odk.groupe4.ApiCollabDev.dto.ProjetDto;
 import odk.groupe4.ApiCollabDev.dto.ProjetResponseDto;
 import odk.groupe4.ApiCollabDev.exception.GlobalExceptionHandler;
+import odk.groupe4.ApiCollabDev.models.Projet;
 import odk.groupe4.ApiCollabDev.models.enums.ProjectDomain;
 import odk.groupe4.ApiCollabDev.models.enums.ProjectLevel;
 import odk.groupe4.ApiCollabDev.models.enums.ProjectSector;
@@ -21,14 +22,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/projets")
 @Tag(name = "Projets", description = "API de gestion des projets collaboratifs")
 public class ProjetController {
-    
+
     private final ProjetService projetService;
 
     @Autowired
@@ -36,19 +44,19 @@ public class ProjetController {
         this.projetService = projetService;
     }
 
-   @Operation(
-        summary = "Récupérer tous les projets",
-        description = "Retourne la liste complète de tous les projets avec possibilité de filtrage par statut"
+    @Operation(
+            summary = "Récupérer tous les projets",
+            description = "Retourne la liste complète de tous les projets avec possibilité de filtrage par statut"
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Liste des projets récupérée avec succès",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ProjetResponseDto.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Liste des projets récupérée avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProjetResponseDto.class)
+                    )
             )
-        )
     })
     @GetMapping
     // Récupérer tous les projets avec option de filtrage par statut
@@ -108,26 +116,26 @@ public class ProjetController {
     }
 
     @Operation(
-        summary = "Récupérer un projet par ID",
-        description = "Retourne les détails complets d'un projet spécifique"
+            summary = "Récupérer un projet par ID",
+            description = "Retourne les détails complets d'un projet spécifique"
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Projet trouvé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ProjetResponseDto.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Projet trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProjetResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Projet non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
             )
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Projet non trouvé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        )
     })
     // Récupérer un projet par son ID
     @GetMapping("/{id}")
@@ -170,34 +178,65 @@ public class ProjetController {
     }
 
     @Operation(
-        summary = "Proposer un nouveau projet",
-        description = "Permet à un contributeur de proposer un nouveau projet collaboratif"
+            summary = "Lister les projets débloqués par un contributeur",
+            description = "Retourne la liste de tous les projets qu'un contributeur a débloqués"
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "201", 
-            description = "Projet proposé avec succès",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ProjetResponseDto.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Liste des projets débloqués récupérée avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Projet.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Contributeur non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
             )
-        ),
-        @ApiResponse(
-            responseCode = "400", 
-            description = "Données du projet invalides",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+    })
+    @GetMapping("/{id}/projets-debloques")
+    public ResponseEntity<List<ProjetResponseDto>> getProjetsDebloquesByContributeur(
+            @Parameter(description = "ID du contributeur", required = true, example = "1")
+            @PathVariable int id) {
+        List<ProjetResponseDto> projets = projetService.getProjetsDebloquesByContributeur(id);
+        return ResponseEntity.ok(projets);
+    }
+
+
+    @Operation(
+            summary = "Proposer un nouveau projet",
+            description = "Permet à un contributeur de proposer un nouveau projet collaboratif"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Projet proposé avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProjetResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Données du projet invalides",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Contributeur porteur de projet non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
             )
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Contributeur porteur de projet non trouvé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        )
     })
     // Proposer un nouveau projet par un contributeur
     @PostMapping("/contributeur/{idPorteurProjet}")
@@ -211,35 +250,158 @@ public class ProjetController {
     }
 
     @Operation(
-        summary = "Valider un projet",
-        description = "Permet à un administrateur de valider un projet proposé (change le statut à OUVERT)"
+            summary = "Mettre à jour un projet",
+            description = "Permet au créateur d'un projet de mettre à jour les détails de son projet. " +
+                    "Seul le créateur peut modifier son projet et uniquement si le projet est en attente ou ouvert."
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Projet validé avec succès",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ProjetResponseDto.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Projet mis à jour avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProjetResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Données invalides ou projet ne peut pas être modifié",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Seul le créateur peut modifier le projet",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Projet ou contributeur non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
             )
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Projet ou administrateur non trouvé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400", 
-            description = "Le projet ne peut pas être validé dans son état actuel",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        )
     })
+    @PutMapping("/{idProjet}/createur/{idCreateur}")
+    public ResponseEntity<ProjetResponseDto> mettreAJourProjet(
+            @Parameter(description = "ID du projet à mettre à jour", required = true, example = "1")
+            @PathVariable int idProjet,
+            @Parameter(description = "ID du créateur du projet", required = true, example = "1")
+            @PathVariable int idCreateur,
+            @Parameter(description = "Nouvelles données du projet", required = true)
+            @Valid @RequestBody ProjetDto projetDto) {
+        ProjetResponseDto projet = projetService.mettreAJourProjet(idProjet, idCreateur, projetDto);
+        return ResponseEntity.ok(projet);
+    }
+
+    @Operation(
+            summary = "Annuler un projet",
+            description = "Permet au créateur d'un projet d'annuler (supprimer) son projet. " +
+                    "Seul le créateur peut supprimer son projet et uniquement si le projet n'est pas en cours ou terminé. " +
+                    "Tous les participants seront notifiés de l'annulation."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Projet annulé avec succès"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Le projet ne peut pas être annulé (en cours ou terminé)",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Seul le créateur peut annuler le projet",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Projet ou contributeur non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            )
+    })
+    @DeleteMapping("/{idProjet}/createur/{idCreateur}")
+    public ResponseEntity<Void> annulerProjet(
+            @Parameter(description = "ID du projet à annuler", required = true, example = "1")
+            @PathVariable int idProjet,
+            @Parameter(description = "ID du créateur du projet", required = true, example = "1")
+            @PathVariable int idCreateur) {
+        projetService.annulerProjet(idProjet, idCreateur);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Valider un projet",
+            description = "Permet à un administrateur de valider un projet proposé (change le statut à OUVERT)"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Projet validé avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProjetResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Projet ou administrateur non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Le projet ne peut pas être validé dans son état actuel",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            )
+    })
+
+    @PostMapping("/contributeur/upload")
+    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
+        try {
+            // Définit un dossier d'upload local
+            Path uploadDir = Paths.get("uploads");
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+
+            String fileName = file.getOriginalFilename();
+            Path filePath = uploadDir.resolve(fileName);
+
+            Files.write(filePath, file.getBytes());
+
+            Map<String, String> response = new HashMap<>();
+            response.put("fileUrl", "/uploads/" + fileName);
+
+            return ResponseEntity.ok(response);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     // Valider un projet proposé par un contributeur
     @PatchMapping("/{id}/validate/admin/{idAdmin}")
     public ResponseEntity<ProjetResponseDto> validerProjet(
@@ -252,22 +414,22 @@ public class ProjetController {
     }
 
     @Operation(
-        summary = "Rejeter un projet",
-        description = "Permet à un administrateur de rejeter un projet proposé (supprime le projet)"
+            summary = "Rejeter un projet",
+            description = "Permet à un administrateur de rejeter un projet proposé (supprime le projet)"
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "204", 
-            description = "Projet rejeté et supprimé avec succès"
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Projet ou administrateur non trouvé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Projet rejeté et supprimé avec succès"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Projet ou administrateur non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
             )
-        )
     })
     // Rejeter un projet proposé par un contributeur
     @DeleteMapping("/{id}/reject/admin/{idAdmin}")
@@ -281,34 +443,34 @@ public class ProjetController {
     }
 
     @Operation(
-        summary = "Éditer le cahier des charges",
-        description = "Met à jour l'URL du cahier des charges d'un projet"
+            summary = "Éditer le cahier des charges",
+            description = "Met à jour l'URL du cahier des charges d'un projet"
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Cahier des charges mis à jour avec succès",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ProjetResponseDto.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Cahier des charges mis à jour avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProjetResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Projet non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "URL du cahier des charges invalide",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
             )
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Projet non trouvé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400", 
-            description = "URL du cahier des charges invalide",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        )
     })
     // Éditer le cahier des charges d'un projet
     @PatchMapping("/{id}/cahier-charges")
@@ -322,34 +484,34 @@ public class ProjetController {
     }
 
     @Operation(
-        summary = "Attribuer un niveau de complexité",
-        description = "Permet à un administrateur d'attribuer un niveau de complexité à un projet"
+            summary = "Attribuer un niveau de complexité",
+            description = "Permet à un administrateur d'attribuer un niveau de complexité à un projet"
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Niveau attribué avec succès",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ProjetResponseDto.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Niveau attribué avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProjetResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Projet ou administrateur non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Niveau invalide ou projet déjà nivelé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
             )
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Projet ou administrateur non trouvé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400", 
-            description = "Niveau invalide ou projet déjà nivelé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        )
     })
     // Attribuer un niveau de complexité à un projet
     @PatchMapping("/{id}/niveau/admin/{idAdmin}")
@@ -365,34 +527,34 @@ public class ProjetController {
     }
 
     @Operation(
-        summary = "Démarrer un projet",
-        description = "Change le statut d'un projet validé vers EN_COURS"
+            summary = "Démarrer un projet",
+            description = "Change le statut d'un projet validé vers EN_COURS"
     )
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200", 
-            description = "Projet démarré avec succès",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ProjetResponseDto.class)
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Projet démarré avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProjetResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Projet non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Le projet ne peut pas être démarré dans son état actuel",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
             )
-        ),
-        @ApiResponse(
-            responseCode = "404", 
-            description = "Projet non trouvé",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400", 
-            description = "Le projet ne peut pas être démarré dans son état actuel",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-            )
-        )
     })
     // Démarrer un projet en changeant son statut à EN_COURS
     @PatchMapping("/{id}/start")
@@ -404,16 +566,16 @@ public class ProjetController {
     }
 
     @Operation(
-        summary = "Terminer un projet",
-        description = "Marque un projet comme terminé"
+            summary = "Terminer un projet",
+            description = "Marque un projet comme terminé"
     )
     @ApiResponse(
-        responseCode = "200", 
-        description = "Projet terminé avec succès",
-        content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ProjetResponseDto.class)
-        )
+            responseCode = "200",
+            description = "Projet terminé avec succès",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ProjetResponseDto.class)
+            )
     )
     // Terminer un projet en changeant son statut à TERMINÉ
     @PatchMapping("/{id}/complete")

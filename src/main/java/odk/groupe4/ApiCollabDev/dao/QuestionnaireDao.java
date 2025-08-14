@@ -9,6 +9,4 @@ import java.util.List;
 @Repository
 public interface QuestionnaireDao extends JpaRepository<Questionnaire, Integer> {
     List<Questionnaire> findByProjetId(int projetId);
-    List<Questionnaire> findByTemplateProjetId(int templateId);
-    List<Questionnaire> findByContributeurId(int contributeurId);
 }

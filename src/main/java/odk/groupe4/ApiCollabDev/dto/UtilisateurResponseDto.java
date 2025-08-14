@@ -9,12 +9,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UtilisateurResponseDto {
     private int id;
-    private String email;
-    private String type;
-    private boolean actif;
     private String nom;
     private String prenom;
     private String telephone;
+    private String email;
+    private boolean actif;
+    private String type;
     private Integer pointExp;
     private Integer totalCoin;
+    private String biographie;
+    private String photoProfilUrl;
 }

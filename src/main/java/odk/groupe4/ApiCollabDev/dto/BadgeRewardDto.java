@@ -17,7 +17,7 @@ public class BadgeRewardDto {
     private int idBadge; // Identifiant de la récompense de badge
     @NotNull
     private TypeBadge typeBadge; // Type de badge (par exemple, "Bronze", "Argent", "Or")
-    @NotBlank @Size(max = 100)
+    @NotBlank
     private String description; // Description du badge
     @NotNull @Positive
     private int nombreContribution; // Nombre de contributions nécessaires pour obtenir le badge

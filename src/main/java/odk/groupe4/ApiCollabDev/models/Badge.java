@@ -34,8 +34,13 @@ public class Badge {
     @JsonIgnore
     private Administrateur createur;
 
-    // Un badge peut être attribué à plusieurs participants
+    /*// Un badge peut être attribué à plusieurs participants
     @OneToMany(mappedBy = "badge", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private Set<BadgeParticipant> badgeParticipants = new HashSet<>();
+    private Set<BadgeParticipant> badgeParticipants = new HashSet<>();*/
+
+    @OneToMany(mappedBy = "badge", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<BadgeContributeur> badgeContributeurs = new HashSet<>();
+
 }

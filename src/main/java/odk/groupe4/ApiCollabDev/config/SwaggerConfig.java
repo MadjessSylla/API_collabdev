@@ -6,16 +6,32 @@ import io.swagger.v3.oas.models.info.Contact;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-
-@Configuration
+/**
+ * Classe de configuration pour Swagger / OpenAPI.
+ * Permet de personnaliser la documentation générée automatiquement
+ * pour l'API CollabDev.
+ */
+@Configuration // Indique que cette classe contient des beans de configuration Spring
 public class SwaggerConfig {
 
+    /**
+     * Déclare un bean OpenAPI personnalisé.
+     * Ce bean configure le titre, la version, la description et les informations
+     * de contact qui apparaîtront dans la documentation Swagger UI.
+     *
+     * @return un objet OpenAPI avec les métadonnées de l'API
+     */
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
+                        // Titre de la documentation
                         .title("API CollabDev - Plateforme de Collaboration")
+
+                        // Version actuelle de l'API
                         .version("1.0.0")
+
+                        // Description détaillée de l'API avec Markdown autorisé
                         .description("""
                                 API REST complète pour la plateforme de collaboration de développement CollabDev.
                                 
@@ -41,10 +57,12 @@ public class SwaggerConfig {
                                 - 409: Conflit (ressource déjà existante)
                                 - 500: Erreur serveur
                                 """)
+
+                        // Informations de contact de l'équipe
                         .contact(new Contact()
                                 .name("Équipe CollabDev - Groupe 4 ODK")
                                 .email("contact@collabdev.com")
                                 .url("https://github.com/MadjessSylla/API_collabdev"))
-                        );
+                );
     }
 }

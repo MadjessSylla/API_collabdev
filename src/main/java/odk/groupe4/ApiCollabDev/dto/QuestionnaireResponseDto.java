@@ -15,6 +15,5 @@ public class QuestionnaireResponseDto {
     private String createurNom;
     private String createurEmail;
     private String projetTitre;
-    private String templateNom;
     private int nombreQuestions;
 }

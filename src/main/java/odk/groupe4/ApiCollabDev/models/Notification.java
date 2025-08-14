@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Notification {
     @Id
@@ -16,10 +18,16 @@ public class Notification {
     @Column(length = 50)
     private String sujet;
 
+    @Column(columnDefinition = "TEXT")
     private String message;
 
-    // Une notification est envoyée à un utilisateur spécifique
+    @Column(name = "date_creation")
+    private LocalDateTime dateCreation;
+
+    @Column(name = "lu")
+    private boolean lu = false; // Par défaut, une notification n'est pas lue
+
     @ManyToOne
     @JoinColumn(name = "id_utilisateur")
-    private Utilisateur utilisateur;
+    private Utilisateur utilisateur; // L'utilisateur qui reçoit la notification
 }

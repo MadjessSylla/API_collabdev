@@ -1,17 +1,27 @@
 package odk.groupe4.ApiCollabDev.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data @AllArgsConstructor @NoArgsConstructor
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * DTO de retour d'un commentaire avec son thread (réponses récursives).
+ */
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class CommentaireResponseDto {
-    @NotBlank
-    private String auteur; // Prenom et nom de l'auteur du commentaire
-    @NotBlank
-    private String contenu; // Contenu du commentaire
-    @NotNull
-    private String date; // Date de création du commentaire
+    private int id;
+    private String contenu;
+    private String creationDate;
+
+    private int auteurId;
+    private String auteurNomComplet;
+    private String auteurPhotoProfilUrl; // pratique côté UI si disponible
+
+    private Integer parentId;
+
+    private List<CommentaireResponseDto> reponses = new ArrayList<>();
 }

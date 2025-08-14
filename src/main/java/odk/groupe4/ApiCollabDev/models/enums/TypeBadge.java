@@ -5,5 +5,6 @@ public enum TypeBadge {
     BRONZE,
     ARGENT,
     OR,
+    DIAMANTPREMIUM,
     PLATINE,
 }

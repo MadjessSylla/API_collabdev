@@ -14,7 +14,7 @@ import odk.groupe4.ApiCollabDev.models.enums.TypeBadge;
 public class BadgeRequestDto {
     @NotNull
     private TypeBadge type ;
-    @NotBlank @Size(min = 50, max = 100)
+    @NotBlank @Size(max = 100)
     private String description;
     @NotNull @Positive
     private int nombreContribution;

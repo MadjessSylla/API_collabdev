@@ -28,4 +28,5 @@ public class ProjetResponseDto {
     private String validateurEmail;
     private int nombreParticipants;
     private int nombreFonctionnalites;
+    private LocalDate dateEcheance;
 }

@@ -11,8 +11,6 @@ import java.util.List;
 @Repository
 public interface ParticipantDao extends JpaRepository<Participant, Integer>  {
     boolean existsByProjetAndContributeur(Projet projet, Contributeur contributeur);
-    
-    Participant findByProjetAndId(Projet projet, int id);
-    
+
     List<Participant> findByProjetId(int projetId);
 }

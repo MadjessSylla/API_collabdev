@@ -13,13 +13,12 @@ import java.util.List;
 @Repository
 public interface ContributionDao extends JpaRepository<Contribution, Integer> {
     List<Contribution> findByParticipantIdAndStatus(int participantId, ContributionStatus status);
-    
-    @Query("SELECT c FROM Contribution c WHERE c.participant.contributeur.id = :idUtilisateur")
-    List<Contribution> findByUserId(@Param("idUtilisateur") Integer idUtilisateur);
-
     List<Contribution> findByParticipant(Participant participant);
-    
     List<Contribution> findByStatus(ContributionStatus status);
-    
     List<Contribution> findByFonctionnaliteId(int fonctionnaliteId);
+    List<Contribution> findByParticipantIn(List<Participant> participants);
+    List<Contribution> findByParticipantInAndStatus(List<Participant> participants, ContributionStatus status);
+    @Query("SELECT COUNT(c) FROM Contribution c JOIN c.participant p WHERE p.contributeur.id = :contributeurId AND c.status = 'VALIDE'")
+    int countValidatedContributionsByContributeur(@Param("contributeurId") int contributeurId);
+
 }
