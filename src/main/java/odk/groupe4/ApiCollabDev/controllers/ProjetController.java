@@ -376,6 +376,16 @@ public class ProjetController {
                     )
             )
     })
+    // Valider un projet proposé par un contributeur
+    @PatchMapping("/{id}/validate/admin/{idAdmin}")
+    public ResponseEntity<ProjetResponseDto> validerProjet(
+            @Parameter(description = "ID du projet à valider", required = true, example = "1")
+            @PathVariable int id,
+            @Parameter(description = "ID de l'administrateur validateur", required = true, example = "1")
+            @PathVariable int idAdmin) {
+        ProjetResponseDto projet = projetService.validerProjet(id, idAdmin);
+        return ResponseEntity.ok(projet);
+    }
 
     @PostMapping("/contributeur/upload")
     public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
@@ -400,17 +410,6 @@ public class ProjetController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }
-
-    // Valider un projet proposé par un contributeur
-    @PatchMapping("/{id}/validate/admin/{idAdmin}")
-    public ResponseEntity<ProjetResponseDto> validerProjet(
-            @Parameter(description = "ID du projet à valider", required = true, example = "1")
-            @PathVariable int id,
-            @Parameter(description = "ID de l'administrateur validateur", required = true, example = "1")
-            @PathVariable int idAdmin) {
-        ProjetResponseDto projet = projetService.validerProjet(id, idAdmin);
-        return ResponseEntity.ok(projet);
     }
 
     @Operation(

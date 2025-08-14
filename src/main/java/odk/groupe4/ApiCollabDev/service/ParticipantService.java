@@ -109,9 +109,14 @@ public class ParticipantService {
         return mapToResponseDto(savedParticipant);
     }
 
-    public ParticipantResponseDto debloquerAcces(int idParticipant) {
+    public ParticipantResponseDto debloquerAcces(int idParticipant, int idProjet) {
         Participant participant = participantDao.findById(idParticipant)
                 .orElseThrow(() -> new RuntimeException("Participant introuvable"));
+
+        // Vérifier que le participant appartient bien au projet spécifié
+        if (participant.getProjet().getId() != idProjet) {
+            throw new RuntimeException("Le participant ne fait pas partie de ce projet");
+        }
 
         if (participant.getStatut() != ParticipantStatus.ACCEPTE) {
             throw new RuntimeException("La demande n'a pas été acceptée.");
