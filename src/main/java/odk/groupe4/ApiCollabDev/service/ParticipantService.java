@@ -46,54 +46,70 @@ public class ParticipantService {
         this.badgeContributeurDao = badgeContributeurDao;
     }
 
-    /**
-     * Vérifie si un contributeur a déjà envoyé une demande de candidature à un projet
-     */
-    public CandidatureStatusDto verifierCandidature(int idProjet, int idContributeur) {
-        Projet projet = projetDao.findById(idProjet)
-                .orElseThrow(() -> new RuntimeException("Projet introuvable avec l'ID: " + idProjet));
+    // ================= CRUD ===========================
 
+
+    public List<ParticipantResponseDto> getAllParticipants() {
+        List<Participant> participants = participantDao.findAll();
+        return participants.stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    public ParticipantResponseDto getParticipantById(int id) {
+        Participant participant = participantDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("Participant non trouvé avec l'ID: " + id));
+        return mapToResponseDto(participant);
+    }
+
+    public List<ParticipantResponseDto> getParticipantsByContributeur(int idContributeur) {
         Contributeur contributeur = contributeurDao.findById(idContributeur)
-                .orElseThrow(() -> new RuntimeException("Contributeur introuvable avec l'ID: " + idContributeur));
+                .orElseThrow(() -> new RuntimeException("Contributeur non trouvé avec l'ID: " + idContributeur));
 
-        // Vérifier si le contributeur est le créateur du projet
-        if (projet.getCreateur().getId() == (contributeur.getId())) {
-            return new CandidatureStatusDto(false, "Vous êtes le créateur de ce projet");
-        }
-
-        // Chercher une participation existante
-        Optional<Participant> participantExistant = participantDao.findByContributeurAndProjet(contributeur, projet);
-
-        if (participantExistant.isPresent()) {
-            Participant participant = participantExistant.get();
-            String message = getMessageStatut(participant.getStatut());
-
-            return new CandidatureStatusDto(
-                    true,
-                    participant.getStatut(),
-                    message,
-                    participant.getId()
-            );
-        } else {
-            return new CandidatureStatusDto(false, "Aucune candidature trouvée pour ce projet");
-        }
+        List<Participant> participants = participantDao.findByContributeur(contributeur);
+        return participants.stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Génère un message approprié selon le statut de la candidature
-     */
-    private String getMessageStatut(ParticipantStatus statut) {
-        switch (statut) {
-            case EN_ATTENTE:
-                return "Votre candidature est en cours d'examen";
-            case ACCEPTE:
-                return "Votre candidature a été acceptée";
-            case REFUSE:
-                return "Votre candidature a été refusée";
-            default:
-                return "Statut de candidature inconnu";
+    public ParticipantResponseDto mettreAJourParticipant(int id, ParticipantDto participantDto) {
+        Participant participant = participantDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("Participant non trouvé avec l'ID: " + id));
+
+        // Mettre à jour les champs modifiables
+        if (participantDto.getProfil() != null) {
+            participant.setProfil(participantDto.getProfil());
         }
+        if (participantDto.getCommentaireMotivation() != null) {
+            participant.setCommentaireMotivation(participantDto.getCommentaireMotivation());
+        }
+        if (participantDto.getCommentaireExperience() != null) {
+            participant.setCommentaireExperience(participantDto.getCommentaireExperience());
+        }
+        if (participantDto.getScoreQuiz() != null) {
+            participant.setScoreQuiz(participantDto.getScoreQuiz());
+        }
+
+        Participant savedParticipant = participantDao.save(participant);
+        return mapToResponseDto(savedParticipant);
     }
+
+    public void supprimerParticipant(int id) {
+        Participant participant = participantDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("Participant non trouvé avec l'ID: " + id));
+
+        // Notifier le contributeur de la suppression
+        notificationService.createNotification(
+                participant.getContributeur(),
+                "Participation supprimée",
+                "Votre participation au projet '" + participant.getProjet().getTitre() + "' a été supprimée."
+        );
+
+        participantDao.delete(participant);
+    }
+
+    // ==================== Participant =====================
+
 
     public ParticipantResponseDto envoyerDemande(int idProjet, int idContributeur, ParticipantDto demandeDTO) {
         Projet projet = projetDao.findById(idProjet)
@@ -130,46 +146,6 @@ public class ParticipantService {
                 "Nouvelle candidature",
                 "Un contributeur a postulé pour le profil " + demandeDTO.getProfil() +
                         " sur votre projet '" + projet.getTitre() + "'."
-        );
-
-        return mapToResponseDto(savedParticipant);
-    }
-
-    public ParticipantResponseDto accepterDemande(int participantId) {
-        Participant participant = participantDao.findById(participantId)
-                .orElseThrow(() -> new IllegalArgumentException("Participant non trouvé"));
-
-        if (participant.getStatut() == ParticipantStatus.ACCEPTE) {
-            throw new IllegalArgumentException("La demande de participation a déjà été acceptée");
-        }
-
-        participant.setStatut(ParticipantStatus.ACCEPTE);
-        Participant savedParticipant = participantDao.save(participant);
-
-        notificationService.createNotification(
-                participant.getContributeur(),
-                "Demande de participation acceptée",
-                "Votre demande de participation au projet '" + participant.getProjet().getTitre() + "' a été acceptée."
-        );
-
-        return mapToResponseDto(savedParticipant);
-    }
-
-    public ParticipantResponseDto refuserDemande(int participantId) {
-        Participant participant = participantDao.findById(participantId)
-                .orElseThrow(() -> new IllegalArgumentException("Participant non trouvé"));
-
-        if (participant.getStatut() == ParticipantStatus.REFUSE) {
-            throw new IllegalArgumentException("La demande de participation a déjà été refusée");
-        }
-
-        participant.setStatut(ParticipantStatus.REFUSE);
-        Participant savedParticipant = participantDao.save(participant);
-
-        notificationService.createNotification(
-                participant.getContributeur(),
-                "Demande de participation refusée",
-                "Votre demande de participation au projet '" + participant.getProjet().getTitre() + "' a été refusée."
         );
 
         return mapToResponseDto(savedParticipant);
@@ -253,20 +229,6 @@ public class ParticipantService {
         return fonctionnaliteToDto(fonctionnalite, participant);
     }
 
-    public FonctionnaliteDto attribuerTache(int idParticipant, int idFonctionnalite) {
-        Fonctionnalite fonctionnalite = fonctionnaliteDao.findById(idFonctionnalite)
-                .orElseThrow(() -> new RuntimeException("Fonctionnalité introuvable"));
-
-        Participant participant = participantDao.findById(idParticipant)
-                .orElseThrow(() -> new RuntimeException("Participant introuvable"));
-
-        fonctionnalite.setParticipant(participant);
-        fonctionnalite.setStatusFeatures(FeaturesStatus.EN_COURS);
-        fonctionnaliteDao.save(fonctionnalite);
-
-        return fonctionnaliteToDto(fonctionnalite, participant);
-    }
-
     public HistAcquisitionDto getHistAcquisition(int idParticipant) {
         Participant participant = participantDao.findById(idParticipant)
                 .orElseThrow(() -> new IllegalArgumentException("Participant avec l'ID " + idParticipant + " n'existe pas."));
@@ -311,17 +273,6 @@ public class ParticipantService {
                 .collect(Collectors.toList());
     }
 
-    public List<ParticipantResponseDto> getParticipantsByProjet(int idProjet) {
-        if (!projetDao.existsById(idProjet)) {
-            throw new RuntimeException("Projet non trouvé avec l'ID: " + idProjet);
-        }
-
-        List<Participant> participants = participantDao.findByProjetId(idProjet);
-        return participants.stream()
-                .map(this::mapToResponseDto)
-                .collect(Collectors.toList());
-    }
-
     public List<BadgeSeuilDto> getProgressionBadges(int idParticipant) {
         Participant participant = participantDao.findById(idParticipant)
                 .orElseThrow(() -> new RuntimeException("Participant non trouvé"));
@@ -346,6 +297,190 @@ public class ParticipantService {
                     );
                 })
                 .collect(Collectors.toList());
+    }
+
+
+    // ==================== Gestionnaire =====================
+
+    /**
+     * Vérifie si un contributeur a déjà envoyé une demande de candidature à un projet
+     */
+    public CandidatureStatusDto verifierCandidature(int idProjet, int idContributeur) {
+        Projet projet = projetDao.findById(idProjet)
+                .orElseThrow(() -> new RuntimeException("Projet introuvable avec l'ID: " + idProjet));
+
+        Contributeur contributeur = contributeurDao.findById(idContributeur)
+                .orElseThrow(() -> new RuntimeException("Contributeur introuvable avec l'ID: " + idContributeur));
+
+        // Vérifier si le contributeur est le créateur du projet
+        if (projet.getCreateur().getId() == (contributeur.getId())) {
+            return new CandidatureStatusDto(false, "Vous êtes le créateur de ce projet");
+        }
+
+        // Chercher une participation existante
+        Optional<Participant> participantExistant = participantDao.findByContributeurAndProjet(contributeur, projet);
+
+        if (participantExistant.isPresent()) {
+            Participant participant = participantExistant.get();
+            String message = getMessageStatut(participant.getStatut());
+
+            return new CandidatureStatusDto(
+                    true,
+                    participant.getStatut(),
+                    message,
+                    participant.getId()
+            );
+        } else {
+            return new CandidatureStatusDto(false, "Aucune candidature trouvée pour ce projet");
+        }
+    }
+
+    @Transactional
+    public ProjetResponseDto definirGestionnaire(int idProjet, int idParticipant) {
+        Projet projet = projetDao.findById(idProjet)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID: " + idProjet));
+
+        Participant participant = participantDao.findById(idParticipant)
+                .orElseThrow(() -> new RuntimeException("Participant non trouvé avec l'ID: " + idParticipant));
+
+        // Vérifier que le participant fait partie du projet
+        if (!(participant.getProjet().getId() == (projet.getId()))) {
+            throw new RuntimeException("Le participant ne fait pas partie de ce projet");
+        }
+
+        // Vérifier que le participant est accepté
+        if (participant.getStatut() != ParticipantStatus.ACCEPTE) {
+            throw new RuntimeException("Le participant doit être accepté pour devenir gestionnaire");
+        }
+
+        // Vérifier que le participant a débloqué l'accès au projet
+        if (!participant.isEstDebloque()) {
+            throw new RuntimeException("Le participant doit avoir débloqué l'accès au projet pour devenir gestionnaire");
+        }
+
+        // Si il y a déjà un gestionnaire, le rétrograder
+        if (projet.getGestionnaire() != null) {
+            Participant ancienGestionnaire = projet.getGestionnaire();
+            // On peut choisir de garder le profil GESTIONNAIRE ou le changer
+            // Ici on le garde mais on peut ajouter une logique différente
+
+            // Notifier l'ancien gestionnaire
+            notificationService.createNotification(
+                    ancienGestionnaire.getContributeur(),
+                    "Changement de gestionnaire",
+                    "Vous n'êtes plus le gestionnaire du projet '" + projet.getTitre() + "'."
+            );
+        }
+
+        // Définir le nouveau gestionnaire
+        projet.setGestionnaire(participant);
+        participant.setProfil(ParticipantProfil.GESTIONNAIRE);
+
+        // Sauvegarder les changements
+        participantDao.save(participant);
+        Projet savedProjet = projetDao.save(projet);
+
+        // Notifier le nouveau gestionnaire
+        notificationService.createNotification(
+                participant.getContributeur(),
+                "Nomination comme gestionnaire",
+                "Félicitations ! Vous avez été désigné comme gestionnaire du projet '" + projet.getTitre() + "'."
+        );
+
+        // Notifier le créateur du projet
+        if (!(projet.getCreateur().getId() == (participant.getContributeur().getId()))) {
+            notificationService.createNotification(
+                    projet.getCreateur(),
+                    "Nouveau gestionnaire désigné",
+                    participant.getContributeur().getPrenom() + " " + participant.getContributeur().getNom() +
+                            " a été désigné comme gestionnaire du projet '" + projet.getTitre() + "'."
+            );
+        }
+
+        return mapProjetToResponseDto(savedProjet);
+    }
+
+    public ParticipantResponseDto accepterDemande(int participantId) {
+        Participant participant = participantDao.findById(participantId)
+                .orElseThrow(() -> new IllegalArgumentException("Participant non trouvé"));
+
+        if (participant.getStatut() == ParticipantStatus.ACCEPTE) {
+            throw new IllegalArgumentException("La demande de participation a déjà été acceptée");
+        }
+
+        participant.setStatut(ParticipantStatus.ACCEPTE);
+        Participant savedParticipant = participantDao.save(participant);
+
+        notificationService.createNotification(
+                participant.getContributeur(),
+                "Demande de participation acceptée",
+                "Votre demande de participation au projet '" + participant.getProjet().getTitre() + "' a été acceptée."
+        );
+
+        return mapToResponseDto(savedParticipant);
+    }
+
+    public ParticipantResponseDto refuserDemande(int participantId) {
+        Participant participant = participantDao.findById(participantId)
+                .orElseThrow(() -> new IllegalArgumentException("Participant non trouvé"));
+
+        if (participant.getStatut() == ParticipantStatus.REFUSE) {
+            throw new IllegalArgumentException("La demande de participation a déjà été refusée");
+        }
+
+        participant.setStatut(ParticipantStatus.REFUSE);
+        Participant savedParticipant = participantDao.save(participant);
+
+        notificationService.createNotification(
+                participant.getContributeur(),
+                "Demande de participation refusée",
+                "Votre demande de participation au projet '" + participant.getProjet().getTitre() + "' a été refusée."
+        );
+
+        return mapToResponseDto(savedParticipant);
+    }
+
+    public FonctionnaliteDto attribuerTache(int idParticipant, int idFonctionnalite) {
+        Fonctionnalite fonctionnalite = fonctionnaliteDao.findById(idFonctionnalite)
+                .orElseThrow(() -> new RuntimeException("Fonctionnalité introuvable"));
+
+        Participant participant = participantDao.findById(idParticipant)
+                .orElseThrow(() -> new RuntimeException("Participant introuvable"));
+
+        fonctionnalite.setParticipant(participant);
+        fonctionnalite.setStatusFeatures(FeaturesStatus.EN_COURS);
+        fonctionnaliteDao.save(fonctionnalite);
+
+        return fonctionnaliteToDto(fonctionnalite, participant);
+    }
+
+    public List<ParticipantResponseDto> getParticipantsByProjet(int idProjet) {
+        if (!projetDao.existsById(idProjet)) {
+            throw new RuntimeException("Projet non trouvé avec l'ID: " + idProjet);
+        }
+
+        List<Participant> participants = participantDao.findByProjetId(idProjet);
+        return participants.stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    // ==================== Fonction utilitaire ==========================
+
+    /**
+     * Génère un message approprié selon le statut de la candidature
+     */
+    private String getMessageStatut(ParticipantStatus statut) {
+        switch (statut) {
+            case EN_ATTENTE:
+                return "Votre candidature est en cours d'examen";
+            case ACCEPTE:
+                return "Votre candidature a été acceptée";
+            case REFUSE:
+                return "Votre candidature a été refusée";
+            default:
+                return "Statut de candidature inconnu";
+        }
     }
 
     private ParticipantResponseDto mapToResponseDto(Participant participant) {
@@ -411,41 +546,6 @@ public class ParticipantService {
         return contributionDto;
     }
 
-    @Transactional
-    public ProjetResponseDto definirGestionnaire(int idProjet, int idParticipant) {
-        Projet projet = projetDao.findById(idProjet)
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé"));
-
-        Participant participant = participantDao.findById(idParticipant)
-                .orElseThrow(() -> new RuntimeException("Participant non trouvé"));
-
-        // Vérifier que le participant fait partie du projet
-        if (!(participant.getProjet().getId() == (projet.getId()))) {
-            throw new RuntimeException("Le participant ne fait pas partie de ce projet");
-        }
-
-        // Vérifier que le participant est accepté
-        if (participant.getStatut() != ParticipantStatus.ACCEPTE) {
-            throw new RuntimeException("Le participant doit être accepté pour devenir gestionnaire");
-        }
-
-        // Définir le participant comme gestionnaire
-        projet.setGestionnaire(participant);
-        participant.setProfil(ParticipantProfil.GESTIONNAIRE);
-
-        participantDao.save(participant);
-        Projet savedProjet = projetDao.save(projet);
-
-        // Notifier le participant
-        notificationService.createNotification(
-                participant.getContributeur(),
-                "Nomination comme gestionnaire",
-                "Vous avez été désigné comme gestionnaire du projet '" + projet.getTitre() + "'."
-        );
-
-        return mapProjetToResponseDto(savedProjet);
-    }
-
     private ProjetResponseDto mapProjetToResponseDto(Projet projet) {
         String gestionnaireNom = null;
         String gestionnairePrenom = null;
@@ -475,4 +575,5 @@ public class ParticipantService {
                 gestionnairePrenom
         );
     }
+
 }

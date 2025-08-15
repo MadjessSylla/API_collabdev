@@ -31,6 +31,154 @@ public class ParticipantController {
         this.participantService = participantService;
     }
 
+    // ======================= CRUD ===========================
+
+    @Operation(
+            summary = "Récupérer tous les participants",
+            description = "Retourne la liste complète de tous les participants"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Liste des participants récupérée avec succès",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ParticipantResponseDto.class)
+            )
+    )
+    @GetMapping
+    public ResponseEntity<List<ParticipantResponseDto>> getAllParticipants() {
+        List<ParticipantResponseDto> participants = participantService.getAllParticipants();
+        return ResponseEntity.ok(participants);
+    }
+
+    @Operation(
+            summary = "Récupérer un participant par ID",
+            description = "Retourne les détails d'un participant spécifique"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Participant trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ParticipantResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Participant non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            )
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<ParticipantResponseDto> getParticipantById(
+            @Parameter(description = "ID du participant", required = true, example = "1")
+            @PathVariable int id) {
+        ParticipantResponseDto participant = participantService.getParticipantById(id);
+        return ResponseEntity.ok(participant);
+    }
+
+    @Operation(
+            summary = "Récupérer les participations d'un contributeur",
+            description = "Retourne toutes les participations d'un contributeur spécifique"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Liste des participations du contributeur récupérée",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ParticipantResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Contributeur non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            )
+    })
+    @GetMapping("/contributeur/{idContributeur}")
+    public ResponseEntity<List<ParticipantResponseDto>> getParticipantsByContributeur(
+            @Parameter(description = "ID du contributeur", required = true, example = "1")
+            @PathVariable int idContributeur) {
+        List<ParticipantResponseDto> participants = participantService.getParticipantsByContributeur(idContributeur);
+        return ResponseEntity.ok(participants);
+    }
+
+    @Operation(
+            summary = "Mettre à jour un participant",
+            description = "Met à jour les informations d'un participant"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Participant mis à jour avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ParticipantResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Participant non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Données invalides",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            )
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<ParticipantResponseDto> mettreAJourParticipant(
+            @Parameter(description = "ID du participant", required = true, example = "1")
+            @PathVariable int id,
+            @Parameter(description = "Nouvelles données du participant", required = true)
+            @Valid @RequestBody ParticipantDto participantDto) {
+        ParticipantResponseDto participant = participantService.mettreAJourParticipant(id, participantDto);
+        return ResponseEntity.ok(participant);
+    }
+
+    @Operation(
+            summary = "Supprimer un participant",
+            description = "Supprime un participant d'un projet"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Participant supprimé avec succès"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Participant non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            )
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> supprimerParticipant(
+            @Parameter(description = "ID du participant", required = true, example = "1")
+            @PathVariable int id) {
+        participantService.supprimerParticipant(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ==================== Participant =====================
+
     @Operation(
             summary = "Envoyer une demande de participation",
             description = "Permet à un contributeur d'envoyer une demande pour participer à un projet"
@@ -71,82 +219,6 @@ public class ParticipantController {
             @Valid @RequestBody ParticipantDto demandeDto) {
         ParticipantResponseDto participant = participantService.envoyerDemande(idProjet, idContributeur, demandeDto);
         return new ResponseEntity<>(participant, HttpStatus.CREATED);
-    }
-
-    @Operation(
-            summary = "Accepter une demande de participation",
-            description = "Permet d'accepter la demande de participation d'un contributeur à un projet"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Demande acceptée avec succès",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ParticipantResponseDto.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Participant non trouvé",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "La demande a déjà été traitée",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-                    )
-            )
-    })
-    @PatchMapping("/{id}/accept")
-    public ResponseEntity<ParticipantResponseDto> accepterDemande(
-            @Parameter(description = "ID du participant", required = true, example = "1")
-            @PathVariable int id) {
-        ParticipantResponseDto participant = participantService.accepterDemande(id);
-        return ResponseEntity.ok(participant);
-    }
-
-    @Operation(
-            summary = "Refuser une demande de participation",
-            description = "Permet de refuser la demande de participation d'un contributeur à un projet"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Demande refusée avec succès",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = ParticipantResponseDto.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Participant non trouvé",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "La demande a déjà été traitée",
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
-                    )
-            )
-    })
-    @PatchMapping("/{id}/reject")
-    public ResponseEntity<ParticipantResponseDto> refuserDemande(
-            @Parameter(description = "ID du participant", required = true, example = "1")
-            @PathVariable int id) {
-        ParticipantResponseDto participant = participantService.refuserDemande(id);
-        return ResponseEntity.ok(participant);
     }
 
     @Operation(
@@ -230,28 +302,6 @@ public class ParticipantController {
     }
 
     @Operation(
-            summary = "Attribuer une tâche à un participant",
-            description = "Permet d'attribuer une fonctionnalité spécifique à un participant (action de gestion)"
-    )
-    @ApiResponse(
-            responseCode = "200",
-            description = "Tâche attribuée avec succès",
-            content = @Content(
-                    mediaType = "application/json",
-                    schema = @Schema(implementation = FonctionnaliteDto.class)
-            )
-    )
-    @PatchMapping("/{idParticipant}/fonctionnalite/{idFonctionnalite}/assign")
-    public ResponseEntity<FonctionnaliteDto> attribuerTache(
-            @Parameter(description = "ID du participant", required = true, example = "1")
-            @PathVariable int idParticipant,
-            @Parameter(description = "ID de la fonctionnalité", required = true, example = "1")
-            @PathVariable int idFonctionnalite) {
-        FonctionnaliteDto fonctionnalite = participantService.attribuerTache(idParticipant, idFonctionnalite);
-        return ResponseEntity.ok(fonctionnalite);
-    }
-
-    @Operation(
             summary = "Récupérer l'historique d'acquisition d'un participant",
             description = "Retourne l'historique des contributions validées et des badges acquis par un participant"
     )
@@ -304,7 +354,6 @@ public class ParticipantController {
         return ResponseEntity.ok(badges);
     }
 
-
     @Operation(
             summary = "Récupérer les contributions d'un participant",
             description = "Retourne toutes les contributions soumises par un participant spécifique"
@@ -326,6 +375,190 @@ public class ParticipantController {
     }
 
     @Operation(
+            summary = "Récupérer la progression des badges d'un participant",
+            description = "Retourne tous les badges disponibles et indique lesquels ont été atteints par le participant"
+    )
+    @GetMapping("/{id}/badges/progression")
+    public ResponseEntity<List<BadgeSeuilDto>> getProgressionBadges(
+            @Parameter(description = "ID du participant", required = true, example = "1")
+            @PathVariable int id) {
+        List<BadgeSeuilDto> progression = participantService.getProgressionBadges(id);
+        return ResponseEntity.ok(progression);
+    }
+
+    // ==================== Gestionnaire =====================
+
+    @Operation(
+            summary = "Vérifier le statut de candidature",
+            description = "Vérifie si un contributeur a déjà envoyé une demande de candidature à un projet et retourne le statut de cette candidature"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Statut de candidature récupéré avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CandidatureStatusDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Projet ou contributeur non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            )
+    })
+    @GetMapping("/projet/{idProjet}/contributeur/{idContributeur}/candidature/status")
+    public ResponseEntity<CandidatureStatusDto> verifierCandidature(
+            @Parameter(description = "ID du projet", required = true, example = "1")
+            @PathVariable int idProjet,
+            @Parameter(description = "ID du contributeur", required = true, example = "1")
+            @PathVariable int idContributeur) {
+        CandidatureStatusDto status = participantService.verifierCandidature(idProjet, idContributeur);
+        return ResponseEntity.ok(status);
+    }
+
+    @Operation(
+            summary = "Définir un participant comme gestionnaire du projet",
+            description = "Permet de désigner un participant accepté comme gestionnaire du projet"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Gestionnaire défini avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ProjetResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Participant non accepté ou ne fait pas partie du projet",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Projet ou participant non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            )
+    })
+    @PatchMapping("/{idParticipant}/projet/{idProjet}/definir-gestionnaire")
+    public ResponseEntity<ProjetResponseDto> definirGestionnaire(
+            @Parameter(description = "ID du participant à désigner comme gestionnaire", required = true, example = "1")
+            @PathVariable int idParticipant,
+            @Parameter(description = "ID du projet", required = true, example = "1")
+            @PathVariable int idProjet) {
+        ProjetResponseDto projet = participantService.definirGestionnaire(idProjet, idParticipant);
+        return ResponseEntity.ok(projet);
+    }
+
+    @Operation(
+            summary = "Accepter une demande de participation",
+            description = "Permet d'accepter la demande de participation d'un contributeur à un projet"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Demande acceptée avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ParticipantResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Participant non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "La demande a déjà été traitée",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            )
+    })
+    @PatchMapping("/{id}/accept")
+    public ResponseEntity<ParticipantResponseDto> accepterDemande(
+            @Parameter(description = "ID du participant", required = true, example = "1")
+            @PathVariable int id) {
+        ParticipantResponseDto participant = participantService.accepterDemande(id);
+        return ResponseEntity.ok(participant);
+    }
+
+    @Operation(
+            summary = "Refuser une demande de participation",
+            description = "Permet de refuser la demande de participation d'un contributeur à un projet"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Demande refusée avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ParticipantResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Participant non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "La demande a déjà été traitée",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            )
+    })
+    @PatchMapping("/{id}/reject")
+    public ResponseEntity<ParticipantResponseDto> refuserDemande(
+            @Parameter(description = "ID du participant", required = true, example = "1")
+            @PathVariable int id) {
+        ParticipantResponseDto participant = participantService.refuserDemande(id);
+        return ResponseEntity.ok(participant);
+    }
+
+    @Operation(
+            summary = "Attribuer une tâche à un participant",
+            description = "Permet d'attribuer une fonctionnalité spécifique à un participant (action de gestion)"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Tâche attribuée avec succès",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = FonctionnaliteDto.class)
+            )
+    )
+    @PatchMapping("/{idParticipant}/fonctionnalite/{idFonctionnalite}/assign")
+    public ResponseEntity<FonctionnaliteDto> attribuerTache(
+            @Parameter(description = "ID du participant", required = true, example = "1")
+            @PathVariable int idParticipant,
+            @Parameter(description = "ID de la fonctionnalité", required = true, example = "1")
+            @PathVariable int idFonctionnalite) {
+        FonctionnaliteDto fonctionnalite = participantService.attribuerTache(idParticipant, idFonctionnalite);
+        return ResponseEntity.ok(fonctionnalite);
+    }
+
+    @Operation(
             summary = "Récupérer tous les participants d'un projet",
             description = "Retourne la liste de tous les participants d'un projet spécifique"
     )
@@ -343,17 +576,5 @@ public class ParticipantController {
             @PathVariable int idProjet) {
         List<ParticipantResponseDto> participants = participantService.getParticipantsByProjet(idProjet);
         return ResponseEntity.ok(participants);
-    }
-
-    @Operation(
-            summary = "Récupérer la progression des badges d'un participant",
-            description = "Retourne tous les badges disponibles et indique lesquels ont été atteints par le participant"
-    )
-    @GetMapping("/{id}/badges/progression")
-    public ResponseEntity<List<BadgeSeuilDto>> getProgressionBadges(
-            @Parameter(description = "ID du participant", required = true, example = "1")
-            @PathVariable int id) {
-        List<BadgeSeuilDto> progression = participantService.getProgressionBadges(id);
-        return ResponseEntity.ok(progression);
     }
 }
