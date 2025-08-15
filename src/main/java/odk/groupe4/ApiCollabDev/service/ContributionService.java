@@ -2,16 +2,19 @@ package odk.groupe4.ApiCollabDev.service;
 
 import jakarta.transaction.Transactional;
 import odk.groupe4.ApiCollabDev.dao.*;
-import odk.groupe4.ApiCollabDev.dto.ContributionDto;
-import odk.groupe4.ApiCollabDev.dto.ContributionResponseDto;
-import odk.groupe4.ApiCollabDev.dto.ContributionSoumiseDto;
+import odk.groupe4.ApiCollabDev.dto.*;
 import odk.groupe4.ApiCollabDev.models.*;
 import odk.groupe4.ApiCollabDev.models.enums.ContributionStatus;
 import odk.groupe4.ApiCollabDev.models.enums.FeaturesStatus;
 import odk.groupe4.ApiCollabDev.models.enums.ParticipantProfil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,6 +31,7 @@ public class ContributionService {
     private final BadgeDao badgeDao;
     private final BadgeContributeurDao badgeContributeurDao;
     private final NotificationService notificationService;
+    private final ProjetDao projetDao;
 
     // Injection des dépendances via constructeur
     @Autowired
@@ -38,7 +42,8 @@ public class ContributionService {
                                ParametreCoinDao parametreCoinDao,
                                BadgeDao badgeDao,
                                BadgeContributeurDao badgeContributeurDao,
-                               NotificationService notificationService) {
+                               NotificationService notificationService,
+                               ProjetDao projetDao) {
         this.contributionDao = contributionDao;
         this.participantDao = participantDao;
         this.fonctionnaliteDao = fonctionnaliteDao;
@@ -47,6 +52,7 @@ public class ContributionService {
         this.badgeDao = badgeDao;
         this.badgeContributeurDao = badgeContributeurDao;
         this.notificationService = notificationService;
+        this.projetDao = projetDao;
     }
 
     /**
@@ -90,6 +96,51 @@ public class ContributionService {
     }
 
     /**
+     * Récupère toutes les contributions validées des participants d'un projet donné.
+     *
+     * @param projetId ID du projet
+     * @return Liste des contributions validées avec leurs URLs
+     * @throws IllegalArgumentException si le projet n'existe pas
+     */
+    public List<ContributionValideeDto> getContributionsValideesParProjet(int projetId) {
+        // Vérifier que le projet existe
+        if (!projetDao.existsById(projetId)) {
+            throw new IllegalArgumentException("Projet avec ID " + projetId + " non trouvé");
+        }
+
+        // Récupérer tous les participants du projet
+        List<Participant> participantsDuProjet = participantDao.findByProjetId(projetId);
+
+        // Récupérer toutes les contributions validées de ces participants
+        List<Contribution> contributionsValidees = contributionDao.findByParticipantInAndStatus(
+                participantsDuProjet,
+                ContributionStatus.VALIDE
+        );
+
+        // Mapper vers le DTO spécialisé
+        return contributionsValidees.stream()
+                .map(this::mapToContributionValideeDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Convertit une Contribution en ContributionValideeDto.
+     */
+    private ContributionValideeDto mapToContributionValideeDto(Contribution contribution) {
+        return ContributionValideeDto.builder()
+                .id(contribution.getId())
+                .titre(contribution.getTitre())
+                .description(contribution.getDescription())
+                .lienUrl(contribution.getLienUrl())
+                .fileUrl(contribution.getFileUrl())
+                .dateSoumission(contribution.getDateSoumission())
+                .fonctionnaliteTitre(contribution.getFonctionnalite().getTitre())
+                .participantNom(contribution.getParticipant().getContributeur().getNom())
+                .participantPrenom(contribution.getParticipant().getContributeur().getPrenom())
+                .build();
+    }
+
+    /**
      * Récupère une contribution par son ID.
      *
      * @param id ID de la contribution
@@ -104,15 +155,19 @@ public class ContributionService {
 
     /**
      * Soumet une nouvelle contribution associée à une fonctionnalité et un participant.
+     * Gère l'upload du fichier si fourni.
      * Initialise la contribution avec le statut ENVOYE et la date de soumission actuelle.
      *
      * @param idFonctionnalite ID de la fonctionnalité concernée
      * @param idParticipant ID du participant soumettant la contribution
      * @param contribution Données de la contribution soumise
+     * @param fichier Fichier optionnel à uploader
      * @return DTO de la contribution enregistrée
      * @throws IllegalArgumentException si le participant ou la fonctionnalité n'existe pas
      */
-    public ContributionResponseDto soumettreContribution(int idFonctionnalite, int idParticipant, ContributionSoumiseDto contribution) {
+    public ContributionResponseDto soumettreContribution(int idFonctionnalite, int idParticipant,
+                                                         ContributionSoumiseDto contribution,
+                                                         MultipartFile fichier) {
         Participant participant = participantDao.findById(idParticipant)
                 .orElseThrow(() -> new IllegalArgumentException("Participant non trouvé"));
 
@@ -123,7 +178,17 @@ public class ContributionService {
         newContribution.setTitre(contribution.getTitre());
         newContribution.setDescription(contribution.getDescription());
         newContribution.setLienUrl(contribution.getLienUrl());
-        newContribution.setFileUrl(contribution.getFileUrl());
+
+        // Gérer l'upload du fichier si fourni
+        if (fichier != null && !fichier.isEmpty()) {
+            try {
+                String fileUrl = uploadContributionFile(fichier);
+                newContribution.setFileUrl(fileUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Erreur lors du téléversement du fichier: " + e.getMessage());
+            }
+        }
+
         newContribution.setStatus(ContributionStatus.ENVOYE);
         newContribution.setDateSoumission(LocalDate.now());
         newContribution.setFonctionnalite(fonctionnalite);
@@ -131,6 +196,60 @@ public class ContributionService {
 
         Contribution savedContribution = contributionDao.save(newContribution);
         return mapToResponseDto(savedContribution);
+    }
+
+    /**
+     * Méthode pour uploader un fichier de contribution
+     */
+    private String uploadContributionFile(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new RuntimeException("Le fichier est vide");
+        }
+
+        // Validation du type de fichier
+        String contentType = file.getContentType();
+        if (contentType != null && !isValidContributionFileType(contentType)) {
+            throw new RuntimeException("Type de fichier non autorisé: " + contentType);
+        }
+
+        // Créer le dossier d'upload s'il n'existe pas
+        Path uploadDir = Paths.get("uploads/contributions");
+        if (!Files.exists(uploadDir)) {
+            Files.createDirectories(uploadDir);
+        }
+
+        // Générer un nom de fichier unique
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        String uniqueFilename = System.currentTimeMillis() + "_" +
+                (originalFilename != null ? originalFilename.replaceAll("[^a-zA-Z0-9.-]", "_") : "file" + fileExtension);
+
+        Path filePath = uploadDir.resolve(uniqueFilename);
+
+        // Sauvegarder le fichier
+        Files.write(filePath, file.getBytes());
+
+        // Retourner l'URL relative du fichier
+        return "/uploads/contributions/" + uniqueFilename;
+    }
+
+    /**
+     * Valide le type de fichier autorisé pour les contributions
+     */
+    private boolean isValidContributionFileType(String contentType) {
+        return contentType.equals("application/pdf") ||
+                contentType.equals("application/msword") ||
+                contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document") ||
+                contentType.equals("text/plain") ||
+                contentType.equals("application/zip") ||
+                contentType.equals("application/x-zip-compressed") ||
+                contentType.startsWith("image/") ||
+                contentType.startsWith("video/") ||
+                contentType.startsWith("audio/");
     }
 
     /**
@@ -173,6 +292,7 @@ public class ContributionService {
      * Seuls les participants ayant le profil GESTIONNAIRE peuvent effectuer cette opération.
      * En cas de validation, récompense le participant avec des coins, met à jour le statut de la fonctionnalité,
      * et assigne des badges si les critères sont remplis.
+     * En cas de rejet, supprime le fichier associé s'il existe.
      * Envoie également une notification au participant concernant la décision.
      *
      * Cette méthode est transactionnelle pour garantir la cohérence des données.
@@ -184,7 +304,7 @@ public class ContributionService {
      * @throws IllegalArgumentException si la contribution, gestionnaire n'existent pas ou si le profil est invalide
      */
     @Transactional
-    public ContributionResponseDto validateOrRejetContribution(int contributionId, ContributionStatus newStatus, int gestionnaireId) {
+    public ContributionResponseDto MiseAJourStatutContribution(int contributionId, ContributionStatus newStatus, int gestionnaireId) {
         Contribution contribution = contributionDao.findById(contributionId)
                 .orElseThrow(() -> new IllegalArgumentException("Contribution avec ID " + contributionId + " non trouvée"));
 
@@ -202,6 +322,9 @@ public class ContributionService {
             recompenseCoins(contribution.getParticipant());  // Attribution des coins au participant
             MiseAJourStatutFonctionnalite(contribution.getFonctionnalite()); // Passage de la fonctionnalité au statut TERMINÉ
             assignerBadges(contribution.getParticipant()); // Attribution éventuelle de badges
+        } else if (newStatus == ContributionStatus.REJETE) {
+            // Supprimer le fichier associé lors du rejet
+            supprimerFichierContribution(contribution.getFileUrl());
         }
 
         // Envoi de notification au participant selon la décision prise
@@ -223,6 +346,30 @@ public class ContributionService {
 
         Contribution savedContribution = contributionDao.save(contribution);
         return mapToResponseDto(savedContribution);
+    }
+
+    /**
+     * Supprime le fichier physique d'une contribution rejetée
+     */
+    private void supprimerFichierContribution(String fileUrl) {
+        if (fileUrl != null && !fileUrl.isEmpty()) {
+            try {
+                // Extraire le chemin du fichier à partir de l'URL
+                // Supposons que l'URL soit de la forme "/uploads/contributions/filename"
+                if (fileUrl.startsWith("/uploads/contributions/")) {
+                    String filename = fileUrl.substring("/uploads/contributions/".length());
+                    Path filePath = Paths.get("uploads/contributions", filename);
+
+                    if (Files.exists(filePath)) {
+                        Files.delete(filePath);
+                        System.out.println("Fichier supprimé: " + filePath);
+                    }
+                }
+            } catch (IOException e) {
+                System.err.println("Erreur lors de la suppression du fichier " + fileUrl + ": " + e.getMessage());
+                // Ne pas faire échouer la transaction pour une erreur de suppression de fichier
+            }
+        }
     }
 
     /**
@@ -254,7 +401,7 @@ public class ContributionService {
 
     /**
      * Attribue des badges à un contributeur en fonction du nombre total de contributions validées.
-     * Compte toutes les contributions validées du contributeur à travers tous ses participations.
+     * Compte toutes les contributions validées du contributeur à travers toutes ses participations.
      * Si le contributeur atteint le seuil pour un badge non encore attribué,
      * le badge est attribué, les coins de récompense associés sont ajoutés,
      * et une notification est envoyée.
