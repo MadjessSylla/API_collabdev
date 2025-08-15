@@ -1,5 +1,6 @@
 package odk.groupe4.ApiCollabDev.service;
 
+import jdk.jshell.execution.Util;
 import odk.groupe4.ApiCollabDev.dao.*;
 import odk.groupe4.ApiCollabDev.dto.*;
 import odk.groupe4.ApiCollabDev.models.*;
@@ -160,6 +161,8 @@ public class QuestionnaireService {
                 dto.setCreateurType("CONTRIBUTEUR");
             } else if (createur instanceof Administrateur) {
                 Administrateur admin = (Administrateur) createur;
+                dto.setCreateurNom(null);
+                dto.setCreateurPrenom(null);
                 dto.setCreateurType("ADMINISTRATEUR");
             }
         }

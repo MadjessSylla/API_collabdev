@@ -51,6 +51,10 @@ public class Projet {
     @ManyToOne @JoinColumn(name="id_validateur")
     private Administrateur validateur;
 
+    @ManyToOne
+    @JoinColumn(name = "id_gestionnaire")
+    private Participant gestionnaire;
+
     // Un projet peut avoir plusieurs fonctionnalités.
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Fonctionnalite> fonctionnalites = new ArrayList<>();

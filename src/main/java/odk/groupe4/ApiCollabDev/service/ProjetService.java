@@ -185,107 +185,6 @@ public class ProjetService {
     }
 
     /**
-     * Permet au créateur d'un projet de mettre à jour les détails de son projet.
-     * Seul le créateur peut modifier son projet et uniquement si le projet est en attente ou ouvert.
-     */
-    public ProjetResponseDto mettreAJourProjet(int idProjet, int idCreateur, ProjetDto projetDto) {
-        Projet projet = projetDao.findById(idProjet)
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID: " + idProjet));
-
-        Contributeur createur = contributeurDao.findById(idCreateur)
-                .orElseThrow(() -> new RuntimeException("Contributeur non trouvé avec l'ID: " + idCreateur));
-
-        // Vérifier que l'utilisateur est bien le créateur du projet
-        if (!(projet.getCreateur().getId() == (createur.getId()))) {
-            throw new RuntimeException("Seul le créateur du projet peut le modifier");
-        }
-
-        // Vérifier que le projet peut être modifié (statut EN_ATTENTE ou OUVERT)
-        if (projet.getStatus() != ProjectStatus.EN_ATTENTE && projet.getStatus() != ProjectStatus.OUVERT) {
-            throw new RuntimeException("Le projet ne peut être modifié que s'il est en attente ou ouvert");
-        }
-
-        // Mise à jour des champs modifiables
-        if (projetDto.getTitre() != null && !projetDto.getTitre().trim().isEmpty()) {
-            projet.setTitre(projetDto.getTitre());
-        }
-        if (projetDto.getDescription() != null && !projetDto.getDescription().trim().isEmpty()) {
-            projet.setDescription(projetDto.getDescription());
-        }
-        if (projetDto.getDomaine() != null) {
-            projet.setDomaine(projetDto.getDomaine());
-        }
-        if (projetDto.getSecteur() != null) {
-            projet.setSecteur(projetDto.getSecteur());
-        }
-        if (projetDto.getDateEcheance() != null) {
-            projet.setDateEcheance(projetDto.getDateEcheance());
-        }
-
-        Projet savedProjet = projetDao.save(projet);
-
-        // Notification des administrateurs si le projet était validé et a été modifié
-        if (projet.getStatus() == ProjectStatus.OUVERT) {
-            administrateurDao.findAll().forEach(administrateur ->
-                    notificationService.createNotification(
-                            administrateur,
-                            "Projet modifié",
-                            "Le projet '" + projet.getTitre() + "' a été modifié par son créateur " +
-                                    createur.getNom() + " " + createur.getPrenom()
-                    )
-            );
-        }
-
-        return mapToResponseDto(savedProjet);
-    }
-
-    /**
-     * Permet au créateur d'un projet d'annuler (supprimer) son projet.
-     * Seul le créateur peut supprimer son projet et uniquement si le projet n'est pas en cours ou terminé.
-     */
-    public void annulerProjet(int idProjet, int idCreateur) {
-        Projet projet = projetDao.findById(idProjet)
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID: " + idProjet));
-
-        Contributeur createur = contributeurDao.findById(idCreateur)
-                .orElseThrow(() -> new RuntimeException("Contributeur non trouvé avec l'ID: " + idCreateur));
-
-        // Vérifier que l'utilisateur est bien le créateur du projet
-        if (!(projet.getCreateur().getId() ==(createur.getId()))) {
-            throw new RuntimeException("Seul le créateur du projet peut l'annuler");
-        }
-
-        // Vérifier que le projet peut être annulé (pas EN_COURS ou TERMINER)
-        if (projet.getStatus() == ProjectStatus.EN_COURS || projet.getStatus() == ProjectStatus.TERMINER) {
-            throw new RuntimeException("Un projet en cours ou terminé ne peut pas être annulé");
-        }
-
-        // Notifier tous les participants du projet de l'annulation
-        projet.getParticipants().forEach(participant -> {
-            if (!(participant.getContributeur().getId() == (createur.getId()))) { // Ne pas notifier le créateur
-                notificationService.createNotification(
-                        participant.getContributeur(),
-                        "Projet annulé",
-                        "Le projet '" + projet.getTitre() + "' a été annulé par son créateur."
-                );
-            }
-        });
-
-        // Notifier les administrateurs si le projet était validé
-        if (projet.getStatus() == ProjectStatus.OUVERT && projet.getValidateur() != null) {
-            notificationService.createNotification(
-                    projet.getValidateur(),
-                    "Projet annulé",
-                    "Le projet '" + projet.getTitre() + "' a été annulé par son créateur " +
-                            createur.getNom() + " " + createur.getPrenom()
-            );
-        }
-
-        // Suppression du projet
-        projetDao.delete(projet);
-    }
-
-    /**
      * Valide un projet en attente.
      */
     public ProjetResponseDto validerProjet(int idProjet, int idUserValide) {
@@ -422,9 +321,112 @@ public class ProjetService {
     }
 
     /**
+     * Met à jour les détails d'un projet par son créateur.
+     */
+    public ProjetResponseDto mettreAJourProjet(int idProjet, int idCreateur, ProjetDto projetDto) {
+        Projet projet = projetDao.findById(idProjet)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID: " + idProjet));
+
+        Contributeur createur = contributeurDao.findById(idCreateur)
+                .orElseThrow(() -> new RuntimeException("Créateur non trouvé avec l'ID: " + idCreateur));
+
+        // Vérifier que l'utilisateur est bien le créateur du projet
+        if (!(projet.getCreateur().getId() == (createur.getId()))) {
+            throw new RuntimeException("Seul le créateur du projet peut le modifier");
+        }
+
+        // Vérifier que le projet peut être modifié
+        if (projet.getStatus() == ProjectStatus.EN_COURS || projet.getStatus() == ProjectStatus.TERMINER) {
+            throw new RuntimeException("Impossible de modifier un projet en cours ou terminé");
+        }
+
+        // Sauvegarder l'ancien statut pour savoir s'il faut notifier
+        ProjectStatus ancienStatut = projet.getStatus();
+
+        // Mettre à jour les champs
+        projet.setTitre(projetDto.getTitre());
+        projet.setDescription(projetDto.getDescription());
+        projet.setDomaine(projetDto.getDomaine());
+        projet.setSecteur(projetDto.getSecteur());
+        if (projetDto.getDateEcheance() != null) {
+            projet.setDateEcheance(projetDto.getDateEcheance());
+        }
+
+        // Si le projet était validé (OUVERT), le remettre en attente pour re-validation
+        if (ancienStatut == ProjectStatus.OUVERT) {
+            projet.setStatus(ProjectStatus.EN_ATTENTE);
+            projet.setValidateur(null);
+
+            // Notifier les administrateurs de la modification
+            administrateurDao.findAll().forEach(administrateur ->
+                    notificationService.createNotification(
+                            administrateur,
+                            "Projet modifié - Re-validation requise",
+                            "Le projet '" + projet.getTitre() + "' a été modifié par son créateur et nécessite une nouvelle validation."
+                    )
+            );
+        }
+
+        return mapToResponseDto(projetDao.save(projet));
+    }
+
+    /**
+     * Annule (supprime) un projet par son créateur.
+     */
+    public void annulerProjet(int idProjet, int idCreateur) {
+        Projet projet = projetDao.findById(idProjet)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'ID: " + idProjet));
+
+        Contributeur createur = contributeurDao.findById(idCreateur)
+                .orElseThrow(() -> new RuntimeException("Créateur non trouvé avec l'ID: " + idCreateur));
+
+        // Vérifier que l'utilisateur est bien le créateur du projet
+        if (!(projet.getCreateur().getId() == (createur.getId()))) {
+            throw new RuntimeException("Seul le créateur du projet peut l'annuler");
+        }
+
+        // Vérifier que le projet peut être annulé
+        if (projet.getStatus() == ProjectStatus.EN_COURS || projet.getStatus() == ProjectStatus.TERMINER) {
+            throw new RuntimeException("Impossible d'annuler un projet en cours ou terminé");
+        }
+
+        // Notifier tous les participants (sauf le créateur)
+        projet.getParticipants().stream()
+                .filter(participant -> !(participant.getContributeur().getId() == (createur.getId())))
+                .forEach(participant ->
+                        notificationService.createNotification(
+                                participant.getContributeur(),
+                                "Projet annulé",
+                                "Le projet '" + projet.getTitre() + "' a été annulé par son créateur."
+                        )
+                );
+
+        // Notifier l'administrateur validateur si le projet était validé
+        if (projet.getValidateur() != null) {
+            notificationService.createNotification(
+                    projet.getValidateur(),
+                    "Projet annulé",
+                    "Le projet '" + projet.getTitre() + "' que vous aviez validé a été annulé par son créateur."
+            );
+        }
+
+        // Supprimer le projet
+        projetDao.delete(projet);
+    }
+
+    /**
      * Convertit un objet Projet en ProjetResponseDto pour l'API.
      */
     private ProjetResponseDto mapToResponseDto(Projet projet) {
+        // Trouver le gestionnaire parmi les participants
+        String gestionnaireNom = null;
+        String gestionnairePrenom = null;
+
+        if (projet.getGestionnaire() != null) {
+            gestionnaireNom = projet.getGestionnaire().getContributeur().getNom();
+            gestionnairePrenom = projet.getGestionnaire().getContributeur().getPrenom();
+        }
+
         return new ProjetResponseDto(
                 projet.getId(),
                 projet.getTitre(),
@@ -440,7 +442,9 @@ public class ProjetService {
                 projet.getValidateur() != null ? projet.getValidateur().getEmail() : null,
                 projet.getParticipants() != null ? projet.getParticipants().size() : 0,
                 projet.getFonctionnalites() != null ? projet.getFonctionnalites().size() : 0,
-                projet.getDateEcheance()
+                projet.getDateEcheance(),
+                gestionnaireNom,
+                gestionnairePrenom
         );
     }
 }
