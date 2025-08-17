@@ -20,6 +20,7 @@ import odk.groupe4.ApiCollabDev.models.enums.ProjectStatus;
 import odk.groupe4.ApiCollabDev.service.ProjetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -239,14 +240,30 @@ public class ProjetController {
             )
     })
     // Proposer un nouveau projet par un contributeur
-    @PostMapping("/contributeur/{idPorteurProjet}")
+    @PostMapping(
+            value = "/contributeur/{idPorteurProjet}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProjetResponseDto> proposerProjet(
             @Parameter(description = "ID du contributeur porteur du projet", required = true, example = "1")
             @PathVariable int idPorteurProjet,
             @Parameter(description = "Données du projet à proposer", required = true)
-            @Valid @RequestBody ProjetDto projetDto) {
-        ProjetResponseDto projet = projetService.proposerProjet(projetDto, idPorteurProjet);
-        return new ResponseEntity<>(projet, HttpStatus.CREATED);
+            @RequestPart("projet") @Valid ProjetDto projetDto,
+            @Parameter(description = "Fichier du cahier des charges (optionnel)", required = false)
+            @RequestPart(value = "cahierDesCharges", required = false) MultipartFile cahierDesCharges) {
+
+        try {
+            // Gérer l'upload du fichier si présent
+            if (cahierDesCharges != null && !cahierDesCharges.isEmpty()) {
+                String fileUrl = uploadFile(cahierDesCharges);
+                projetDto.setUrlCahierDeCharge(fileUrl);
+            }
+
+            ProjetResponseDto projet = projetService.proposerProjet(projetDto, idPorteurProjet);
+            return new ResponseEntity<>(projet, HttpStatus.CREATED);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Erreur lors du téléversement du fichier: " + e.getMessage());
+        }
     }
 
     @Operation(
@@ -377,7 +394,7 @@ public class ProjetController {
             )
     })
 
-    @PostMapping("/contributeur/upload")
+  /*  @PostMapping("/contributeur/upload")
     public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
         try {
             // Définit un dossier d'upload local
@@ -400,7 +417,7 @@ public class ProjetController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-    }
+    }*/
 
     // Valider un projet proposé par un contributeur
     @PatchMapping("/{id}/validate/admin/{idAdmin}")
@@ -584,5 +601,54 @@ public class ProjetController {
             @PathVariable int id) {
         ProjetResponseDto projet = projetService.terminerProjet(id);
         return ResponseEntity.ok(projet);
+    }
+    /**
+     * Méthode privée pour gérer l'upload des fichiers
+     */
+    private String uploadFile(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new RuntimeException("Le fichier est vide");
+        }
+
+        // Validation du type de fichier (optionnel)
+        String contentType = file.getContentType();
+        if (contentType != null && !isValidFileType(contentType)) {
+            throw new RuntimeException("Type de fichier non autorisé: " + contentType);
+        }
+
+        // Créer le dossier d'upload s'il n'existe pas
+        Path uploadDir = Paths.get("uploads/cahiers-charges");
+        if (!Files.exists(uploadDir)) {
+            Files.createDirectories(uploadDir);
+        }
+
+        // Générer un nom de fichier unique
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        String uniqueFilename = System.currentTimeMillis() + "_" +
+                (originalFilename != null ? originalFilename.replaceAll("[^a-zA-Z0-9.-]", "_") : "file" + fileExtension);
+
+        Path filePath = uploadDir.resolve(uniqueFilename);
+
+        // Sauvegarder le fichier
+        Files.write(filePath, file.getBytes());
+
+        // Retourner l'URL relative du fichier
+        return "/uploads/cahiers-charges/" + uniqueFilename;
+    }
+
+    /**
+     * Valide le type de fichier autorisé
+     */
+    private boolean isValidFileType(String contentType) {
+        return contentType.equals("application/pdf") ||
+                contentType.equals("application/msword") ||
+                contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document") ||
+                contentType.equals("text/plain") ||
+                contentType.startsWith("image/");
     }
 }

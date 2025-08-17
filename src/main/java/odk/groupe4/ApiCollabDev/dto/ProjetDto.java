@@ -31,6 +31,7 @@ public class ProjetDto {
     private ProjectLevel niveau;
     private LocalDate dateEcheance;
     private Integer createurId;
+    private String urlCahierDeCharge;
     // Ajout pour aligner avec le service (détermine le profil du participant créateur)
     private RolePorteurProjet role;
 }

@@ -26,14 +26,11 @@ public class ProjetService {
     private final ParticipantDao participantDao;
     private final NotificationService notificationService;
 
-<<<<<<< HEAD
-    //@Autowired
-=======
+
     /**
      * Injection des dépendances via constructeur
      */
     @Autowired
->>>>>>> 2871946058ec39345fa1dc10e26b34b1acd9dfcf
     public ProjetService(ProjetDao projetDao,
                          AdministrateurDao administrateurDao,
                          ContributeurDao contributeurDao,
