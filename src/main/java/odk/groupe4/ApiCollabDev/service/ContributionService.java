@@ -168,6 +168,26 @@ public class ContributionService {
                 .collect(Collectors.toList());
     }
 
+
+    /**
+     * Récupère toutes les contributions d'un contributeur donné, peu importe le statut.
+     *
+     * @param contributeurId ID du contributeur
+     * @return Liste des contributions sous forme de DTO
+     * @throws IllegalArgumentException si le contributeur n'existe pas
+     */
+    public List<ContributionDto> getContributionsByContributeur(int contributeurId) {
+        // Vérifier que le contributeur existe
+        if (!contributeurDao.existsById(contributeurId)) {
+            throw new IllegalArgumentException("Contributeur avec ID " + contributeurId + " non trouvé");
+        }
+
+        List<Contribution> contributions = contributionDao.findAllByContributeurId(contributeurId);
+        return contributions.stream()
+                .map(this::ContributionDaoToContributionDto)
+                .collect(Collectors.toList());
+    }
+
     /**
      * Valide ou rejette une contribution selon la décision d'un gestionnaire.
      * Seuls les participants ayant le profil GESTIONNAIRE peuvent effectuer cette opération.

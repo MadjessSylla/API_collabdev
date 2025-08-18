@@ -393,33 +393,6 @@ public class ProjetController {
                     )
             )
     })
-
-  /*  @PostMapping("/contributeur/upload")
-    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
-        try {
-            // Définit un dossier d'upload local
-            Path uploadDir = Paths.get("uploads");
-            if (!Files.exists(uploadDir)) {
-                Files.createDirectories(uploadDir);
-            }
-
-            String fileName = file.getOriginalFilename();
-            Path filePath = uploadDir.resolve(fileName);
-
-            Files.write(filePath, file.getBytes());
-
-            Map<String, String> response = new HashMap<>();
-            response.put("fileUrl", "/uploads/" + fileName);
-
-            return ResponseEntity.ok(response);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }*/
-
-    // Valider un projet proposé par un contributeur
     @PatchMapping("/{id}/validate/admin/{idAdmin}")
     public ResponseEntity<ProjetResponseDto> validerProjet(
             @Parameter(description = "ID du projet à valider", required = true, example = "1")

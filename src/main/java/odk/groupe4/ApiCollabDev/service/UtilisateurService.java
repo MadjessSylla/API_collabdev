@@ -23,13 +23,19 @@ public class UtilisateurService {
     private final UtilisateurDao utilisateurDao;
     private final ContributeurDao contributeurDao;
     private final ParametreCoinDao parametreCoinDao;
+    private final NotificationService notificationService;
 
     @Autowired
-    public UtilisateurService(UtilisateurDao utilisateurDao, ContributeurDao contributeurDao, ParametreCoinDao parametreCoinDao) {
+    public UtilisateurService(UtilisateurDao utilisateurDao,
+                              ContributeurDao contributeurDao,
+                              ParametreCoinDao parametreCoinDao,
+                              NotificationService notificationService) {
         this.utilisateurDao = utilisateurDao;
         this.contributeurDao = contributeurDao;
         this.parametreCoinDao = parametreCoinDao;
+        this.notificationService = notificationService;
     }
+
 
     /**
      * Inscrit un nouvel utilisateur en tant que contributeur.
@@ -67,6 +73,10 @@ public class UtilisateurService {
 
         // Enregistrer le contributeur dans la base de données
         Utilisateur savedUser = utilisateurDao.save(contributeur);
+
+        // Envoi du message de bienvenue
+        envoyerMessageBienvenue(savedUser);
+
         // Retourner les détails de l'utilisateur inscrit
         return mapToUtilisateurResponseDto(savedUser);
     }
@@ -143,6 +153,43 @@ public class UtilisateurService {
         utilisateur.setPassword(nouveauMotDePasse);
         // Enregistrer les modifications de l'utilisateur
         utilisateurDao.save(utilisateur);
+    }
+
+    /**
+     * Envoie un message de bienvenue personnalisé au nouveau contributeur
+     */
+    private void envoyerMessageBienvenue(Utilisateur utilisateur) {
+        if (utilisateur instanceof Contributeur contributeur) {
+            String sujet = "🎉 Bienvenue sur CollabDev !";
+
+            String message = String.format(
+                    "Bonjour %s %s,\n\n" +
+                    "🎊 Félicitations ! Votre inscription sur APICollabDev a été réalisée avec succès.\n\n" +
+                    "🚀 Vous pouvez maintenant :\n" +
+                    "• Découvrir et rejoindre des projets passionnants\n" +
+                    "• Collaborer avec d'autres développeurs talentueux\n" +
+                    "• Contribuer à des projets innovants\n" +
+                    "• Gagner des coins et débloquer des badges\n\n" +
+                    "💰 Bonus d'inscription : Vous avez reçu %d coins pour commencer votre aventure !\n" +
+                    "⭐ Points d'expérience : %d points pour débuter\n\n" +
+                    "📧 Votre compte : %s\n\n" +
+                    "N'hésitez pas à explorer la plateforme et à vous lancer dans votre premier projet.\n\n" +
+                    "Bonne collaboration ! 🤝\n\n" +
+                    "L'équipe APICollabDev",
+                    contributeur.getPrenom(),
+                    contributeur.getNom(),
+                    contributeur.getTotalCoin(),
+                    contributeur.getPointExp(),
+                    contributeur.getEmail()
+            );
+
+            try {
+                notificationService.createNotification(utilisateur, sujet, message);
+            } catch (Exception e) {
+                // Log l'erreur mais ne fait pas échouer l'inscription
+                System.err.println("Erreur lors de l'envoi du message de bienvenue : " + e.getMessage());
+            }
+        }
     }
 
     /**

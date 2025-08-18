@@ -20,5 +20,8 @@ public interface ContributionDao extends JpaRepository<Contribution, Integer> {
     List<Contribution> findByParticipantInAndStatus(List<Participant> participants, ContributionStatus status);
     @Query("SELECT COUNT(c) FROM Contribution c JOIN c.participant p WHERE p.contributeur.id = :contributeurId AND c.status = 'VALIDE'")
     int countValidatedContributionsByContributeur(@Param("contributeurId") int contributeurId);
+    // Méthode pour récupérer toutes les contributions d'un contributeur
+    @Query("SELECT c FROM Contribution c WHERE c.participant.contributeur.id = :contributeurId")
+    List<Contribution> findAllByContributeurId(@Param("contributeurId") int contributeurId);
 
 }

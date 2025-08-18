@@ -67,6 +67,6 @@ public class Projet {
     private Set<Questionnaire> questionnaires = new HashSet<>();
 
     // Un projet peut avoir plusieurs participants.
-    @OneToMany(mappedBy = "projet")
+    @OneToMany(mappedBy = "projet", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<Participant> participants = new HashSet<>();
 }

@@ -278,4 +278,34 @@ public class ContributionController {
         List<ContributionDto> contributions = contributionService.getContributionsByFonctionnalite(fonctionnaliteId);
         return ResponseEntity.ok(contributions);
     }
+
+    @Operation(
+            summary = "Récupérer toutes les contributions d'un contributeur",
+            description = "Retourne toutes les contributions soumises par un contributeur spécifique, peu importe le statut"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Contributions du contributeur récupérées avec succès",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ContributionDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Contributeur non trouvé",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = GlobalExceptionHandler.ErrorResponse.class)
+                    )
+            )
+    })
+    @GetMapping("/contributeur/{contributeurId}")
+    public ResponseEntity<List<ContributionDto>> getContributionsByContributeur(
+            @Parameter(description = "ID du contributeur", required = true, example = "1")
+            @PathVariable int contributeurId) {
+        List<ContributionDto> contributions = contributionService.getContributionsByContributeur(contributeurId);
+        return ResponseEntity.ok(contributions);
+    }
 }
