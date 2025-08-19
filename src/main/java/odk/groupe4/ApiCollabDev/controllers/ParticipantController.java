@@ -179,11 +179,13 @@ public class ParticipantController {
                     )
             )
     })
-    @PatchMapping("/{id}/unlock")
+    @PatchMapping("/{id}/projet/{idProjet}/unlock")
     public ResponseEntity<ParticipantResponseDto> debloquerAcces(
             @Parameter(description = "ID du participant", required = true, example = "1")
-            @PathVariable int id) {
-        ParticipantResponseDto participant = participantService.debloquerAcces(id);
+            @PathVariable int id,
+            @Parameter(description = "ID du projet", required = true, example = "1")
+            @PathVariable int idProjet) {
+        ParticipantResponseDto participant = participantService.debloquerAcces(id, idProjet);
         return ResponseEntity.ok(participant);
     }
 
