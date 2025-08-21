@@ -14,11 +14,19 @@ public class ParametreCoin {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_parametre_coin")
     private int id;
+
+    @Column(length = 45, nullable = false)
     private String nom;
+
+    @Column(length = 255, nullable = false)
     private String description;
+
+    @Column(length = 45, nullable = false)
     private String typeEvenementLien;
+
     private int valeur;
 
+    // Un paramètre de coin est créé par un administrateur
     @ManyToOne
     @JoinColumn(name = "id_administrateur")
     private Administrateur administrateur;

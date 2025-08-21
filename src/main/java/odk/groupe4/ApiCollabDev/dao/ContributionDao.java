@@ -1,16 +1,27 @@
 package odk.groupe4.ApiCollabDev.dao;
 
 import odk.groupe4.ApiCollabDev.models.Contribution;
-import odk.groupe4.ApiCollabDev.models.enums.StatusContribution;
+import odk.groupe4.ApiCollabDev.models.Participant;
+import odk.groupe4.ApiCollabDev.models.enums.ContributionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 public interface ContributionDao extends JpaRepository<Contribution, Integer> {
-    // Méthode pour trouver les contributions par participant et statut
-    // Equivalent en SQL : SELECT * FROM contribution WHERE participant_id = ? AND status = ?
-    List<Contribution> findByParticipantIdAndStatus(int participantId, StatusContribution status);
+    List<Contribution> findByParticipantIdAndStatus(int participantId, ContributionStatus status);
+    List<Contribution> findByParticipant(Participant participant);
+    List<Contribution> findByStatus(ContributionStatus status);
+    List<Contribution> findByFonctionnaliteId(int fonctionnaliteId);
+    List<Contribution> findByParticipantIn(List<Participant> participants);
+    List<Contribution> findByParticipantInAndStatus(List<Participant> participants, ContributionStatus status);
+    @Query("SELECT COUNT(c) FROM Contribution c JOIN c.participant p WHERE p.contributeur.id = :contributeurId AND c.status = 'VALIDE'")
+    int countValidatedContributionsByContributeur(@Param("contributeurId") int contributeurId);
+    // Méthode pour récupérer toutes les contributions d'un contributeur
+    @Query("SELECT c FROM Contribution c WHERE c.participant.contributeur.id = :contributeurId")
+    List<Contribution> findAllByContributeurId(@Param("contributeurId") int contributeurId);
+
 }

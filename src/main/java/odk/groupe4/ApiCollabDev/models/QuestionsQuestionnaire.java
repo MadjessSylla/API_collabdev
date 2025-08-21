@@ -14,12 +14,22 @@ public class QuestionsQuestionnaire  {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_questions")
     private int id;
-    private String question; // Titre de la question
-    private List<String> options; // Liste des options de réponse
-    private int indexReponse; // Indice de la bonne réponse dans la liste des options
 
+    @Column(length = 500)
+    private String question; // Titre de la question
+
+    @ElementCollection
+    @CollectionTable(name = "question_options", joinColumns = @JoinColumn(name = "id_question"))
+    @Column(name = "option_text")
+    private List<String> options; // Réponses possibles
+
+    @ElementCollection
+    @CollectionTable(name = "question_index_reponse", joinColumns = @JoinColumn(name = "id_question"))
+    @Column(name = "index_reponse")
+    private List<Integer> indexReponse; // Num d'indice des bonnes réponses
+
+    // Une Question est assigné à un quiz.
     @ManyToOne
     @JoinColumn(name = "id_questionnaire")
-    private Questionnaire questionnaire; // Référence au questionnaire auquel cette question appartient
-
+    private Questionnaire questionnaire;
 }

@@ -1,186 +1,373 @@
 package odk.groupe4.ApiCollabDev.service;
 
-
 import jakarta.transaction.Transactional;
 import odk.groupe4.ApiCollabDev.dao.*;
+import odk.groupe4.ApiCollabDev.dto.ContributionDto;
+import odk.groupe4.ApiCollabDev.dto.ContributionResponseDto;
+import odk.groupe4.ApiCollabDev.dto.ContributionSoumiseDto;
 import odk.groupe4.ApiCollabDev.models.*;
-import odk.groupe4.ApiCollabDev.models.enums.Profil;
-import odk.groupe4.ApiCollabDev.models.enums.StatusContribution;
-import odk.groupe4.ApiCollabDev.models.enums.StatusFeatures;
+import odk.groupe4.ApiCollabDev.models.enums.ContributionStatus;
+import odk.groupe4.ApiCollabDev.models.enums.FeaturesStatus;
+import odk.groupe4.ApiCollabDev.models.enums.ParticipantProfil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ContributionService {
-    private final ParametreCoinDao parametreCoinDao;
-    private final Participant_projetDao participantDao;
-    private final ContributeurDao contributeurDao;
+
+    // Déclaration des DAO et services nécessaires pour gérer les contributions, participants, fonctionnalités, badges et notifications
     private final ContributionDao contributionDao;
+    private final ParticipantDao participantDao;
     private final FonctionnaliteDao fonctionnaliteDao;
+    private final ContributeurDao contributeurDao;
+    private final ParametreCoinDao parametreCoinDao;
     private final BadgeDao badgeDao;
-    private final Badge_participantDao badgeParticipantDao;
+    private final BadgeContributeurDao badgeContributeurDao;
     private final NotificationService notificationService;
 
+    // Injection des dépendances via constructeur
     @Autowired
-    public ContributionService(ParametreCoinDao parametreCoinDao,
-                                 Participant_projetDao participantDao,
-                                 ContributeurDao contributeurDao,
-                                 ContributionDao contributionDao,
-                                 FonctionnaliteDao fonctionnaliteDao,
-                                 BadgeDao badgeDao,
-                                 Badge_participantDao badgeParticipantDao,
-                                 NotificationService notificationService) {
-        this.parametreCoinDao = parametreCoinDao;
-        this.participantDao = participantDao;
-        this.contributeurDao = contributeurDao;
+    public ContributionService(ContributionDao contributionDao,
+                               ParticipantDao participantDao,
+                               FonctionnaliteDao fonctionnaliteDao,
+                               ContributeurDao contributeurDao,
+                               ParametreCoinDao parametreCoinDao,
+                               BadgeDao badgeDao,
+                               BadgeContributeurDao badgeContributeurDao,
+                               NotificationService notificationService) {
         this.contributionDao = contributionDao;
+        this.participantDao = participantDao;
         this.fonctionnaliteDao = fonctionnaliteDao;
+        this.contributeurDao = contributeurDao;
+        this.parametreCoinDao = parametreCoinDao;
         this.badgeDao = badgeDao;
-        this.badgeParticipantDao = badgeParticipantDao;
+        this.badgeContributeurDao = badgeContributeurDao;
         this.notificationService = notificationService;
     }
-    // Méthode pour soumettre une contribution
-    public Contribution createContribution(Contribution contribution) {
-        // Vérifier que la contribution est soumise
-        if (contribution.getStatus() == StatusContribution.ENVOYER) {
-            // Sauvegarde de la contribution
-            Contribution savedContribution = contributionDao.save(contribution);
 
-            // Récupérer le gestionnaire assigné
-            Participant gestionnaire = savedContribution.getParticipantGestionnaire();
-            if (gestionnaire != null) {
-                // Envoyer une notification au gestionnaire
-                notificationService.createNotification(
-                        gestionnaire.getContributeur(),
-                        "Nouvelle contribution soumise",
-                        "Une nouvelle contribution a été soumise pour la fonctionnalité '" +
-                                savedContribution.getFonctionnalite().getTitre() + "'."
-                );
-            }
-            return savedContribution;
+    /**
+     * Récupère la liste des contributions filtrées par statut.
+     * Si le statut est null, retourne toutes les contributions.
+     *
+     * @param status Le statut des contributions à filtrer (optionnel)
+     * @return Liste de DTO des contributions correspondantes
+     */
+    public List<ContributionDto> afficherLaListeDesContribution(ContributionStatus status) {
+        List<Contribution> contributions;
+        if (status != null) {
+            contributions = contributionDao.findByStatus(status);
+        } else {
+            contributions = contributionDao.findAll();
         }
-        return contributionDao.save(contribution);
-    }
-    // Méthode permettant de valider ou rejeter une contribution
-    public Contribution updateContributionStatus(int contributionId, StatusContribution newStatus) {
-        Contribution contribution = contributionDao.findById(contributionId)
-                .orElseThrow(() -> new IllegalArgumentException("Contribution non trouvée"));
-
-        // Vérifier si le statut change vers VALIDER ou REJETER
-        if (newStatus == StatusContribution.VALIDER || newStatus == StatusContribution.REJETER) {
-            contribution.setStatus(newStatus);
-            Contribution updatedContribution = contributionDao.save(contribution);
-
-            // Notifier le participant soumetteur
-            Participant participant = updatedContribution.getParticipant();
-            String sujet = newStatus == StatusContribution.VALIDER
-                    ? "Contribution validée"
-                    : "Contribution rejetée";
-            String message = newStatus == StatusContribution.VALIDER
-                    ? "Votre contribution pour la fonctionnalité '" + updatedContribution.getFonctionnalite().getTitre() + "' a été validée."
-                    : "Votre contribution pour la fonctionnalité '" + updatedContribution.getFonctionnalite().getTitre() + "' a été rejetée.";
-
-            notificationService.createNotification(
-                    participant.getContributeur(),
-                    sujet,
-                    message
-            );
-
-            return updatedContribution;
-        }
-
-        return contribution;
+        return contributions.stream()
+                .map(this::ContributionDaoToContributionDto)
+                .collect(Collectors.toList());
     }
 
-    public void refuseParticipation(int participantId) {
-        Participant participant = participantDao.findById(participantId)
+    public List<ContributionDto> afficherContributionsParProjetEtStatus(int projetId, ContributionStatus status) {
+        // Récupérer la liste des participants associés au projet donné
+        List<Participant> participantsDuProjet = participantDao.findByProjetId(projetId);
+
+        // Récupérer toutes les contributions dont le participant fait partie de ce projet
+        List<Contribution> contributions;
+
+        if (status != null) {
+            // Filtrer par statut en plus
+            contributions = contributionDao.findByParticipantInAndStatus(participantsDuProjet, status);
+        } else {
+            // Sans filtre de statut
+            contributions = contributionDao.findByParticipantIn(participantsDuProjet);
+        }
+
+        // Transformer en DTO
+        return contributions.stream()
+                .map(this::ContributionDaoToContributionDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Récupère une contribution par son ID.
+     *
+     * @param id ID de la contribution
+     * @return DTO de la contribution correspondante
+     * @throws RuntimeException si la contribution n'existe pas
+     */
+    public ContributionResponseDto getContributionById(int id) {
+        Contribution contribution = contributionDao.findById(id)
+                .orElseThrow(() -> new RuntimeException("Contribution non trouvée avec l'ID: " + id));
+        return mapToResponseDto(contribution);
+    }
+
+    /**
+     * Soumet une nouvelle contribution associée à une fonctionnalité et un participant.
+     * Initialise la contribution avec le statut ENVOYE et la date de soumission actuelle.
+     *
+     * @param idFonctionnalite ID de la fonctionnalité concernée
+     * @param idParticipant ID du participant soumettant la contribution
+     * @param contribution Données de la contribution soumise
+     * @return DTO de la contribution enregistrée
+     * @throws IllegalArgumentException si le participant ou la fonctionnalité n'existe pas
+     */
+    public ContributionResponseDto soumettreContribution(int idFonctionnalite, int idParticipant, ContributionSoumiseDto contribution) {
+        Participant participant = participantDao.findById(idParticipant)
                 .orElseThrow(() -> new IllegalArgumentException("Participant non trouvé"));
 
-        // Notifier le contributeur du participant
-        notificationService.createNotification(
-                participant.getContributeur(),
-                "Participation refusée",
-                "Votre demande de participation au projet '" + participant.getProjet().getTitre() + "' a été refusée."
-        );
+        Fonctionnalite fonctionnalite = fonctionnaliteDao.findById(idFonctionnalite)
+                .orElseThrow(() -> new IllegalArgumentException("Fonctionnalité non trouvée"));
 
-        // Supprimer le participant (ou gérer selon la logique métier)
-        participantDao.delete(participant);
+        Contribution newContribution = new Contribution();
+        newContribution.setTitre(contribution.getTitre());
+        newContribution.setDescription(contribution.getDescription());
+        newContribution.setLienUrl(contribution.getLienUrl());
+        newContribution.setFileUrl(contribution.getFileUrl());
+        newContribution.setStatus(ContributionStatus.ENVOYE);
+        newContribution.setDateSoumission(LocalDate.now());
+        newContribution.setFonctionnalite(fonctionnalite);
+        newContribution.setParticipant(participant);
+
+        Contribution savedContribution = contributionDao.save(newContribution);
+        return mapToResponseDto(savedContribution);
     }
 
+    /**
+     * Récupère toutes les contributions d'un participant donné.
+     *
+     * @param participantId ID du participant
+     * @return Liste des contributions sous forme de DTO
+     * @throws IllegalArgumentException si le participant n'existe pas
+     */
+    public List<ContributionDto> getContributionsByParticipant(int participantId) {
+        Participant participant = participantDao.findById(participantId)
+                .orElseThrow(() -> new IllegalArgumentException("Participant avec ID " + participantId + " non trouvé"));
+
+        List<Contribution> contributions = contributionDao.findByParticipant(participant);
+        return contributions.stream()
+                .map(this::ContributionDaoToContributionDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Récupère toutes les contributions associées à une fonctionnalité spécifique.
+     *
+     * @param fonctionnaliteId ID de la fonctionnalité
+     * @return Liste des contributions sous forme de DTO
+     * @throws RuntimeException si la fonctionnalité n'existe pas
+     */
+    public List<ContributionDto> getContributionsByFonctionnalite(int fonctionnaliteId) {
+        if (!fonctionnaliteDao.existsById(fonctionnaliteId)) {
+            throw new RuntimeException("Fonctionnalité non trouvée avec l'ID: " + fonctionnaliteId);
+        }
+
+        List<Contribution> contributions = contributionDao.findByFonctionnaliteId(fonctionnaliteId);
+        return contributions.stream()
+                .map(this::ContributionDaoToContributionDto)
+                .collect(Collectors.toList());
+    }
+
+
+    /**
+     * Récupère toutes les contributions d'un contributeur donné, peu importe le statut.
+     *
+     * @param contributeurId ID du contributeur
+     * @return Liste des contributions sous forme de DTO
+     * @throws IllegalArgumentException si le contributeur n'existe pas
+     */
+    public List<ContributionDto> getContributionsByContributeur(int contributeurId) {
+        // Vérifier que le contributeur existe
+        if (!contributeurDao.existsById(contributeurId)) {
+            throw new IllegalArgumentException("Contributeur avec ID " + contributeurId + " non trouvé");
+        }
+
+        List<Contribution> contributions = contributionDao.findAllByContributeurId(contributeurId);
+        return contributions.stream()
+                .map(this::ContributionDaoToContributionDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Valide ou rejette une contribution selon la décision d'un gestionnaire.
+     * Seuls les participants ayant le profil GESTIONNAIRE peuvent effectuer cette opération.
+     * En cas de validation, récompense le participant avec des coins, met à jour le statut de la fonctionnalité,
+     * et assigne des badges si les critères sont remplis.
+     * Envoie également une notification au participant concernant la décision.
+     *
+     * Cette méthode est transactionnelle pour garantir la cohérence des données.
+     *
+     * @param contributionId ID de la contribution à valider ou rejeter
+     * @param newStatus Nouveau statut (VALIDE ou REJETE)
+     * @param gestionnaireId ID du gestionnaire effectuant la validation
+     * @return DTO de la contribution mise à jour
+     * @throws IllegalArgumentException si la contribution, gestionnaire n'existent pas ou si le profil est invalide
+     */
     @Transactional
-    public Contribution MiseAJourStatutContribution(int contributionId, StatusContribution newStatus, int gestionnaireId) {
-        // Récupérer la contribution et valider
+    public ContributionResponseDto validateOrRejetContribution(int contributionId, ContributionStatus newStatus, int gestionnaireId) {
         Contribution contribution = contributionDao.findById(contributionId)
                 .orElseThrow(() -> new IllegalArgumentException("Contribution avec ID " + contributionId + " non trouvée"));
 
         Participant gestionnaire = participantDao.findById(gestionnaireId)
                 .orElseThrow(() -> new IllegalArgumentException("Gestionnaire avec ID " + gestionnaireId + " non trouvé"));
 
-        // Vérifier que le participant est un gestionnaire
-        if (!gestionnaire.getProfil().equals(Profil.GESTIONNAIRE)) {
+        if (!gestionnaire.getProfil().equals(ParticipantProfil.GESTIONNAIRE)) {
             throw new IllegalArgumentException("Seul un gestionnaire peut mettre à jour le statut d'une contribution");
         }
 
-        // Mettre à jour le statut de la contribution
         contribution.setStatus(newStatus);
-        contribution.setParticipantGestionnaire(gestionnaire);
+        contribution.setGestionnaire(gestionnaire);
 
-        // Si la contribution est validée, récompenser les coins et mettre à jour le statut de la fonctionnalité
-        if (newStatus == StatusContribution.VALIDER) {
-            recompenseCoins(contribution.getParticipant());
-            MiseAJourStatutFonctionnalite(contribution.getFonctionnalite());
-            assignerBadges(contribution.getParticipant());
+        if (newStatus == ContributionStatus.VALIDE) {
+            recompenseCoins(contribution.getParticipant());  // Attribution des coins au participant
+            MiseAJourStatutFonctionnalite(contribution.getFonctionnalite()); // Passage de la fonctionnalité au statut TERMINÉ
+            assignerBadges(contribution.getParticipant()); // Attribution éventuelle de badges
         }
 
-        return contributionDao.save(contribution);
+        // Envoi de notification au participant selon la décision prise
+        if (newStatus == ContributionStatus.VALIDE || newStatus == ContributionStatus.REJETE) {
+            Participant participant = contribution.getParticipant();
+            String sujet = newStatus == ContributionStatus.VALIDE
+                    ? "Contribution validée"
+                    : "Contribution rejetée";
+            String message = newStatus == ContributionStatus.VALIDE
+                    ? "Votre contribution pour la fonctionnalité '" + contribution.getFonctionnalite().getTitre() + "' a été validée."
+                    : "Votre contribution pour la fonctionnalité '" + contribution.getFonctionnalite().getTitre() + "' a été rejetée.";
+
+            notificationService.createNotification(
+                    participant.getContributeur(),
+                    sujet,
+                    message
+            );
+        }
+
+        Contribution savedContribution = contributionDao.save(contribution);
+        return mapToResponseDto(savedContribution);
     }
 
+    /**
+     * Ajoute des coins de récompense au contributeur associé à un participant donné,
+     * selon la configuration de coins pour l'événement "CONTRIBUTION_VALIDEE".
+     *
+     * @param participant Participant qui reçoit les coins
+     */
     private void recompenseCoins(Participant participant) {
-        // Recupération de la configuration des coins pour la contribution validée
         ParametreCoin coinConfig = parametreCoinDao.findByTypeEvenementLien("CONTRIBUTION_VALIDEE")
                 .orElseThrow(() -> new IllegalStateException("Coin configuration pour CONTRIBUTION_VALIDEE non trouvée"));
 
-        // Mise à jour des coins du participant
         Contributeur contributeur = participant.getContributeur();
         contributeur.setTotalCoin(contributeur.getTotalCoin() + coinConfig.getValeur());
         contributeurDao.save(contributeur);
     }
 
+    /**
+     * Met à jour le statut d'une fonctionnalité en le passant à TERMINÉ.
+     *
+     * @param fonctionnalite La fonctionnalité à mettre à jour
+     */
     private void MiseAJourStatutFonctionnalite(Fonctionnalite fonctionnalite) {
         if (fonctionnalite != null) {
-            fonctionnalite.setStatusFeatures(StatusFeatures.TERMINE);
+            fonctionnalite.setStatusFeatures(FeaturesStatus.TERMINE);
             fonctionnaliteDao.save(fonctionnalite);
         }
     }
 
+    /**
+     * Attribue des badges à un contributeur en fonction du nombre total de contributions validées.
+     * Compte toutes les contributions validées du contributeur à travers tous ses participations.
+     * Si le contributeur atteint le seuil pour un badge non encore attribué,
+     * le badge est attribué, les coins de récompense associés sont ajoutés,
+     * et une notification est envoyée.
+     *
+     * @param participant Participant dont le contributeur recevra les badges
+     */
     private void assignerBadges(Participant participant) {
-        // Compter le nombre de contributions validées
-        int NombreValidation = contributionDao.findByParticipantIdAndStatus(participant.getId(), StatusContribution.VALIDER).size();
+        Contributeur contributeur = participant.getContributeur();
 
-        // Définition des seuils de badge (par exemple, 5, 10, 20, 50)
-        int[] plages = {1, 5, 10, 20, 50};
+        // Compter toutes les contributions validées du contributeur à travers toutes ses participations
+        int nombreValidationTotal = 0;
+        for (Participant p : contributeur.getParticipations()) {
+            nombreValidationTotal += contributionDao.findByParticipantIdAndStatus(p.getId(), ContributionStatus.VALIDE).size();
+        }
 
-        for (int plage : plages) {
-            if (NombreValidation >= plage) {
-                // Vérifie si le badge existe pour ce seuil
-                List<Badge> badges = badgeDao.findByNombreContribution(plage);
-                if (!badges.isEmpty()) {
-                    Badge badge = badges.get(0); // Supposons un badge par seuil
-                    // Vérifie si le participant a déjà ce badge
-                    boolean hasBadge = badgeParticipantDao.findByParticipantIdAndBadgeId(participant.getId(), badge.getId()).isPresent();
-                    if (!hasBadge) {
-                        // Attribution du badge au participant
-                        Badge_participant badgeParticipant = new Badge_participant();
-                        badgeParticipant.setBadge(badge);
-                        badgeParticipant.setParticipant(participant);
-                        badgeParticipant.setDateAcquisition(LocalDate.now());
-                        badgeParticipantDao.save(badgeParticipant);
-                    }
+        // Liste des badges disponibles triée par nombre de contributions requises
+        List<Badge> badgesDisponibles = badgeDao.findAllOrderByNombreContributionAsc();
+
+        for (Badge badge : badgesDisponibles) {
+            if (nombreValidationTotal >= badge.getNombreContribution()) {
+                // Vérifie si le contributeur possède déjà ce badge
+                boolean hasBadge = badgeContributeurDao.findByContributeurIdAndBadgeId(contributeur.getId(), badge.getId()).isPresent();
+
+                if (!hasBadge) {
+                    // Attribution du badge au contributeur
+                    BadgeContributeur badgeContributeur = new BadgeContributeur();
+                    badgeContributeur.setBadge(badge);
+                    badgeContributeur.setContributeur(contributeur);
+                    badgeContributeur.setDateAcquisition(LocalDate.now());
+                    badgeContributeurDao.save(badgeContributeur);
+
+                    // Attribution des coins de récompense au contributeur
+                    contributeur.setTotalCoin(contributeur.getTotalCoin() + badge.getCoin_recompense());
+                    contributeurDao.save(contributeur);
+
+                    // Notification au contributeur
+                    notificationService.createNotification(
+                            contributeur,
+                            "Nouveau badge obtenu !",
+                            "Félicitations ! Vous avez obtenu le badge " + badge.getType() +
+                                    " pour avoir atteint " + badge.getNombreContribution() + " contributions validées. " +
+                                    "Vous recevez " + badge.getCoin_recompense() + " coins en récompense !"
+                    );
+
+                    System.out.println("Badge " + badge.getType() + " attribué au contributeur " + contributeur.getId());
                 }
             }
         }
+    }
+
+    /**
+     * Convertit une entité Contribution en DTO simple.
+     *
+     * @param contribution Entité Contribution à convertir
+     * @return DTO correspondant
+     */
+    private ContributionDto ContributionDaoToContributionDto(Contribution contribution) {
+        ContributionDto contributionDto = new ContributionDto();
+        contributionDto.setId(contribution.getId());
+        contributionDto.setTitre(contribution.getTitre());
+        contributionDto.setDescription(contribution.getDescription());
+        contributionDto.setLienUrl(contribution.getLienUrl());
+        contributionDto.setFileUrl(contribution.getFileUrl());
+        contributionDto.setStatus(contribution.getStatus());
+        contributionDto.setDateSoumission(contribution.getDateSoumission());
+        contributionDto.setFonctionnaliteId(contribution.getFonctionnalite().getId());
+        contributionDto.setParticipantId(contribution.getParticipant().getId());
+        if (contribution.getGestionnaire() != null) {
+            contributionDto.setGestionnaireId(contribution.getGestionnaire().getId());
+        }
+        return contributionDto;
+    }
+
+    /**
+     * Convertit une entité Contribution en DTO détaillé pour la réponse API.
+     *
+     * @param contribution Entité Contribution à convertir
+     * @return DTO détaillé avec informations sur la fonctionnalité, participant et gestionnaire
+     */
+    private ContributionResponseDto mapToResponseDto(Contribution contribution) {
+        return new ContributionResponseDto(
+                contribution.getId(),
+                contribution.getTitre(),
+                contribution.getDescription(),
+                contribution.getLienUrl(),
+                contribution.getFileUrl(),
+                contribution.getStatus(),
+                contribution.getDateSoumission(),
+                contribution.getFonctionnalite().getTitre(),
+                contribution.getParticipant().getContributeur().getNom() + " " + contribution.getParticipant().getContributeur().getPrenom(),
+                contribution.getGestionnaire() != null ?
+                        contribution.getGestionnaire().getContributeur().getNom() + " " + contribution.getGestionnaire().getContributeur().getPrenom() :
+                        null
+        );
     }
 }

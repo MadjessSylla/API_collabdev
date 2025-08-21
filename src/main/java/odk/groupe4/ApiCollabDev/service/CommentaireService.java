@@ -1,64 +1,122 @@
 package odk.groupe4.ApiCollabDev.service;
 
+import jakarta.transaction.Transactional;
 import odk.groupe4.ApiCollabDev.dao.CommentaireDao;
-import odk.groupe4.ApiCollabDev.dao.Participant_projetDao;
-import odk.groupe4.ApiCollabDev.dto.CommentaireDto;
+import odk.groupe4.ApiCollabDev.dao.ParticipantDao;
+import odk.groupe4.ApiCollabDev.dao.ProjetDao;
+import odk.groupe4.ApiCollabDev.dto.CommentaireRequestDto;
+import odk.groupe4.ApiCollabDev.dto.CommentaireResponseDto;
 import odk.groupe4.ApiCollabDev.models.Commentaire;
+import odk.groupe4.ApiCollabDev.models.Contributeur;
 import odk.groupe4.ApiCollabDev.models.Participant;
+import odk.groupe4.ApiCollabDev.models.Projet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentaireService {
 
-    private final  CommentaireDao commentaireDao ;
-    private final Participant_projetDao participantDao;
-
-    // Ensemble pour stocker les observateurs (participants abonnés aux notifications)
-    private final Set<Participant> observers = new HashSet<>();
-
+    private final CommentaireDao commentaireDao;
+    private final ParticipantDao participantDao;
+    private final ProjetDao projetDao;
 
     @Autowired
-    public CommentaireService(CommentaireDao commentaireDao, Participant_projetDao participantDao) {
+    public CommentaireService(CommentaireDao commentaireDao, ParticipantDao participantDao, ProjetDao projetDao) {
         this.commentaireDao = commentaireDao;
         this.participantDao = participantDao;
+        this.projetDao = projetDao;
     }
 
-    // SIMPO POST
-    public Commentaire creerCommentaire(int id, CommentaireDto dto){
+    @Transactional
+    public CommentaireResponseDto creerCommentaire(int participantId, int projetId, CommentaireRequestDto dto) {
+        Participant participant = participantDao.findById(participantId)
+                .orElseThrow(() -> new RuntimeException("Participant non trouvé avec l'id : " + participantId));
 
-        // Vérification de l'existence du participant
-        Participant participant = participantDao.findById(id)
-                .orElseThrow(() -> new RuntimeException("Participant non trouvé avec l'id : " + id));
+        Projet projet = projetDao.findById(projetId)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'id : " + projetId));
 
-        // Initialisation d'un nouvel objet commentaire à partir du DTO
         Commentaire commentaire = new Commentaire();
-
         commentaire.setContenu(dto.getContenu());
-        commentaire.setDate(dto.getDate());
+        commentaire.setCreationDate(LocalDate.now());
         commentaire.setAuteur(participant);
+        commentaire.setProjet(projet);
 
-        return commentaireDao.save(commentaire);
-    }
-
-    //SIMPO GET ALL
-    public List<Commentaire> afficherCommentaire(){
-
-        return commentaireDao.findAll();
-    }
-    //SIMPO DELETE
-    public String supprimerCommentaire(int id_commentaire){
-        // Vérification de l'existence du commentaire avant la suppression
-        if (!commentaireDao.existsById(id_commentaire)){
-            throw new RuntimeException("Commentaire non trouvé avec l'id : " + id_commentaire);
+        if (dto.getParentId() != null) {
+            Commentaire parent = commentaireDao.findById(dto.getParentId())
+                    .orElseThrow(() -> new RuntimeException("Commentaire parent non trouvé avec l'id : " + dto.getParentId()));
+            commentaire.setCommentaireParent(parent);
         }
-        //suppression du commentaire
-        commentaireDao.deleteById(id_commentaire);
-        return "commentaire avec l'id " + id_commentaire + "a ete supprimer avec succes.";
+
+        Commentaire saved = commentaireDao.save(commentaire);
+        return mapToResponseDto(saved, true);
     }
 
+    @Transactional
+    public List<CommentaireResponseDto> afficherCommentairesRacinesParParticipant(int participantId) {
+        Participant participant = participantDao.findById(participantId)
+                .orElseThrow(() -> new RuntimeException("Participant non trouvé avec l'id : " + participantId));
+
+        List<Commentaire> racines = commentaireDao.findByAuteurAndCommentaireParentIsNull(participant);
+        racines.sort(Comparator.comparing(Commentaire::getCreationDate));
+
+        return racines.stream()
+                .map(c -> mapToResponseDto(c, true))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<CommentaireResponseDto> afficherCommentairesRacinesParProjet(int projetId) {
+        Projet projet = projetDao.findById(projetId)
+                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'id : " + projetId));
+
+        List<Commentaire> racines = commentaireDao.findByProjetAndCommentaireParentIsNull(projet);
+        racines.sort(Comparator.comparing(Commentaire::getCreationDate));
+
+        return racines.stream()
+                .map(c -> mapToResponseDto(c, true))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public String supprimerCommentaire(int idCommentaire) {
+        Commentaire commentaire = commentaireDao.findById(idCommentaire)
+                .orElseThrow(() -> new RuntimeException("Commentaire non trouvé avec l'id : " + idCommentaire));
+        commentaireDao.delete(commentaire);
+        return "Commentaire supprimé avec succès.";
+    }
+
+    private CommentaireResponseDto mapToResponseDto(Commentaire commentaire, boolean includeReplies) {
+        CommentaireResponseDto dto = new CommentaireResponseDto();
+        dto.setId(commentaire.getId());
+        dto.setContenu(commentaire.getContenu());
+        dto.setCreationDate(commentaire.getCreationDate() != null ? commentaire.getCreationDate().toString() : null);
+
+        if (commentaire.getAuteur() != null) {
+            dto.setAuteurId(commentaire.getAuteur().getId());
+            Contributeur contrib = commentaire.getAuteur().getContributeur();
+            if (contrib != null) {
+                dto.setAuteurNomComplet((contrib.getPrenom() + " " + contrib.getNom()).trim());
+                dto.setAuteurPhotoProfilUrl(contrib.getPhotoProfil());
+            }
+        }
+
+        dto.setParentId(commentaire.getCommentaireParent() != null ? commentaire.getCommentaireParent().getId() : null);
+
+        if (includeReplies) {
+            dto.setReponses(
+                    commentaire.getReponses().stream()
+                            .filter(rep -> rep.getId() != commentaire.getId())
+                            .sorted(Comparator.comparing(Commentaire::getCreationDate))
+                            .map(child -> mapToResponseDto(child, true))
+                            .collect(Collectors.toList())
+            );
+        }
+        return dto;
+    }
 }
+

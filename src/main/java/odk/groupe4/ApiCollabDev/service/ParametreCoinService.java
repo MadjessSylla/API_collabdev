@@ -3,12 +3,14 @@ package odk.groupe4.ApiCollabDev.service;
 import odk.groupe4.ApiCollabDev.dao.AdministrateurDao;
 import odk.groupe4.ApiCollabDev.dao.ParametreCoinDao;
 import odk.groupe4.ApiCollabDev.dto.ParametreCoinDto;
+import odk.groupe4.ApiCollabDev.dto.ParametreCoinResponseDto;
 import odk.groupe4.ApiCollabDev.models.Administrateur;
 import odk.groupe4.ApiCollabDev.models.ParametreCoin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ParametreCoinService {
@@ -21,68 +23,111 @@ public class ParametreCoinService {
         this.administrateurDao = administrateurDao;
     }
 
-    //Méthode pour créer un nouveau paramètre de coin
-    public ParametreCoin creerParametreCoin(int idAdmin, ParametreCoinDto dto) {
-        // Vérifier si l'administrateur existe (vous pouvez ajouter une vérification ici si nécessaire)
+    /**
+     * Crée un nouveau paramètre de coin.
+     *
+     * @param idAdmin l'ID de l'administrateur créateur
+     * @param dto les informations du paramètre de coin à créer
+     * @return les détails du paramètre de coin créé
+     */
+    public ParametreCoinResponseDto creerParametreCoin(int idAdmin, ParametreCoinDto dto) {
+        // Vérification de l'existence de l'administrateur
         Administrateur admin = administrateurDao.findById(idAdmin)
                 .orElseThrow(() -> new IllegalArgumentException("Administrateur non trouvé avec l'ID : " + idAdmin));
-        // Convertir le DTO en modèle ParametreCoin
-        ParametreCoin parametreCoin = dtoToModel(dto);
-        // Assigner l'administrateur au paramètre de coin
-        parametreCoin.setAdministrateur(admin);
-        // Enregistrer le paramètre de coin dans la base de données
-        return parametreCoinDao.save(dtoToModel(dto));
-    }
 
-    // Méthode pour obtenir tous les paramètres de coins
-    public List<ParametreCoin> obtenirTousLesParametresCoins() {
-        // Récupérer la liste de ParametreCoinDto depuis le DAO
-        List<ParametreCoinDto> parametreCoinDtos = parametreCoinDao.findAllByOrderByIdAsc();
-
-        // Convertir la liste de ParametreCoinDto en liste de ParametreCoin
-        return parametreCoinDtos.stream()
-                .map(this::dtoToModel)
-                .toList();
-    }
-    // Méthode pour modifier un paramètre de coin
-    public ParametreCoin modifierParametreCoin(int id, ParametreCoinDto dto) {
-        // Vérifier si le paramètre de coin existe
-        if (!parametreCoinDao.existsById(id)) {
-            throw new IllegalArgumentException("Paramètre de coin non trouvé avec l'ID : " + id);
-        }
-        // Convertir le DTO en modèle
-        ParametreCoin parametreCoin = dtoToModel(dto);
-        parametreCoin.setId(id); // Assigner l'ID pour la mise à jour
-        return parametreCoinDao.save(parametreCoin);
-    }
-    // Méthode pour supprimer un paramètre de coin
-    public String supprimerParametreCoin(int id) {
-        // Vérifier si le paramètre de coin existe
-        if (!parametreCoinDao.existsById(id)) {
-            return "Paramètre de coin non trouvé avec l'ID : " + id;
-        }
-        // Supprimer le paramètre de coin
-        parametreCoinDao.deleteById(id);
-        return "Paramètre de coin supprimé avec succès.";
-    }
-
-    // Convertir ParametreCoinDto en ParametreCoin
-    private ParametreCoin dtoToModel(ParametreCoinDto dto) {
+        // Création du paramètre de coin
         ParametreCoin parametreCoin = new ParametreCoin();
         parametreCoin.setNom(dto.getNom());
         parametreCoin.setDescription(dto.getDescription());
         parametreCoin.setTypeEvenementLien(dto.getTypeEvenementLien());
         parametreCoin.setValeur(dto.getValeur());
-        return parametreCoin;
+        parametreCoin.setAdministrateur(admin);
+
+        // Enregistrement du paramètre de coin
+        ParametreCoin savedParametre = parametreCoinDao.save(parametreCoin);
+        // Retourne les détails du paramètre de coin créé
+        return mapToResponseDto(savedParametre);
     }
 
-    // Convertir ParametreCoin en ParametreCoinDto
-    private ParametreCoinDto modelToDto(ParametreCoin parametreCoin) {
-        ParametreCoinDto dto = new ParametreCoinDto();
-        dto.setNom(parametreCoin.getNom());
-        dto.setDescription(parametreCoin.getDescription());
-        dto.setTypeEvenementLien(parametreCoin.getTypeEvenementLien());
-        dto.setValeur(parametreCoin.getValeur());
-        return dto;
+    /**
+     * Récupère un paramètre de coin par son ID.
+     *
+     * @param id l'ID du paramètre de coin à récupérer
+     * @return les détails du paramètre de coin trouvé
+     */
+    public ParametreCoinResponseDto getParametreCoinById(int id) {
+        // Recherche du paramètre de coin par ID
+        ParametreCoin parametreCoin = parametreCoinDao.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Paramètre de coin non trouvé avec l'ID : " + id));
+        // Retourne les détails du paramètre de coin trouvé
+        return mapToResponseDto(parametreCoin);
+    }
+
+    /**
+     * Récupère tous les paramètres de coins.
+     *
+     * @return la liste des paramètres de coins
+     */
+    public List<ParametreCoinResponseDto> obtenirTousLesParametresCoins() {
+        // Récupération de tous les paramètres de coins
+        return parametreCoinDao.findAll().stream()
+                .map(this::mapToResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Modifie un paramètre de coin existant.
+     *
+     * @param id l'ID du paramètre de coin à modifier
+     * @param dto les nouvelles informations du paramètre de coin
+     * @return les détails du paramètre de coin modifié
+     */
+    public ParametreCoinResponseDto modifierParametreCoin(int id, ParametreCoinDto dto) {
+        // Vérification de l'existence du paramètre de coin
+        ParametreCoin parametreCoin = parametreCoinDao.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Paramètre de coin non trouvé avec l'ID : " + id));
+
+        // Mise à jour des informations du paramètre de coin
+        parametreCoin.setNom(dto.getNom());
+        parametreCoin.setDescription(dto.getDescription());
+        parametreCoin.setTypeEvenementLien(dto.getTypeEvenementLien());
+        parametreCoin.setValeur(dto.getValeur());
+
+        // Enregistrement du paramètre de coin mis à jour
+        ParametreCoin updatedParametre = parametreCoinDao.save(parametreCoin);
+        // Retourne les détails du paramètre de coin mis à jour
+        return mapToResponseDto(updatedParametre);
+    }
+
+    /**
+     * Supprime un paramètre de coin par son ID.
+     *
+     * @param id l'ID du paramètre de coin à supprimer
+     */
+    public void supprimerParametreCoin(int id) {
+        // Vérification de l'existence du paramètre de coin
+        if (!parametreCoinDao.existsById(id)) {
+            throw new IllegalArgumentException("Paramètre de coin non trouvé avec l'ID : " + id);
+        }
+        // Suppression du paramètre de coin
+        parametreCoinDao.deleteById(id);
+    }
+
+    /**
+     * Mappe un objet ParametreCoin en ParametreCoinResponseDto.
+     *
+     * @param parametreCoin l'objet ParametreCoin à mapper
+     * @return l'objet ParametreCoinResponseDto correspondant
+     */
+    private ParametreCoinResponseDto mapToResponseDto(ParametreCoin parametreCoin) {
+        return new ParametreCoinResponseDto(
+                parametreCoin.getId(),
+                parametreCoin.getNom(),
+                parametreCoin.getDescription(),
+                parametreCoin.getTypeEvenementLien(),
+                parametreCoin.getValeur(),
+                parametreCoin.getAdministrateur() != null ? 
+                    parametreCoin.getAdministrateur().getEmail() : null
+        );
     }
 }

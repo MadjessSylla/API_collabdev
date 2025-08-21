@@ -5,46 +5,60 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import odk.groupe4.ApiCollabDev.models.enums.Profil;
-import odk.groupe4.ApiCollabDev.models.enums.StatusParticipant;
-import odk.groupe4.ApiCollabDev.models.interfaces.NotificationObserver;
+import odk.groupe4.ApiCollabDev.models.enums.ParticipantProfil;
+import odk.groupe4.ApiCollabDev.models.enums.ParticipantStatus;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.*;
 
-@Entity @Getter  @Setter @NoArgsConstructor @AllArgsConstructor
+@Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Participant {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_participant")
     private int id;
 
     @Enumerated(EnumType.STRING)
-    private Profil profil; // Profil du participant (Porteur de projet, Développeur, Designer, Gestionnaire, Testeur, etc.)
+    private ParticipantProfil profil; // Profil du participant : Gestionnaire, Développeur, Designer
 
     @Enumerated(EnumType.STRING)
-    private StatusParticipant statut; // EN_ATTENTE, ACCEPTE, REFUSE
+    private ParticipantStatus statut; // Statut de la participation EN_ATTENTE, ACCEPTE, REFUSE
 
-    // Clé étrangère de la table Projet
+    private String scoreQuiz; // Score eu lors du quiz pour participer
+
+    private boolean estDebloque; // boolean vérifiant si le projet a été débloqué
+
+    private LocalDate datePostulation; // Date à laquelle le participant a postulé
+
+    @Column(columnDefinition = "TEXT")
+    private String commentaireMotivation; // Motivation du participant au projet
+
+    @Column(columnDefinition = "TEXT")
+    private String commentaireExperience; // Commentaire sur l'exp
+
+    // Un participant contribue à un projet.
     @ManyToOne
     @JoinColumn(name = "id_projet")
     private Projet projet;
 
-    // Clé étrangère de la table Contributeur
+    // Un participant est un contributeur
     @ManyToOne
     @JoinColumn(name = "id_contributeur")
     private Contributeur contributeur;
 
-    // Liste des commentaires associés à ce participant
+    // Un participant peut écrire plusieurs commentaires dans le projet.
     @OneToMany(mappedBy = "auteur", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Commentaire> commentaires = new HashSet<>();
 
-    // Les badges reçus par le participant
+    /*// Un participant peur recevoir des badges de récompenses
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Badge_participant> badgeParticipants = new HashSet<>();
+    private Set<BadgeParticipant> badgeParticipants = new HashSet<>();*/
 
+    // Un participant peut travailler sur plusieurs fonctionnalités d'un projet.
     @OneToMany(mappedBy = "participant")
-    private Set<Fonctionnalite> fonctionnalitesTraite = new HashSet<>();
+    private Set<Fonctionnalite> fonctionnalite;
 
+    // Un participant peut soumettre plusieurs contributions.
+    @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contribution> contributions = new ArrayList<>();
 }
