@@ -234,7 +234,6 @@ public class UtilisateurService {
             );
         }
     }
-
     /**
      * Mappe un utilisateur à une réponse de connexion.
      *

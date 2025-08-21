@@ -11,7 +11,6 @@ import java.time.LocalDate;
 @Entity @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"id_badge", "id_contributeur"}))
 public class BadgeContributeur {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_badge_contributeur")

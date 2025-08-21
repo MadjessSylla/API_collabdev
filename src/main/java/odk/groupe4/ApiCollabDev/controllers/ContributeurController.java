@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import odk.groupe4.ApiCollabDev.dto.ContributeurDto;
-import odk.groupe4.ApiCollabDev.dto.ContributeurPhotoDto;
 import odk.groupe4.ApiCollabDev.dto.ContributeurResponseDto;
 import odk.groupe4.ApiCollabDev.dto.ContributeurSoldeDto;
 import odk.groupe4.ApiCollabDev.exception.GlobalExceptionHandler;

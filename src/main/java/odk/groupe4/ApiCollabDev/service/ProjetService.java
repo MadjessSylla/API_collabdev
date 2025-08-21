@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
  */
 @Service
 public class ProjetService {
-
     private final ProjetDao projetDao;
     private final AdministrateurDao administrateurDao;
     private final ContributeurDao contributeurDao;
